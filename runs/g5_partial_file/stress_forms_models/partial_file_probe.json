@@ -1,0 +1,582 @@
+{
+  "pyrefly_version": "pyrefly 1.0.0",
+  "target": "/tmp/swe_repos/django__django-17087/django/forms/models.py",
+  "initial_diag_count_clean_file": 97,
+  "cases": [
+    {
+      "name": "a_trailing_def_open_paren",
+      "description": "trailing `def foo(` with no body",
+      "ast_parses": false,
+      "ast_error": "'(' was never closed at line 1677",
+      "rt_to_diag_ms": 19.835563376545906,
+      "got_broken_diag": true,
+      "broken_diag_count": 98,
+      "broken_diag_sample": [
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.core.exceptions`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 1,
+              "line": 11
+            },
+            "start": {
+              "character": 0,
+              "line": 6
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        },
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.db.models.utils`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 45,
+              "line": 12
+            },
+            "start": {
+              "character": 0,
+              "line": 12
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        },
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.forms.fields`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 50,
+              "line": 13
+            },
+            "start": {
+              "character": 0,
+              "line": 13
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        },
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.forms.forms`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 67,
+              "line": 14
+            },
+            "start": {
+              "character": 0,
+              "line": 14
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        },
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.forms.formsets`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 62,
+              "line": 15
+            },
+            "start": {
+              "character": 0,
+              "line": 15
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        }
+      ],
+      "rt_to_recovery_ms": 19.863052293658257,
+      "got_recovery_diag": true,
+      "recovery_diag_count": 97,
+      "recovered_clean": true
+    },
+    {
+      "name": "b_unclosed_string",
+      "description": "unclosed string literal",
+      "ast_parses": false,
+      "ast_error": "unterminated string literal (detected at line 1677) at line 1677",
+      "rt_to_diag_ms": 34.91794131696224,
+      "got_broken_diag": true,
+      "broken_diag_count": 98,
+      "broken_diag_sample": [
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.core.exceptions`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 1,
+              "line": 11
+            },
+            "start": {
+              "character": 0,
+              "line": 6
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        },
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.db.models.utils`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 45,
+              "line": 12
+            },
+            "start": {
+              "character": 0,
+              "line": 12
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        },
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.forms.fields`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 50,
+              "line": 13
+            },
+            "start": {
+              "character": 0,
+              "line": 13
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        },
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.forms.forms`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 67,
+              "line": 14
+            },
+            "start": {
+              "character": 0,
+              "line": 14
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        },
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.forms.formsets`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 62,
+              "line": 15
+            },
+            "start": {
+              "character": 0,
+              "line": 15
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        }
+      ],
+      "rt_to_recovery_ms": 19.692780449986458,
+      "got_recovery_diag": true,
+      "recovery_diag_count": 97,
+      "recovered_clean": true
+    },
+    {
+      "name": "c_if_colon_no_body",
+      "description": "trailing `if x:` with no body",
+      "ast_parses": false,
+      "ast_error": "expected an indented block after 'if' statement on line 1677 at line 1677",
+      "rt_to_diag_ms": 20.076636224985123,
+      "got_broken_diag": true,
+      "broken_diag_count": 98,
+      "broken_diag_sample": [
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.core.exceptions`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 1,
+              "line": 11
+            },
+            "start": {
+              "character": 0,
+              "line": 6
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        },
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.db.models.utils`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 45,
+              "line": 12
+            },
+            "start": {
+              "character": 0,
+              "line": 12
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        },
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.forms.fields`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 50,
+              "line": 13
+            },
+            "start": {
+              "character": 0,
+              "line": 13
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        },
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.forms.forms`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 67,
+              "line": 14
+            },
+            "start": {
+              "character": 0,
+              "line": 14
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        },
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.forms.formsets`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 62,
+              "line": 15
+            },
+            "start": {
+              "character": 0,
+              "line": 15
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        }
+      ],
+      "rt_to_recovery_ms": 35.11149436235428,
+      "got_recovery_diag": true,
+      "recovery_diag_count": 97,
+      "recovered_clean": true
+    },
+    {
+      "name": "d_mid_statement_attr",
+      "description": "mid-statement truncation inside a function body (no closing)",
+      "ast_parses": true,
+      "ast_error": null,
+      "rt_to_diag_ms": 20.240699872374535,
+      "got_broken_diag": true,
+      "broken_diag_count": 97,
+      "broken_diag_sample": [
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.core.exceptions`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 1,
+              "line": 11
+            },
+            "start": {
+              "character": 0,
+              "line": 6
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        },
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.db.models.utils`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 45,
+              "line": 12
+            },
+            "start": {
+              "character": 0,
+              "line": 12
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        },
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.forms.fields`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 50,
+              "line": 13
+            },
+            "start": {
+              "character": 0,
+              "line": 13
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        },
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.forms.forms`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 67,
+              "line": 14
+            },
+            "start": {
+              "character": 0,
+              "line": 14
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        },
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.forms.formsets`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 62,
+              "line": 15
+            },
+            "start": {
+              "character": 0,
+              "line": 15
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        }
+      ],
+      "rt_to_recovery_ms": 20.181596279144287,
+      "got_recovery_diag": true,
+      "recovery_diag_count": 97,
+      "recovered_clean": true
+    },
+    {
+      "name": "e_unclosed_call_paren",
+      "description": "trailing unclosed parenthesis in a call",
+      "ast_parses": false,
+      "ast_error": "'(' was never closed at line 1677",
+      "rt_to_diag_ms": 19.968893378973007,
+      "got_broken_diag": true,
+      "broken_diag_count": 99,
+      "broken_diag_sample": [
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.core.exceptions`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 1,
+              "line": 11
+            },
+            "start": {
+              "character": 0,
+              "line": 6
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        },
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.db.models.utils`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 45,
+              "line": 12
+            },
+            "start": {
+              "character": 0,
+              "line": 12
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        },
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.forms.fields`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 50,
+              "line": 13
+            },
+            "start": {
+              "character": 0,
+              "line": 13
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        },
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.forms.forms`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 67,
+              "line": 14
+            },
+            "start": {
+              "character": 0,
+              "line": 14
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        },
+        {
+          "code": "untyped-import",
+          "codeDescription": {
+            "href": "https://pyrefly.org/en/docs/error-kinds/#untyped-import"
+          },
+          "data": "committing-transaction",
+          "message": "Cannot find type stubs for module `django.forms.formsets`\n  Hint: install the `django-stubs` package",
+          "range": {
+            "end": {
+              "character": 62,
+              "line": 15
+            },
+            "start": {
+              "character": 0,
+              "line": 15
+            }
+          },
+          "severity": 2,
+          "source": "Pyrefly"
+        }
+      ],
+      "rt_to_recovery_ms": 19.782764837145805,
+      "got_recovery_diag": true,
+      "recovery_diag_count": 97,
+      "recovered_clean": true
+    }
+  ]
+}

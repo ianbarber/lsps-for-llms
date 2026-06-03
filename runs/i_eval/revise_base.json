@@ -1,0 +1,100 @@
+{
+  "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+  "adapter": null,
+  "arms": [
+    {
+      "arm": "no_diag",
+      "n": 10,
+      "revise_rate": 0.3,
+      "rows": [
+        {
+          "ep": "add",
+          "revised": true
+        },
+        {
+          "ep": "is_even",
+          "revised": true
+        },
+        {
+          "ep": "first",
+          "revised": false
+        },
+        {
+          "ep": "square",
+          "revised": false
+        },
+        {
+          "ep": "count_pos",
+          "revised": false
+        },
+        {
+          "ep": "last",
+          "revised": true
+        },
+        {
+          "ep": "maxof",
+          "revised": false
+        },
+        {
+          "ep": "dbl_list",
+          "revised": false
+        },
+        {
+          "ep": "strip_neg",
+          "revised": false
+        },
+        {
+          "ep": "join_words",
+          "revised": false
+        }
+      ]
+    },
+    {
+      "arm": "diag",
+      "n": 10,
+      "revise_rate": 1.0,
+      "rows": [
+        {
+          "ep": "add",
+          "revised": true
+        },
+        {
+          "ep": "is_even",
+          "revised": true
+        },
+        {
+          "ep": "first",
+          "revised": true
+        },
+        {
+          "ep": "square",
+          "revised": true
+        },
+        {
+          "ep": "count_pos",
+          "revised": true
+        },
+        {
+          "ep": "last",
+          "revised": true
+        },
+        {
+          "ep": "maxof",
+          "revised": true
+        },
+        {
+          "ep": "dbl_list",
+          "revised": true
+        },
+        {
+          "ep": "strip_neg",
+          "revised": true
+        },
+        {
+          "ep": "join_words",
+          "revised": true
+        }
+      ]
+    }
+  ]
+}

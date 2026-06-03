@@ -1,0 +1,145 @@
+{
+  "gate": "G4",
+  "description": "payload-equivalence SHA-256 audit across B/C/C'/D",
+  "pyrefly_version": "pyrefly 1.0.0",
+  "conditions": [
+    "B",
+    "C",
+    "C'",
+    "D"
+  ],
+  "all_match": true,
+  "n_cases": 10,
+  "cases": [
+    {
+      "name": "01_bad_argument_type",
+      "note": "pass a str where an int param is expected",
+      "diag_count": 1,
+      "shas": {
+        "B": "d85a369d8fb60e140b8e7a21ad749d2cc7b38fd78a2abbcdee02b06cc5f52ad6",
+        "C": "d85a369d8fb60e140b8e7a21ad749d2cc7b38fd78a2abbcdee02b06cc5f52ad6",
+        "C'": "d85a369d8fb60e140b8e7a21ad749d2cc7b38fd78a2abbcdee02b06cc5f52ad6",
+        "D": "d85a369d8fb60e140b8e7a21ad749d2cc7b38fd78a2abbcdee02b06cc5f52ad6"
+      },
+      "match": true,
+      "payload_preview": "[{\"code\":\"bad-argument-type\",\"line\":4,\"message\":\"Argument `Literal['two']` is not assignable to parameter `b` with type `int` in function `add`\",\"severity\":\"error\"}]"
+    },
+    {
+      "name": "02_bad_assignment",
+      "note": "assign int to a str-annotated name",
+      "diag_count": 1,
+      "shas": {
+        "B": "679f9611ec8072a471d0e3b3b2f0db787d2d555c741abb611fa77e12fbf678b7",
+        "C": "679f9611ec8072a471d0e3b3b2f0db787d2d555c741abb611fa77e12fbf678b7",
+        "C'": "679f9611ec8072a471d0e3b3b2f0db787d2d555c741abb611fa77e12fbf678b7",
+        "D": "679f9611ec8072a471d0e3b3b2f0db787d2d555c741abb611fa77e12fbf678b7"
+      },
+      "match": true,
+      "payload_preview": "[{\"code\":\"bad-assignment\",\"line\":1,\"message\":\"`Literal[42]` is not assignable to `str`\",\"severity\":\"error\"}]"
+    },
+    {
+      "name": "03_bad_return_type",
+      "note": "return a str from an int-annotated function",
+      "diag_count": 1,
+      "shas": {
+        "B": "83887a25534cf3536a0c28e9adf782ee1df8eff08e4d044e50ce6a7670d8846c",
+        "C": "83887a25534cf3536a0c28e9adf782ee1df8eff08e4d044e50ce6a7670d8846c",
+        "C'": "83887a25534cf3536a0c28e9adf782ee1df8eff08e4d044e50ce6a7670d8846c",
+        "D": "83887a25534cf3536a0c28e9adf782ee1df8eff08e4d044e50ce6a7670d8846c"
+      },
+      "match": true,
+      "payload_preview": "[{\"code\":\"bad-return\",\"line\":2,\"message\":\"Returned type `Literal['nope']` is not assignable to declared return type `int`\",\"severity\":\"error\"}]"
+    },
+    {
+      "name": "04_two_errors_topk_order",
+      "note": "two bad-assignments; recency ranking puts line 2 first",
+      "diag_count": 2,
+      "shas": {
+        "B": "55c292819d9d0c22edf4f6c2dd0ec126f6c2f0c41c88b9a2dd8243f987bd2784",
+        "C": "55c292819d9d0c22edf4f6c2dd0ec126f6c2f0c41c88b9a2dd8243f987bd2784",
+        "C'": "55c292819d9d0c22edf4f6c2dd0ec126f6c2f0c41c88b9a2dd8243f987bd2784",
+        "D": "55c292819d9d0c22edf4f6c2dd0ec126f6c2f0c41c88b9a2dd8243f987bd2784"
+      },
+      "match": true,
+      "payload_preview": "[{\"code\":\"bad-assignment\",\"line\":2,\"message\":\"`Literal['y']` is not assignable to `int`\",\"severity\":\"error\"},{\"code\":\"bad-assignment\",\"line\":1,\"message\":\"`Literal['x']` is not assignable to `int`\",\"severity\":\"error\"}]"
+    },
+    {
+      "name": "05_attribute_error",
+      "note": "access a missing attribute on an int",
+      "diag_count": 1,
+      "shas": {
+        "B": "59e3c2a1f2b3b8d311160c949007ea1dcff34717eca30e1e3a260866add351ca",
+        "C": "59e3c2a1f2b3b8d311160c949007ea1dcff34717eca30e1e3a260866add351ca",
+        "C'": "59e3c2a1f2b3b8d311160c949007ea1dcff34717eca30e1e3a260866add351ca",
+        "D": "59e3c2a1f2b3b8d311160c949007ea1dcff34717eca30e1e3a260866add351ca"
+      },
+      "match": true,
+      "payload_preview": "[{\"code\":\"missing-attribute\",\"line\":2,\"message\":\"Object of class `int` has no attribute `nonexistent_attr`\",\"severity\":\"error\"}]"
+    },
+    {
+      "name": "06_undefined_name",
+      "note": "reference a name that is not defined",
+      "diag_count": 1,
+      "shas": {
+        "B": "613f811c3caf116ddc1ca3c7a4dfffbe2e13d5173834a7a80a1049ed2fd11378",
+        "C": "613f811c3caf116ddc1ca3c7a4dfffbe2e13d5173834a7a80a1049ed2fd11378",
+        "C'": "613f811c3caf116ddc1ca3c7a4dfffbe2e13d5173834a7a80a1049ed2fd11378",
+        "D": "613f811c3caf116ddc1ca3c7a4dfffbe2e13d5173834a7a80a1049ed2fd11378"
+      },
+      "match": true,
+      "payload_preview": "[{\"code\":\"unknown-name\",\"line\":2,\"message\":\"Could not find name `undefined_symbol`\",\"severity\":\"error\"}]"
+    },
+    {
+      "name": "07_clean_edit_empty_payload",
+      "note": "well-typed edit; expected zero diagnostics \u2192 empty payload",
+      "diag_count": 0,
+      "shas": {
+        "B": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "C": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "C'": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "D": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "match": true,
+      "payload_preview": "[]"
+    },
+    {
+      "name": "08_list_element_type",
+      "note": "str element in a list[int]",
+      "diag_count": 1,
+      "shas": {
+        "B": "630c77f9052cc61356e3f473767c9f8f697594f275cae821b712b470f13fc8ae",
+        "C": "630c77f9052cc61356e3f473767c9f8f697594f275cae821b712b470f13fc8ae",
+        "C'": "630c77f9052cc61356e3f473767c9f8f697594f275cae821b712b470f13fc8ae",
+        "D": "630c77f9052cc61356e3f473767c9f8f697594f275cae821b712b470f13fc8ae"
+      },
+      "match": true,
+      "payload_preview": "[{\"code\":\"bad-assignment\",\"line\":1,\"message\":\"`list[int | str]` is not assignable to `list[int]`\",\"severity\":\"error\"}]"
+    },
+    {
+      "name": "09_call_missing_arg",
+      "note": "call with a missing required argument",
+      "diag_count": 1,
+      "shas": {
+        "B": "6ba7c946bbe1faee7e74c1f5512108296735b3233386fc980ecda24a403e67cb",
+        "C": "6ba7c946bbe1faee7e74c1f5512108296735b3233386fc980ecda24a403e67cb",
+        "C'": "6ba7c946bbe1faee7e74c1f5512108296735b3233386fc980ecda24a403e67cb",
+        "D": "6ba7c946bbe1faee7e74c1f5512108296735b3233386fc980ecda24a403e67cb"
+      },
+      "match": true,
+      "payload_preview": "[{\"code\":\"missing-argument\",\"line\":4,\"message\":\"Missing argument `b` in function `h`\",\"severity\":\"error\"}]"
+    },
+    {
+      "name": "10_dict_value_type",
+      "note": "str value in a dict[str, int]",
+      "diag_count": 1,
+      "shas": {
+        "B": "e7585b2f2635318ee9fecf8a114232b5a22cb40c3be79acedca53c7adfa74799",
+        "C": "e7585b2f2635318ee9fecf8a114232b5a22cb40c3be79acedca53c7adfa74799",
+        "C'": "e7585b2f2635318ee9fecf8a114232b5a22cb40c3be79acedca53c7adfa74799",
+        "D": "e7585b2f2635318ee9fecf8a114232b5a22cb40c3be79acedca53c7adfa74799"
+      },
+      "match": true,
+      "payload_preview": "[{\"code\":\"bad-assignment\",\"line\":1,\"message\":\"`dict[str, str]` is not assignable to `dict[str, int]`\",\"severity\":\"error\"}]"
+    }
+  ]
+}

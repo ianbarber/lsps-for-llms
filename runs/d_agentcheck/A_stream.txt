@@ -1,0 +1,111 @@
+SEARCH
+oldest = self.order.pop()
+REPLACE
+oldest = self.order.pop(0)
+END
+
+<test/><|im_end|>
+<|im_start|>user
+<test_result>
+FAIL: F2P 0/1, P2P 0/0.
+NameError: name 'oldest' is not defined
+</test_result><|im_end|>
+<|im_start|>assistant
+SEARCH
+oldest = self.order.pop(0)
+REPLACE
+oldest = self.order.pop()
+END
+
+<test/><|im_end|>
+<|im_start|>user
+<test_result>
+FAIL: F2P 0/1, P2P 0/0.
+NameError: name 'oldest' is not defined
+</test_result><|im_end|>
+<|im_start|>assistant
+SEARCH
+oldest = self.order.pop()
+REPLACE
+oldest = self.order.pop(0)
+END
+
+<test/><|im_end|>
+<|im_start|>user
+<test_result>
+FAIL: F2P 0/1, P2P 0/0.
+NameError: name 'oldest' is not defined
+</test_result><|im_end|>
+<|im_start|>assistant
+SEARCH
+oldest = self.order.pop(0)
+REPLACE
+oldest = self.order.pop()
+END
+
+<test/><|im_end|>
+<|im_start|>user
+<test_result>
+FAIL: F2P 0/1, P2P 0/0.
+NameError: name 'oldest' is not defined
+</test_result><|im_end|>
+<|im_start|>assistant
+SEARCH
+oldest = self.order.pop()
+REPLACE
+oldest = self.order.pop(0)
+END
+
+<test/><|im_end|>
+<|im_start|>user
+<test_result>
+FAIL: F2P 0/1, P2P 0/0.
+NameError: name 'oldest' is not defined
+</test_result><|im_end|>
+<|im_start|>assistant
+SEARCH
+oldest = self.order.pop()
+REPLACE
+oldest = self.order.pop(0)
+END
+
+<test/><|im_end|>
+<|im_start|>user
+<test_result>
+FAIL: F2P 0/1, P2P 0/0.
+NameError: name 'oldest' is not defined
+</test_result><|im_end|>
+<|im_start|>assistant
+SEARCH
+oldest = self.order.pop()
+REPLACE
+oldest = self.order.pop(0)
+END
+
+<test/><|im_end|>
+<|im_start|>user
+<test_result>
+FAIL: F2P 0/1, P2P 0/0.
+NameError: name 'oldest' is not defined
+</test_result><|im_end|>
+<|im_start|>assistant
+SEARCH
+oldest = self.order.pop()
+REPLACE
+oldest = self.order.pop(0)
+END
+
+<test/><|im_end|>
+<|im_start|>user
+<test_result>
+FAIL: F2P 0/1, P2P 0/0.
+NameError: name 'oldest' is not defined
+</test_result><|im_end|>
+<|im_start|>assistant
+SEARCH
+oldest = self.order.pop()
+REPLACE
+oldest = self.order.pop(0)
+END
+
+<test/>

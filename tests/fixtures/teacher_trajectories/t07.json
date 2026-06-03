@@ -1,0 +1,108 @@
+{
+  "traj_id": "t07",
+  "teacher_tokenizer": "mock-teacher-tokenizer",
+  "meta": {},
+  "events": [
+    {
+      "type": "agent_token",
+      "t_emit": 0,
+      "text": "a",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 1,
+      "text": "b",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 2,
+      "text": "c",
+      "payload": {}
+    },
+    {
+      "type": "lsp_query",
+      "t_emit": 3,
+      "text": "",
+      "payload": {
+        "query_id": "t07.q0"
+      }
+    },
+    {
+      "type": "lsp_response",
+      "t_emit": 3,
+      "text": "<<SYNC_DIAG>> [info] L1 s0: note zero",
+      "payload": {
+        "query_id": "t07.q0",
+        "diagnostics": [
+          {
+            "severity": "info",
+            "line": 1,
+            "code": "s0",
+            "message": "note zero"
+          }
+        ]
+      }
+    },
+    {
+      "type": "lsp_query",
+      "t_emit": 4,
+      "text": "",
+      "payload": {
+        "query_id": "t07.q1"
+      }
+    },
+    {
+      "type": "lsp_response",
+      "t_emit": 4,
+      "text": "",
+      "payload": {
+        "query_id": "t07.q1",
+        "diagnostics": []
+      }
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 4,
+      "text": "d",
+      "payload": {}
+    },
+    {
+      "type": "lsp_query",
+      "t_emit": 5,
+      "text": "",
+      "payload": {
+        "query_id": "t07.q2"
+      }
+    },
+    {
+      "type": "lsp_response",
+      "t_emit": 5,
+      "text": "<<SYNC_DIAG>> [error] L3 e2: err two\n<<SYNC_DIAG>> [warning] L3 w2: warn two",
+      "payload": {
+        "query_id": "t07.q2",
+        "diagnostics": [
+          {
+            "severity": "error",
+            "line": 3,
+            "code": "e2",
+            "message": "err two"
+          },
+          {
+            "severity": "warning",
+            "line": 3,
+            "code": "w2",
+            "message": "warn two"
+          }
+        ]
+      }
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 5,
+      "text": "e",
+      "payload": {}
+    }
+  ]
+}

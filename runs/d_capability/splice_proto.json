@@ -1,0 +1,11 @@
+{
+  "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+  "ms_per_token_single": 92.61525887995958,
+  "tok_per_s_single": 10.797356851273495,
+  "splice_demo": {
+    "pre_splice": "```python\ndef merge_sorted_lists(list1, list2",
+    "spliced_block": "\u2039diag\u203a\n[error] L3 bad-return-type: expected int, got str\n\u2039/diag\u203a",
+    "post_splice": "):\n    # Initialize pointers for both lists\n    i, j = 0, 0\n    merged_list = []\n    \n    # Traverse both lists and append the smaller element to the merged list",
+    "ok": true
+  }
+}

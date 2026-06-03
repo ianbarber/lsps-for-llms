@@ -1,0 +1,67 @@
+{
+  "traj_id": "t05",
+  "teacher_tokenizer": "mock-teacher-tokenizer",
+  "meta": {},
+  "events": [
+    {
+      "type": "agent_token",
+      "t_emit": 0,
+      "text": "def",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 1,
+      "text": " g",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 2,
+      "text": "(",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 3,
+      "text": ")",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 4,
+      "text": ":",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 5,
+      "text": " return",
+      "payload": {}
+    },
+    {
+      "type": "lsp_query",
+      "t_emit": 6,
+      "text": "",
+      "payload": {
+        "query_id": "t05.q0"
+      }
+    },
+    {
+      "type": "lsp_response",
+      "t_emit": 6,
+      "text": "<<SYNC_DIAG>> [error] L1 bad-return: return needs value",
+      "payload": {
+        "query_id": "t05.q0",
+        "diagnostics": [
+          {
+            "severity": "error",
+            "line": 1,
+            "code": "bad-return",
+            "message": "return needs value"
+          }
+        ]
+      }
+    }
+  ]
+}

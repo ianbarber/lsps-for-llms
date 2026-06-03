@@ -1,0 +1,277 @@
+{
+  "traj_id": "t08",
+  "teacher_tokenizer": "mock-teacher-tokenizer",
+  "meta": {},
+  "events": [
+    {
+      "type": "agent_token",
+      "t_emit": 0,
+      "text": "tok0",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 1,
+      "text": "tok1",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 2,
+      "text": "tok2",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 3,
+      "text": "tok3",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 4,
+      "text": "tok4",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 5,
+      "text": "tok5",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 6,
+      "text": "tok6",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 7,
+      "text": "tok7",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 8,
+      "text": "tok8",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 9,
+      "text": "tok9",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 10,
+      "text": "tok10",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 11,
+      "text": "tok11",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 12,
+      "text": "tok12",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 13,
+      "text": "tok13",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 14,
+      "text": "tok14",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 15,
+      "text": "tok15",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 16,
+      "text": "tok16",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 17,
+      "text": "tok17",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 18,
+      "text": "tok18",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 19,
+      "text": "tok19",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 20,
+      "text": "tok20",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 21,
+      "text": "tok21",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 22,
+      "text": "tok22",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 23,
+      "text": "tok23",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 24,
+      "text": "tok24",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 25,
+      "text": "tok25",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 26,
+      "text": "tok26",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 27,
+      "text": "tok27",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 28,
+      "text": "tok28",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 29,
+      "text": "tok29",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 30,
+      "text": "tok30",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 31,
+      "text": "tok31",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 32,
+      "text": "tok32",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 33,
+      "text": "tok33",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 34,
+      "text": "tok34",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 35,
+      "text": "tok35",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 36,
+      "text": "tok36",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 37,
+      "text": "tok37",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 38,
+      "text": "tok38",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 39,
+      "text": "tok39",
+      "payload": {}
+    },
+    {
+      "type": "lsp_query",
+      "t_emit": 40,
+      "text": "",
+      "payload": {
+        "query_id": "t08.q0"
+      }
+    },
+    {
+      "type": "lsp_response",
+      "t_emit": 40,
+      "text": "<<SYNC_DIAG>> [error] L12 undef: name X undefined",
+      "payload": {
+        "query_id": "t08.q0",
+        "diagnostics": [
+          {
+            "severity": "error",
+            "line": 12,
+            "code": "undef",
+            "message": "name X undefined"
+          }
+        ]
+      }
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 41,
+      "text": "end",
+      "payload": {}
+    }
+  ]
+}

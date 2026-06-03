@@ -1,0 +1,143 @@
+starting generic LSP server
+ INFO Reading messages
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py opened, prepare to validate open files.
+ INFO Ran task on sourcedb_queue heavy task queue. Queue time: 0.00, task time: 0.00
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidOpenTextDocument` in 0.20s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.00s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.00s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.00s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.04s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.00s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 98 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 98 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.03s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 98 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.03s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 99 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)
+ INFO File /tmp/swe_repos/django__django-17087/django/forms/models.py changed, prepare to validate open files.
+ INFO Published 97 diagnostics for file:///tmp/swe_repos/django__django-17087/django/forms/models.py
+ INFO Validated open files and committed transaction.
+ INFO Language server processed event `DidChangeTextDocument` in 0.02s (0.00s waiting)

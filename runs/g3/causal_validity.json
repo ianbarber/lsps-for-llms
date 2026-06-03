@@ -1,0 +1,108 @@
+{
+  "gate": "G3_causal_validity",
+  "fixture_source": "tests/fixtures/teacher_trajectories",
+  "tokenizer_rate": "mock (teacher=student=4.0 chars/token, scale=1.0)",
+  "tokenizer_scale": 1.0,
+  "n_trajectories": 10,
+  "n_pass": 10,
+  "gate_pass": true,
+  "assertions": {
+    "a": "no teacher sync-diagnostic content remains in D's Output/prefix",
+    "b": "diagnostic appears on the Analytical side stream, latency-shifted",
+    "c": "side-stream position >= query (latency >= 0), consistent with offset",
+    "d": "C\u2032: diagnostic on side stream at snapshot timestep (no shift), absent from Output",
+    "adv": "a naive leaky reformat IS flagged by (a) \u2014 proves the gate is non-vacuous"
+  },
+  "per_trajectory": {
+    "t00": {
+      "a_no_sync_in_output": true,
+      "b_diag_on_side_stream": true,
+      "c_latency_shift_consistent": true,
+      "d_cprime_no_shift": true,
+      "adv_leak_detected": true,
+      "_all_pass": true,
+      "_n_diagnostics": 1
+    },
+    "t01": {
+      "a_no_sync_in_output": true,
+      "b_diag_on_side_stream": true,
+      "c_latency_shift_consistent": true,
+      "d_cprime_no_shift": true,
+      "adv_leak_detected": true,
+      "_all_pass": true,
+      "_n_diagnostics": 2
+    },
+    "t02": {
+      "a_no_sync_in_output": true,
+      "b_diag_on_side_stream": true,
+      "c_latency_shift_consistent": true,
+      "d_cprime_no_shift": true,
+      "adv_leak_detected": null,
+      "_all_pass": true,
+      "_n_diagnostics": 0
+    },
+    "t03": {
+      "a_no_sync_in_output": true,
+      "b_diag_on_side_stream": true,
+      "c_latency_shift_consistent": true,
+      "d_cprime_no_shift": true,
+      "adv_leak_detected": true,
+      "_all_pass": true,
+      "_n_diagnostics": 3
+    },
+    "t04": {
+      "a_no_sync_in_output": true,
+      "b_diag_on_side_stream": true,
+      "c_latency_shift_consistent": true,
+      "d_cprime_no_shift": true,
+      "adv_leak_detected": true,
+      "_all_pass": true,
+      "_n_diagnostics": 1
+    },
+    "t05": {
+      "a_no_sync_in_output": true,
+      "b_diag_on_side_stream": true,
+      "c_latency_shift_consistent": true,
+      "d_cprime_no_shift": true,
+      "adv_leak_detected": true,
+      "_all_pass": true,
+      "_n_diagnostics": 1
+    },
+    "t06": {
+      "a_no_sync_in_output": true,
+      "b_diag_on_side_stream": true,
+      "c_latency_shift_consistent": true,
+      "d_cprime_no_shift": true,
+      "adv_leak_detected": true,
+      "_all_pass": true,
+      "_n_diagnostics": 2
+    },
+    "t07": {
+      "a_no_sync_in_output": true,
+      "b_diag_on_side_stream": true,
+      "c_latency_shift_consistent": true,
+      "d_cprime_no_shift": true,
+      "adv_leak_detected": true,
+      "_all_pass": true,
+      "_n_diagnostics": 3
+    },
+    "t08": {
+      "a_no_sync_in_output": true,
+      "b_diag_on_side_stream": true,
+      "c_latency_shift_consistent": true,
+      "d_cprime_no_shift": true,
+      "adv_leak_detected": true,
+      "_all_pass": true,
+      "_n_diagnostics": 1
+    },
+    "t09": {
+      "a_no_sync_in_output": true,
+      "b_diag_on_side_stream": true,
+      "c_latency_shift_consistent": true,
+      "d_cprime_no_shift": true,
+      "adv_leak_detected": true,
+      "_all_pass": true,
+      "_n_diagnostics": 1
+    }
+  }
+}

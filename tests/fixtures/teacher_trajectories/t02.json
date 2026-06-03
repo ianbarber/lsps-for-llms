@@ -1,0 +1,120 @@
+{
+  "traj_id": "t02",
+  "teacher_tokenizer": "mock-teacher-tokenizer",
+  "meta": {},
+  "events": [
+    {
+      "type": "agent_token",
+      "t_emit": 0,
+      "text": "a",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 1,
+      "text": "=",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 2,
+      "text": "[",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 3,
+      "text": "]",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 4,
+      "text": "\n",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 5,
+      "text": "a",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 6,
+      "text": ".",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 7,
+      "text": "append",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 8,
+      "text": "(",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 9,
+      "text": "1",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 10,
+      "text": ")",
+      "payload": {}
+    },
+    {
+      "type": "lsp_query",
+      "t_emit": 11,
+      "text": "",
+      "payload": {
+        "query_id": "t02.q0"
+      }
+    },
+    {
+      "type": "lsp_response",
+      "t_emit": 11,
+      "text": "",
+      "payload": {
+        "query_id": "t02.q0",
+        "diagnostics": []
+      }
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 12,
+      "text": "\n",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 13,
+      "text": "print",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 14,
+      "text": "(",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 15,
+      "text": "a",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 16,
+      "text": ")",
+      "payload": {}
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+  "adapter": null,
+  "n": 8,
+  "rates": {
+    "none": 0.875,
+    "correct": 1.0,
+    "wrong": 1.0
+  },
+  "rows": [
+    {
+      "name": "off_by_one_slice",
+      "none": true,
+      "correct": true,
+      "wrong": true
+    },
+    {
+      "name": "product_init",
+      "none": true,
+      "correct": true,
+      "wrong": true
+    },
+    {
+      "name": "avg_intdiv",
+      "none": true,
+      "correct": true,
+      "wrong": true
+    },
+    {
+      "name": "all_vs_any",
+      "none": true,
+      "correct": true,
+      "wrong": true
+    },
+    {
+      "name": "get_or_zero",
+      "none": true,
+      "correct": true,
+      "wrong": true
+    },
+    {
+      "name": "str_plus_int",
+      "none": true,
+      "correct": true,
+      "wrong": true
+    },
+    {
+      "name": "countdown",
+      "none": false,
+      "correct": true,
+      "wrong": true
+    },
+    {
+      "name": "first_even",
+      "none": true,
+      "correct": true,
+      "wrong": true
+    }
+  ]
+}

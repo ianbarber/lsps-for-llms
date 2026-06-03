@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.venv-streams/
+.venv-streams.system/
+
+# Editors / IDEs / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Model / training artifacts
+*.pt
+*.safetensors
+*.bin
+*.gguf
+*.ckpt
+
+# Data caches
+*.npy
+*.npz
+
+# Experiment outputs — exclude the heavyweight dirs, KEEP the small result JSONs
+# (runs/agent/*.json, runs/rebench/*, runs/i_eval/* are committed for reproducibility)
+runs/d_sft/
+runs/d_sft_data/
+runs/i_sft_data/
+runs/i_sft_data_v2/
+runs/task_env/
+runs/g1_prep/
+runs/g6_*/
+runs/pyrefly_determinism/
+runs/agent/workdirs/
+runs/*/workdirs/

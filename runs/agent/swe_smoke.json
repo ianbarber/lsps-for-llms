@@ -1,0 +1,164 @@
+{
+  "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+  "adapter": null,
+  "summary": {
+    "D": {
+      "resolved": 0,
+      "n": 1,
+      "mean_in": 149487.0,
+      "mean_out": 2000.0,
+      "mean_sec": 764.5,
+      "mean_rework": 0.0
+    }
+  },
+  "rows": {
+    "D": [
+      {
+        "id": "iris-hep__func_adl-185",
+        "cond": "D",
+        "resolved": false,
+        "bailed": false,
+        "in_tokens": 149487,
+        "out_tokens": 2000,
+        "sec": 764.5,
+        "rework_ratio": 0.0114,
+        "edit_count": 2,
+        "failed_edits": 0,
+        "n_tests": 5,
+        "n_reads": 0,
+        "turns": 10,
+        "stream_tail": "            self._found_types[node] = type(node.value)\n1019|             return node\n1020| \n1021|         def visit_Attribute(self, node: ast.Attribute) -> Any:\n1022|             t_node = self.generic_visit(node)\n1023|             assert isinstance(t_node, ast.Attribute)\n1024|             # If this is a dict reference, then figure out what the\n1025|             # type is for that value of the dict.\n1026|             if isinstance(t_node.value, ast.Dict):\n1027|                 key = t_node.attr\n1028|                 key_index = [\n1029|                     e for e, k in enumerate(t_node.value.keys) if k.value == key  # type: ignore\n1030|                 ]\n1031|                 if len(key_index) == 0:\n1032|                     if t_node.attr.lower() == \"zip\":\n1033|                         return t_node\n1034|                     raise ValueError(f\"Key {key} not found in dict expression!!\")\n1035|                 value = t_node.value.values[key_index[0]]\n1036|                 self._found_types[node] = self.lookup_type(value)\n1037|             elif ((dc := self.lookup_type(t_node.value)) is not None) and is_dataclass(dc):\n1038|                 dc_types = get_type_hints(dc)\n1039|                 if node.attr not in dc_types:\n1040|                     raise ValueError(f\"Key {node.attr} not found in dataclass/dictionary {dc}\")\n1041|                 self._found_types[node] = dc_types[node.attr]\n1042|             return t_node\n1043| \n1044|     tt = type_transformer(o_stream)\n1045|     r_a = tt.visit(a)\n1046| \n1047|     return tt.stream, r_a, tt.lookup_type(a)\n1048| \n1049| \n1050| def remap_from_lambda(\n1051|     o_stream: ObjectStream[T], l_func: ast.Lambda, known_types: Dict[str, Any]\n1052| ) -> Tuple[ObjectStream[T], ast.Lambda, Type]:\n1053|     \"\"\"Helper function that will translate the contents of lambda\n1054|     function with inline methods and special functions.\n1055| \n1056|     Returns:\n1057|         ObjectStream[T]\n1058|         ast.AST: Updated stream and lambda function\n1059|         Type: Return type of the lambda function, Any if not known.\n1060|     \"\"\"\n1061|     assert len(l_func.args.args) == 1\n1062|     orig_type = o_stream.item_type\n1063|     var_name = l_func.args.args[0].arg\n1064|     stream, new_body, return_type = remap_by_types(\n1065|         o_stream, {var_name: orig_type} | known_types, l_func.body\n1066|     )\n1067|     return stream, ast.Lambda(l_func.args, new_body), return_type  # type: ignore\n1068| \n1069| \n1070| def reset_global_functions():\n1071|     \"\"\"Resets all the global functions we know about.\n1072| \n1073|     Generally only used between tests.\n1074|     \"\"\"\n1075|     global _global_functions, _g_collection_classes, _g_parameterized_callbacks\n1076|     _global_functions = {}\n1077|     _load_default_global_functions()\n1078|     _g_collection_classes = {}\n1079|     _load_g_collection_classes()\n1080|     _g_parameterized_callbacks = {}<|im_end|>\n<|im_start|>assistant\n<edit path=\"func_adl/type_based_replacement.py\" lines=\"585-586\">\ndef process_method_call_on_stream_obj(\n    self,\n    obj_info: CollectionClassInfo,\n    m_name: str,\n    call_node: ast.Call,\n    item_type: type,\n) -> Optional[Tuple[ast.AST, Any]]:\n    \"\"\"The type following and resolution system in func_adl is pretty limited.\n    When it fails, we fall back to try another method - basically, someone providing\n    dummy classes that implement an `ObjectStream` like interface:\n        `object_stream.query_ast`\n        `object_stream.item_type`\n\n    They are",
+        "events": [
+          {
+            "tok": 619,
+            "type": "line_edit",
+            "path": "func_adl/type_based_replacement.py",
+            "lines": "585-586",
+            "ok": true,
+            "info": "",
+            "fail_streak": 0
+          },
+          {
+            "tok": 619,
+            "type": "diag_pending",
+            "text": "[hint] L446 unused-parameter: Parameter `a` is unused\n[hint] L446 unused-parameter: Parameter `o_stream` is unused\n[error] L447 bad-return: Function declared to return `tuple[ObjectStream[T], AST, type[Any]]` but is missing an explicit `return`\n[error] L580 bad-return: Function declared to return `Call` but is missing an explicit `return`\n[hint] L580 unused-parameter: Parameter `call_method` is unused\n[hint] L580 unused-parameter: Parameter `node` is unused\n[hint] L580 unused-parameter: Parameter `obj_type` is unused\n[error] L592 parse-error: Parse error: Expected an identifier\n[error] L592 parse-error: Parse error: Simple statements must be separated by newlines or semicolons\n[error] L592 parse-error: Parse error: Simple statements must be separated by newlines or semicolons"
+          },
+          {
+            "tok": 627,
+            "type": "diag_async",
+            "text": "[hint] L446 unused-parameter: Parameter `a` is unused\n[hint] L446 unused-parameter: Parameter `o_stream` is unused\n[error] L447 bad-return: Function declared to return `tuple[ObjectStream[T], AST, type[Any]]` but is missing an explicit `return`\n[error] L580 bad-return: Function declared to return `Call` but is missing an explicit `return`\n[hint] L580 unused-parameter: Parameter `call_method` is unused\n[hint] L580 unused-parameter: Parameter `node` is unused\n[hint] L580 unused-parameter: Parameter `obj_type` is unused\n[error] L592 parse-error: Parse error: Expected an identifier\n[error] L592 parse-error: Parse error: Simple statements must be separated by newlines or semicolons\n[error] L592 parse-error: Parse error: Simple statements must be separated by newlines or semicolons"
+          },
+          {
+            "tok": 844,
+            "type": "turn",
+            "n": 1,
+            "via": "eos"
+          },
+          {
+            "tok": 845,
+            "type": "test",
+            "n": 1,
+            "resolved": false
+          },
+          {
+            "tok": 845,
+            "type": "turn",
+            "n": 2,
+            "via": "test"
+          },
+          {
+            "tok": 1380,
+            "type": "line_edit",
+            "path": "func_adl/type_based_replacement.py",
+            "lines": "585-586",
+            "ok": true,
+            "info": "",
+            "fail_streak": 0
+          },
+          {
+            "tok": 1380,
+            "type": "diag_pending",
+            "text": "[hint] L446 unused-parameter: Parameter `a` is unused\n[hint] L446 unused-parameter: Parameter `o_stream` is unused\n[error] L447 bad-return: Function declared to return `tuple[ObjectStream[T], AST, type[Any]]` but is missing an explicit `return`\n[error] L580 bad-return: Function declared to return `Call` but is missing an explicit `return`\n[hint] L580 unused-parameter: Parameter `call_method` is unused\n[hint] L580 unused-parameter: Parameter `node` is unused\n[hint] L580 unused-parameter: Parameter `obj_type` is unused\n[error] L592 parse-error: Parse error: Expected an identifier\n[error] L592 parse-error: Parse error: Simple statements must be separated by newlines or semicolons\n[error] L592 parse-error: Parse error: Simple statements must be separated by newlines or semicolons"
+          },
+          {
+            "tok": 1388,
+            "type": "diag_async",
+            "text": "[hint] L446 unused-parameter: Parameter `a` is unused\n[hint] L446 unused-parameter: Parameter `o_stream` is unused\n[error] L447 bad-return: Function declared to return `tuple[ObjectStream[T], AST, type[Any]]` but is missing an explicit `return`\n[error] L580 bad-return: Function declared to return `Call` but is missing an explicit `return`\n[hint] L580 unused-parameter: Parameter `call_method` is unused\n[hint] L580 unused-parameter: Parameter `node` is unused\n[hint] L580 unused-parameter: Parameter `obj_type` is unused\n[error] L592 parse-error: Parse error: Expected an identifier\n[error] L592 parse-error: Parse error: Simple statements must be separated by newlines or semicolons\n[error] L592 parse-error: Parse error: Simple statements must be separated by newlines or semicolons"
+          },
+          {
+            "tok": 1409,
+            "type": "turn",
+            "n": 3,
+            "via": "eos"
+          },
+          {
+            "tok": 1410,
+            "type": "test",
+            "n": 2,
+            "resolved": false
+          },
+          {
+            "tok": 1410,
+            "type": "turn",
+            "n": 4,
+            "via": "test"
+          },
+          {
+            "tok": 1560,
+            "type": "turn",
+            "n": 5,
+            "via": "eos"
+          },
+          {
+            "tok": 1561,
+            "type": "test",
+            "n": 3,
+            "resolved": false
+          },
+          {
+            "tok": 1561,
+            "type": "turn",
+            "n": 6,
+            "via": "test"
+          },
+          {
+            "tok": 1711,
+            "type": "turn",
+            "n": 7,
+            "via": "eos"
+          },
+          {
+            "tok": 1712,
+            "type": "test",
+            "n": 4,
+            "resolved": false
+          },
+          {
+            "tok": 1712,
+            "type": "turn",
+            "n": 8,
+            "via": "test"
+          },
+          {
+            "tok": 1862,
+            "type": "turn",
+            "n": 9,
+            "via": "eos"
+          },
+          {
+            "tok": 1863,
+            "type": "test",
+            "n": 5,
+            "resolved": false
+          },
+          {
+            "tok": 1863,
+            "type": "turn",
+            "n": 10,
+            "via": "test"
+          }
+        ]
+      }
+    ]
+  }
+}

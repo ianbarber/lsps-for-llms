@@ -1,0 +1,17 @@
+[
+  {
+    "repo": "django/django",
+    "instance_id": "django__django-17087",
+    "base_commit": "4a72da71001f154ea60906a2f74898d32b7322a7"
+  },
+  {
+    "repo": "sympy/sympy",
+    "instance_id": "sympy__sympy-24661",
+    "base_commit": "a36caf5c74fe654cedc488e8a8a05fad388f8406"
+  },
+  {
+    "repo": "scikit-learn/scikit-learn",
+    "instance_id": "scikit-learn__scikit-learn-26323",
+    "base_commit": "586f4318ffcdfbd9a1093f35ad43e81983740b66"
+  }
+]

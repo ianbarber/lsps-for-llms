@@ -1,0 +1,91 @@
+{
+  "traj_id": "t06",
+  "teacher_tokenizer": "mock-teacher-tokenizer",
+  "meta": {},
+  "events": [
+    {
+      "type": "agent_token",
+      "t_emit": 0,
+      "text": "p",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 1,
+      "text": "=",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 2,
+      "text": "1",
+      "payload": {}
+    },
+    {
+      "type": "lsp_query",
+      "t_emit": 3,
+      "text": "",
+      "payload": {
+        "query_id": "t06.q0"
+      }
+    },
+    {
+      "type": "lsp_response",
+      "t_emit": 3,
+      "text": "<<SYNC_DIAG>> [warning] L1 shadow: p shadows builtin",
+      "payload": {
+        "query_id": "t06.q0",
+        "diagnostics": [
+          {
+            "severity": "warning",
+            "line": 1,
+            "code": "shadow",
+            "message": "p shadows builtin"
+          }
+        ]
+      }
+    },
+    {
+      "type": "lsp_query",
+      "t_emit": 4,
+      "text": "",
+      "payload": {
+        "query_id": "t06.q1"
+      }
+    },
+    {
+      "type": "lsp_response",
+      "t_emit": 4,
+      "text": "<<SYNC_DIAG>> [error] L2 type: p is str not int",
+      "payload": {
+        "query_id": "t06.q1",
+        "diagnostics": [
+          {
+            "severity": "error",
+            "line": 2,
+            "code": "type",
+            "message": "p is str not int"
+          }
+        ]
+      }
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 4,
+      "text": "q",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 5,
+      "text": "=",
+      "payload": {}
+    },
+    {
+      "type": "agent_token",
+      "t_emit": 6,
+      "text": "p",
+      "payload": {}
+    }
+  ]
+}

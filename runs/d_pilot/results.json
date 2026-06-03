@@ -1,0 +1,218 @@
+[
+  {
+    "instance_id": "sympy__sympy-23950",
+    "target": "sympy/sets/contains.py",
+    "conds": {
+      "A": {
+        "resolved": false,
+        "rework_ratio": 0.0,
+        "edit_cycles": 0,
+        "n_edits": 1,
+        "n_edits_applied": 1,
+        "n_diag": 0,
+        "tokens": 72,
+        "secs": 10.6
+      },
+      "C": {
+        "resolved": false,
+        "rework_ratio": 0.544,
+        "edit_cycles": 1,
+        "n_edits": 2,
+        "n_edits_applied": 2,
+        "n_diag": 2,
+        "tokens": 203,
+        "secs": 25.0
+      },
+      "D": {
+        "resolved": false,
+        "rework_ratio": 0.0,
+        "edit_cycles": 0,
+        "n_edits": 1,
+        "n_edits_applied": 1,
+        "n_diag": 1,
+        "tokens": 72,
+        "secs": 9.8
+      }
+    }
+  },
+  {
+    "instance_id": "sympy__sympy-23824",
+    "target": "sympy/physics/hep/gamma_matrices.py",
+    "conds": {
+      "A": {
+        "resolved": false,
+        "rework_ratio": 0.0,
+        "edit_cycles": 0,
+        "n_edits": 0,
+        "n_edits_applied": 0,
+        "n_diag": 0,
+        "tokens": 113,
+        "secs": 19.7
+      },
+      "C": {
+        "resolved": false,
+        "rework_ratio": 0.0,
+        "edit_cycles": 0,
+        "n_edits": 0,
+        "n_edits_applied": 0,
+        "n_diag": 0,
+        "tokens": 113,
+        "secs": 18.8
+      },
+      "D": {
+        "resolved": false,
+        "rework_ratio": 0.0,
+        "edit_cycles": 0,
+        "n_edits": 0,
+        "n_edits_applied": 0,
+        "n_diag": 0,
+        "tokens": 113,
+        "secs": 18.7
+      }
+    }
+  },
+  {
+    "instance_id": "sympy__sympy-23413",
+    "target": "sympy/polys/matrices/normalforms.py",
+    "conds": {
+      "A": {
+        "resolved": false,
+        "rework_ratio": 0.0,
+        "edit_cycles": 0,
+        "n_edits": 0,
+        "n_edits_applied": 0,
+        "n_diag": 0,
+        "tokens": 112,
+        "secs": 18.6
+      },
+      "C": {
+        "resolved": false,
+        "rework_ratio": 0.0,
+        "edit_cycles": 0,
+        "n_edits": 0,
+        "n_edits_applied": 0,
+        "n_diag": 0,
+        "tokens": 112,
+        "secs": 17.8
+      },
+      "D": {
+        "resolved": false,
+        "rework_ratio": 0.0,
+        "edit_cycles": 0,
+        "n_edits": 0,
+        "n_edits_applied": 0,
+        "n_diag": 0,
+        "tokens": 112,
+        "secs": 17.8
+      }
+    }
+  },
+  {
+    "instance_id": "sympy__sympy-20916",
+    "target": "sympy/printing/conventions.py",
+    "conds": {
+      "A": {
+        "resolved": false,
+        "rework_ratio": 0.0,
+        "edit_cycles": 0,
+        "n_edits": 0,
+        "n_edits_applied": 0,
+        "n_diag": 0,
+        "tokens": 159,
+        "secs": 18.0
+      },
+      "C": {
+        "resolved": false,
+        "rework_ratio": 0.0,
+        "edit_cycles": 0,
+        "n_edits": 0,
+        "n_edits_applied": 0,
+        "n_diag": 0,
+        "tokens": 159,
+        "secs": 17.7
+      },
+      "D": {
+        "resolved": false,
+        "rework_ratio": 0.0,
+        "edit_cycles": 0,
+        "n_edits": 0,
+        "n_edits_applied": 0,
+        "n_diag": 0,
+        "tokens": 159,
+        "secs": 17.8
+      }
+    }
+  },
+  {
+    "instance_id": "sympy__sympy-16766",
+    "target": "sympy/printing/pycode.py",
+    "conds": {
+      "A": {
+        "resolved": false,
+        "rework_ratio": 0.0,
+        "edit_cycles": 0,
+        "n_edits": 0,
+        "n_edits_applied": 0,
+        "n_diag": 0,
+        "tokens": 1500,
+        "secs": 147.6
+      },
+      "C": {
+        "resolved": false,
+        "rework_ratio": 0.0,
+        "edit_cycles": 0,
+        "n_edits": 0,
+        "n_edits_applied": 0,
+        "n_diag": 0,
+        "tokens": 1500,
+        "secs": 147.5
+      },
+      "D": {
+        "resolved": false,
+        "rework_ratio": 0.0,
+        "edit_cycles": 0,
+        "n_edits": 0,
+        "n_edits_applied": 0,
+        "n_diag": 0,
+        "tokens": 1500,
+        "secs": 147.5
+      }
+    }
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-10466",
+    "target": "sphinx/builders/gettext.py",
+    "conds": {
+      "A": {
+        "resolved": false,
+        "rework_ratio": 0.0,
+        "edit_cycles": 0,
+        "n_edits": 0,
+        "n_edits_applied": 0,
+        "n_diag": 0,
+        "tokens": 151,
+        "secs": 22.7
+      },
+      "C": {
+        "resolved": false,
+        "rework_ratio": 0.0,
+        "edit_cycles": 0,
+        "n_edits": 0,
+        "n_edits_applied": 0,
+        "n_diag": 0,
+        "tokens": 151,
+        "secs": 22.1
+      },
+      "D": {
+        "resolved": false,
+        "rework_ratio": 0.0,
+        "edit_cycles": 0,
+        "n_edits": 0,
+        "n_edits_applied": 0,
+        "n_diag": 0,
+        "tokens": 151,
+        "secs": 22.0
+      }
+    }
+  }
+]

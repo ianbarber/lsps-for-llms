@@ -1,0 +1,207 @@
+{
+  "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+  "adapter": null,
+  "results": {
+    "A": {
+      "correct": 0,
+      "n": 12,
+      "mean_tokens": 61.0,
+      "rows": [
+        {
+          "id": "config_0",
+          "correct": false,
+          "tokens": 61
+        },
+        {
+          "id": "config_1",
+          "correct": false,
+          "tokens": 61
+        },
+        {
+          "id": "config_2",
+          "correct": false,
+          "tokens": 61
+        },
+        {
+          "id": "config_3",
+          "correct": false,
+          "tokens": 61
+        },
+        {
+          "id": "config_4",
+          "correct": false,
+          "tokens": 61
+        },
+        {
+          "id": "config_5",
+          "correct": false,
+          "tokens": 61
+        },
+        {
+          "id": "config_6",
+          "correct": false,
+          "tokens": 61
+        },
+        {
+          "id": "config_7",
+          "correct": false,
+          "tokens": 61
+        },
+        {
+          "id": "config_8",
+          "correct": false,
+          "tokens": 61
+        },
+        {
+          "id": "config_9",
+          "correct": false,
+          "tokens": 61
+        },
+        {
+          "id": "config_10",
+          "correct": false,
+          "tokens": 61
+        },
+        {
+          "id": "config_11",
+          "correct": false,
+          "tokens": 61
+        }
+      ]
+    },
+    "C": {
+      "correct": 12,
+      "n": 12,
+      "mean_tokens": 139.0,
+      "rows": [
+        {
+          "id": "config_0",
+          "correct": true,
+          "tokens": 140
+        },
+        {
+          "id": "config_1",
+          "correct": true,
+          "tokens": 134
+        },
+        {
+          "id": "config_2",
+          "correct": true,
+          "tokens": 140
+        },
+        {
+          "id": "config_3",
+          "correct": true,
+          "tokens": 140
+        },
+        {
+          "id": "config_4",
+          "correct": true,
+          "tokens": 140
+        },
+        {
+          "id": "config_5",
+          "correct": true,
+          "tokens": 140
+        },
+        {
+          "id": "config_6",
+          "correct": true,
+          "tokens": 140
+        },
+        {
+          "id": "config_7",
+          "correct": true,
+          "tokens": 140
+        },
+        {
+          "id": "config_8",
+          "correct": true,
+          "tokens": 140
+        },
+        {
+          "id": "config_9",
+          "correct": true,
+          "tokens": 140
+        },
+        {
+          "id": "config_10",
+          "correct": true,
+          "tokens": 134
+        },
+        {
+          "id": "config_11",
+          "correct": true,
+          "tokens": 140
+        }
+      ]
+    },
+    "D": {
+      "correct": 12,
+      "n": 12,
+      "mean_tokens": 70.5,
+      "rows": [
+        {
+          "id": "config_0",
+          "correct": true,
+          "tokens": 72
+        },
+        {
+          "id": "config_1",
+          "correct": true,
+          "tokens": 72
+        },
+        {
+          "id": "config_2",
+          "correct": true,
+          "tokens": 72
+        },
+        {
+          "id": "config_3",
+          "correct": true,
+          "tokens": 72
+        },
+        {
+          "id": "config_4",
+          "correct": true,
+          "tokens": 72
+        },
+        {
+          "id": "config_5",
+          "correct": true,
+          "tokens": 66
+        },
+        {
+          "id": "config_6",
+          "correct": true,
+          "tokens": 72
+        },
+        {
+          "id": "config_7",
+          "correct": true,
+          "tokens": 72
+        },
+        {
+          "id": "config_8",
+          "correct": true,
+          "tokens": 72
+        },
+        {
+          "id": "config_9",
+          "correct": true,
+          "tokens": 66
+        },
+        {
+          "id": "config_10",
+          "correct": true,
+          "tokens": 72
+        },
+        {
+          "id": "config_11",
+          "correct": true,
+          "tokens": 66
+        }
+      ]
+    }
+  }
+}

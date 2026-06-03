@@ -1,0 +1,45 @@
+{
+  "vanilla": {
+    "rows": [
+      {
+        "task_id": "HumanEval/0",
+        "pass": true,
+        "err": null,
+        "raw_head": "```python\nfrom typing import List\n\n\ndef has_close_elements(numbers: List[float], threshold: float) -> bool:\n    \"\"\" Check if in given list of numbers, are any two numbers closer to each other than\n    given threshold.\n    >>> has_close_elements([1.0, 2.0, 3.0], 0.5)\n    False\n    >>> has_close_eleme",
+        "comp_head": "from typing import List\n\n\ndef has_close_elements(numbers: List[float], threshold: float) -> bool:\n    \"\"\" Check if in given list of numbers, are any two numbers closer to each other than\n    given threshold.\n    >>> has_close_elements([1.0, 2.0, 3.0], 0.5)\n    False\n    >>> has_close_elements([1.0, "
+      },
+      {
+        "task_id": "HumanEval/1",
+        "pass": true,
+        "err": null,
+        "raw_head": "```python\nfrom typing import List\n\n\ndef separate_paren_groups(paren_string: str) -> List[str]:\n    \"\"\" Input to this function is a string containing multiple groups of nested parentheses. Your goal is to\n    separate those group into separate strings and return the list of those.\n    Separate groups",
+        "comp_head": "from typing import List\n\n\ndef separate_paren_groups(paren_string: str) -> List[str]:\n    \"\"\" Input to this function is a string containing multiple groups of nested parentheses. Your goal is to\n    separate those group into separate strings and return the list of those.\n    Separate groups are balan"
+      }
+    ]
+  },
+  "stream": {
+    "rows": [
+      {
+        "task_id": "HumanEval/0",
+        "pass": false,
+        "err": "SyntaxError: invalid syntax (<string>, line 1)",
+        "raw_head": "place threshold comparison threshold. \"\"\" return any( abs( num threshold. ```python def has_close_elements( [1, 2.0, 3.0], 0.5) == True ```python def has_close_elements( [1.1, 3.2], 0.3) == True ```python def has_close_elements( [1.0, 3.0], 0.5) == True ```python def has_close_elements( [1.1, 2.0, 3.0], 0.5) == True ```python def has_close_elements( [1.1, 2.8, 3.0], 0.5) == True ```python def has_",
+        "comp_head": "python def has_close_elements( [1, 2.0, 3.0], 0.5) == True "
+      },
+      {
+        "task_id": "HumanEval/1",
+        "pass": false,
+        "err": "SyntaxError: invalid syntax (<string>, line 1)",
+        "raw_head": "groups(())' == ['()()', '()']) ```python def separate_paren_groups (string) -> List[str] : \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\",
+        "comp_head": "python def separate_paren_groups (string) -> List[str] : \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n \\n "
+      }
+    ],
+    "determinism": {
+      "task_id": "HumanEval/0",
+      "identical": false,
+      "len1": 632,
+      "len2": 385,
+      "first_diff": 0
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+  "adapter": null,
+  "agg": {
+    "D": {
+      "resolved": 1,
+      "n": 1,
+      "mean_rework": 0.0,
+      "mean_edits": 1.0,
+      "mean_cycles": 0.0,
+      "mean_tokens": 53.0,
+      "rows": [
+        {
+          "task": "totals_undefined",
+          "cond": "D",
+          "resolved": true,
+          "rework_ratio": 0.0,
+          "n_edits": 1,
+          "edit_error_cycles": 0,
+          "n_tokens": 53,
+          "n_events": 3,
+          "sec": 6.5,
+          "events": [
+            {
+              "tok": 49,
+              "type": "rewrite",
+              "ok": true,
+              "fail_streak": 0
+            },
+            {
+              "tok": 52,
+              "type": "test",
+              "n": 1,
+              "resolved": true
+            },
+            {
+              "tok": 52,
+              "type": "turn",
+              "n": 1,
+              "via": "test"
+            }
+          ],
+          "stream_tail": "<rewrite>\ndef totals(xs: list[int]) -> list[int]:\n    out = []\n    acc = 0\n    for x in xs:\n        acc = acc + x\n        out.append(acc)\n    return out\n</rewrite>\n\n<test/><|im_end|>\n<|im_start|>user\n<test_result>\nALL TESTS PASS.\n</test_result>\nTests pass \u2014 emit <done/> if the fix is complete.\n\nCurrent `sol.py` (edit against THIS exact text):\n  1| def totals(xs: list[int]) -> list[int]:\n  2|     out = []\n  3|     acc = 0\n  4|     for x in xs:\n  5|         acc = acc + x\n  6|         out.append(acc)\n  7|     return out<|im_end|>\n<|im_start|>assistant\n<"
+        }
+      ]
+    }
+  }
+}
