@@ -1,6 +1,17 @@
 #!/usr/bin/env python3
-"""A/C/D efficiency eval on the synthetic multi-site type-signal tasks, through the
-SAME non-blocking agent harness (MockEnv + real pyrefly + line edits).
+"""Condition runner for the synthetic multi-site type-error suite (the paper's
+main experiment), through the non-blocking agent harness (MockEnv + real pyrefly
++ line edits).
+
+PAPER CONDITION -> INVOCATION (the paper's D arms all use debounce 24 + pause-align;
+note the bare argparse defaults below are debounce 0 / no pause-align):
+  A        : --conds A
+  C-lazy   : --conds C
+  C-eager  : --conds C --c-eager
+  D-naive  : --conds D --debounce 24 --pause-align --announce-lsp   ("D-tuned" in log.md)
+  D-plain  : --conds D --debounce 24 --pause-align
+  D-gate   : --conds D --debounce 24 --pause-align --syntax-gate
+  +rich    : add --rich-signal        |  +SFT: add --adapter <dir>
 
 The mechanism under test: a multi-site type-error cascade. `pytest` reveals broken
 sites one at a time (A must grind serially: fix->retest->next crash); `pyrefly`

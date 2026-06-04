@@ -450,13 +450,19 @@ the task suite and its verifier, the agent harness with every delivery condition
 a flag, the harvest/train/eval SFT pipeline, and a chronological lab log containing
 every intermediate result, retraction, and audit memo are in the repository. Key
 artifacts: `scaffold/stream_agent.py`, `scripts/synth_tasks.py`,
-`scripts/synth_acd.py`, `runs/agent/*.json`, `log.md`, `WRITEUP.md`.
+`scripts/synth_acd.py`, `runs/agent/*.json`, `log.md`; every headline statistic is
+reproduced by `scripts/analysis/stats.py`, and the repository README maps each
+paper condition to its exact invocation and result files.
 
 **Naming note.** The repository's logs and result files predate this paper's
 terminology: the condition called **D-naive** here appears as `D-tuned` in
 `log.md`/`synth_power.json` (it was, at the time, the debounce-"tuned" variant —
 before the announce confound and gating results reframed it as the naive baseline).
-`D-plain` and `D-gate` match their file names.
+`D-plain` and `D-gate` match their file names. Inside result files, conditions are
+keyed by harness letter only: the `D` rows of `synth_power.json` are D-naive, those
+of `synth_dplain.json`/`synth_dgate.json` are D-plain/D-gate, and the `C` rows of
+`synth_power.json` vs `synth_ceager.json` are C-lazy vs C-eager respectively (the
+flag recipes live in the README and the finalized files do not embed their config).
 
 **Engineering errata.** Two harness defects were found and fixed during the study,
 each documented with before/after numbers in the log: (i) the line-edit parser

@@ -5,7 +5,7 @@ Runs REAL pyrefly (one-shot CLI) so diagnostics are authentic; run_tests execs
 the file against an assertion."""
 import os, re, json, subprocess, tempfile, multiprocessing as mp
 
-PYREFLY = os.path.expanduser("/home/ianbarber/Projects/Streams/.venv-streams/bin/pyrefly")
+PYREFLY = os.path.expanduser("/home/ianbarber/Projects/Streams/.venv-streams/bin/pyrefly")  # NOTE: point at your own pyrefly binary (pip install pyrefly)
 SEV = {0:"error",1:"error",2:"warning",3:"info"}
 
 class MockEnv:

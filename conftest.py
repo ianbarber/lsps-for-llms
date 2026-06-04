@@ -1,4 +1,4 @@
-"""Make the repo root importable so `import training...` resolves under pytest."""
+"""Make the repo root importable so `import harness...` resolves under pytest (tests/test_task_env.py)."""
 import sys
 from pathlib import Path
 
