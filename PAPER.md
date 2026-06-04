@@ -72,14 +72,17 @@ Our findings:
    regardless of timing.
 2. **A significant harm mode.** A naive live implementation — diagnostics spliced
    mid-stream after every edit, plus a prompt instructing the model to treat them
-   urgently — falls 14–25 points below the band (0.345), significantly below both
-   sync variants (p = 0.0002, p = 0.006). The mechanism is measurable: 78.3% of its
-   delivered diagnostics are *self-inflicted* (describing the model's own incomplete
-   edit state), and 92% of paired regressions against no-feedback involve one. The
-   agent chases squigglies about code it has not finished writing.
+   urgently — falls 14–25 points below every other condition (0.345), significantly
+   below both sync variants (p = 0.0002, p = 0.006; both survive multiplicity
+   correction). The mechanism is measurable: 78.3% of its delivered diagnostics are
+   *self-inflicted* (describing the model's own incomplete edit state), and 23 of
+   the 25 paired units where no-feedback succeeds and naive-live fails (92%) involve
+   one. The agent chases squigglies about code it has not finished writing.
 3. **Hygiene recovers; nothing exceeds.** Removing the prompt and gating delivery on
-   parseable file states restores live delivery to parity (naive-vs-gated p = 0.041),
-   cutting deliveries by 70%. Two attempts to *exceed* the band fail: enriching
+   parseable file states improves the live channel (naive-vs-gated, nominal
+   p = 0.041) back to the level of the other arms — gated-live vs no-feedback is then
+   exactly balanced (p = 1.0) — while cutting deliveries by 70%. Two attempts to add
+   value *beyond* the no-feedback baseline fail: enriching
    diagnostics with definition context (a small, consistently-positive but
    non-significant nudge), and LoRA self-distillation on the agent's own successful
    trajectories, which produces task memorization — exposed by a no-feedback control
