@@ -977,4 +977,15 @@ Ran the audit's two clean arms (announce-OFF), seeds 0-5, paired with existing A
 
 ---
 
+## 2026-06-03 — RICH-SIGNAL result: mild nudge, band holds. SFT chain launched (last lever).
+
+Rich-signal (go-to-def/hover context appended to diagnostics), seeds 0-5 vs plain counterparts, paired:
+- **D-gate+rich 0.524 vs D-gate 0.500** — only 2 discordant pairs, BOTH favouring rich (b=2,c=0, p=0.5). Direction positive, magnitude tiny. Task texture: rename/key-type tasks hit ceiling with rich (return_container 6/6, dict_key 6/6) — context helps exactly where "what does this symbol look like now" is the question.
+- **C-eager+rich 0.607 vs C-eager 0.595** — flat (b=3,c=2, p=1.0).
+→ **Constructive content does NOT break the parity band untrained.** Neither timing nor content is the binding constraint; the test loop saturates the untrained model.
+
+**SFT chain launched** (the last lever): harvest train-split (7 even-indexed tasks) × seeds 100-111 (disjoint from eval seeds) in the D-gate deployment config → expect ~40 resolved demos → `d_sft.py` LoRA (r64, --max-len 4000, bs1×accum8, 2 epochs) → eval next: D-gate ± adapter and A ± adapter on all 14 tasks @ seeds 0-5; the claim rides on the HELD-OUT (odd) tasks. Task #46.
+
+---
+
 <!-- Add new entries above this line. Format: ## YYYY-MM-DD — short title -->
