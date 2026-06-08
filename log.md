@@ -1103,4 +1103,22 @@ Preread channel effect CONFIRMED, stronger with power: n=180 preread-A 74/180=0.
 
 ---
 
+## 2026-06-08 — SKEPTICAL REVIEW (verified vs raw data): effect REAL, but 2 of 3 interpretations OVERREACH. Three confounds, one is project-wide.
+
+Reviewer reproduced every headline number exactly. The 0.41->0.58 preread sync-vs-none effect is real (exact p=0.00054, survives Bonferroni x5 and jackknife<0.021). But:
+
+**[ALIVE, most dangerous] Claim 2 (sync>live) is a delivery-FORMAT confound, not timing.** sync(c_eager) delivers diagnostics as a clean USER TURN + refreshed file view; live(D) raw-splices ‹diag› markers mid-assistant-stream with no turn/file-view. **22% of live rollouts that got a diagnostic had the ‹diag› markers LEAK into the model's edits (it wrote ‹diag› as code).** Decisive: at matched 1-diagnostic, sync +0.50 vs live +0.04 (kills the delivery-COUNT confound — not a count effect — but the residual is plausibly FORMAT not timing). **This is a marker-leakage BUG in the live delivery path that confounds EVERY live-vs-sync comparison in the project, incl. the single-file "naive-live hurts" finding in PAPER.md.** We have never cleanly tested live timing.
+
+**[ALIVE] Claim 3 interpretation wrong: it's largely an EDIT-ERROR/ANTI-THRASHING loop, not type-localization.** ~80% (6400/7874) of delivered sync diagnostics are SELF-INFLICTED syntax/scope errors from the model's brittle line-edits (unknown-name, invalid-syntax, parse-error); only ~700 are the cross-file TYPE errors the tasks are about. **The CONTROL task (no type signal at all) STILL benefits from sync: 0.222->0.611, p=0.039.** preread-none failures don't "never attempt" (5/106 zero-edit) — they THRASH (mean 10.3 edits, budget-out). Type-localization IS real (rich>plain p=0.016, weak on plain p=0.16 — refutes recency) but is a MINORITY of payload, entangled with generic edit feedback.
+
+**[WEAKENED] Claim 1 ("ONLY under full context"): the INTERACTION is not significant (z=1.32, p~0.19).** Classic compare-significance-levels error. Full +0.167 (p<0.001) vs partial +0.058 (n.s.) — partial is underpowered, not demonstrably zero. Drop "ONLY"; restate as "substantially larger under full context."
+
+**KILLED:** delivery-count (B), recency (B — rich>plain refutes it), model-ignores-context (D, preread reads drop to 0.12), multiple-comparisons (survives Bonferroni), single-task-driven (G, jackknife robust; but disclose 2/10 tasks REVERSE — sync sometimes hurts).
+
+**Robust defensible core (reviewer):** "a TURN-STRUCTURED type-checker channel raises a weak 7B's multi-file resolve 0.41->0.58 (p<0.001, robust), benefit larger with code in context; the channel acts substantially as an early edit-error/anti-thrashing signal, with a real but minority type-localization component." Timing (sync vs live) and the attention-vs-information mechanism need 2 more arms before claimable.
+
+**Decisive follow-ups (reviewer):** (1) CLEAN-LIVE arm — deliver D's debounced diagnostic via a clean turn + file view (fixes marker leakage; isolates timing from format). (2) MECHANISM — type-errors-only vs syntax-errors-only delivery (isolates anti-thrashing from type-localization). + bounds on model-weakness via rewrite edit-mode / stronger model. Task #48.
+
+---
+
 <!-- Add new entries above this line. Format: ## YYYY-MM-DD — short title -->
