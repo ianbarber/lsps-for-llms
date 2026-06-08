@@ -116,7 +116,8 @@ class StreamAgent:
                  max_new_tokens=3000, max_tests=8, max_turns=12, max_bad=5,
                  max_reads=6, edit_mode="search", temperature=0.0, seed=0,
                  debounce=0, pause_align=False, announce_lsp=False, c_eager=False,
-                 syntax_gate=False, rich_signal=False, device=None):
+                 syntax_gate=False, rich_signal=False, clean_delivery=False,
+                 diag_filter=None, device=None):
         assert condition in ("A", "C", "D")
         assert edit_mode in ("search", "rewrite", "line")
         self.temperature, self.seed = temperature, seed
@@ -128,6 +129,8 @@ class StreamAgent:
         self.c_eager = c_eager   # C: deliver the diagnostic immediately after each edit (post-edit hook) vs batched at the next yield
         self.syntax_gate = syntax_gate   # D: only deliver a live diagnostic when the file currently PARSES (suppress self-inflicted mid-edit syntax-error squiggles)
         self.rich_signal = rich_signal   # append go-to-def/hover-style context (signature/fields of the symbols the diagnostic names) to each delivered diagnostic
+        self.clean_delivery = clean_delivery   # D: deliver the live diagnostic as a clean USER turn + file view (not a raw ‹diag› splice) — isolates delivery FORMAT from timing; avoids marker leakage
+        self.diag_filter = diag_filter   # None | "type" | "syntax": deliver only cross-file TYPE errors, or only self-inflicted syntax/scope errors (mechanism decomposition)
         self.model, self.tok, self.env = model, tok, env
         self.cond, self.latency = condition, latency_tokens
         self.max_new, self.max_tests, self.max_turns = max_new_tokens, max_tests, max_turns
@@ -233,9 +236,29 @@ class StreamAgent:
             diag_text += "\ndefinitions:\n" + "\n".join(ctx[:10])
         return diag_text
 
+    # cross-file TYPE errors (the bug the task is "about") vs self-inflicted syntax/scope
+    # errors created by the model's own brittle edits (everything else).
+    TYPE_CODES = {"missing-argument", "bad-unpacking", "bad-typed-dict-key", "missing-attribute",
+                  "bad-index", "unsupported-operation", "no-matching-overload", "bad-override",
+                  "bad-assignment", "bad-argument-type"}
+
+    def _filter_diag(self, text):
+        """Keep only TYPE-code lines (diag_filter='type') or only non-TYPE/self-inflicted
+        lines (diag_filter='syntax'). Lines look like '[error] [file] Lnn code: msg'."""
+        if not self.diag_filter or not text:
+            return text
+        keep = []
+        for ln in text.splitlines():
+            m = re.search(r"L\d+\s+([\w-]+):", ln)
+            code = m.group(1) if m else ""
+            is_type = code in self.TYPE_CODES
+            if (self.diag_filter == "type" and is_type) or (self.diag_filter == "syntax" and not is_type):
+                keep.append(ln)
+        return "\n".join(keep)
+
     def _diag_text(self, path):
-        """Formatted (and optionally enriched) current diagnostics for `path`."""
-        d = self._fmt_diag(self.env.pyrefly_diagnostics(path))
+        """Formatted (optionally filtered/enriched) current diagnostics for `path`."""
+        d = self._filter_diag(self._fmt_diag(self.env.pyrefly_diagnostics(path)))
         if d and self.rich_signal:
             try:
                 d = self._enrich_diag(d, self.env.read_file(path))
@@ -386,9 +409,18 @@ class StreamAgent:
                 if settled and at_pause and not gated:
                     diag = self._diag_text(target_file)
                     if diag and diag != d_last_delivered:
-                        splice(DIAG_OPEN + diag + DIAG_CLOSE)
+                        if self.clean_delivery:
+                            # live timing, CLEAN format: deliver as a user turn + file view
+                            # (no raw ‹diag› markers in the assistant stream -> no leakage)
+                            fv = self._file_view(target_file)
+                            body = "Static analysis:\n" + diag + ("\n\n" + fv if fv else "")
+                            splice("<|im_end|>\n<|im_start|>user\n" + body +
+                                   "<|im_end|>\n<|im_start|>assistant\n")
+                        else:
+                            splice(DIAG_OPEN + diag + DIAG_CLOSE)
                         d_last_delivered = diag
-                        events.append({"tok": t, "type": "diag_debounced", "text": diag})
+                        events.append({"tok": t, "type": "diag_debounced",
+                                       "clean": self.clean_delivery, "text": diag})
                     d_dirty_at = None
 
             # detect a newly-completed whole-file rewrite (rewrite mode)

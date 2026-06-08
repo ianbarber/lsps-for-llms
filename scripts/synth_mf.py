@@ -43,6 +43,10 @@ ap.add_argument("--rich-signal", action="store_true")
 ap.add_argument("--preread", action="store_true",
                 help="put ALL workspace files in the prompt (context-saturation ablation: "
                      "the diagnostic channel becomes informationally redundant)")
+ap.add_argument("--clean-delivery", action="store_true",
+                help="D: deliver live diagnostic as a clean user turn + file view (isolates format from timing)")
+ap.add_argument("--diag-filter", default=None, choices=[None, "type", "syntax"],
+                help="deliver only cross-file TYPE errors, or only self-inflicted SYNTAX/scope errors")
 A = ap.parse_args()
 
 tasks = TASKS_MF if not A.names else [t for t in TASKS_MF if t["name"] in set(A.names.split(","))]
@@ -91,7 +95,8 @@ for task in tasks:
                                 temperature=A.temp, seed=seed,
                                 debounce=A.debounce, pause_align=A.pause_align,
                                 announce_lsp=A.announce_lsp, c_eager=A.c_eager,
-                                syntax_gate=A.syntax_gate, rich_signal=A.rich_signal)
+                                syntax_gate=A.syntax_gate, rich_signal=A.rich_signal,
+                                clean_delivery=A.clean_delivery, diag_filter=A.diag_filter)
             t0 = time.time()
             r = agent.run(build_prompt(task), task["target"])
             dt = time.time() - t0
