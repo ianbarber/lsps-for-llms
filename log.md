@@ -1039,4 +1039,14 @@ Combined harvest 62 demos (27+35, 42% resolve on train split, seeds 100-123) →
 
 ---
 
+## 2026-06-07 — Reframe (Ian): paper centers on the DELIVERY MECHANISM; redundancy is a boundary condition, not the headline. Preread ablation built.
+
+Ian: don't make the single-file-redundancy insight the big thing (obvious to the field). Instead — focus on the DELIVERY MECHANISM (timing/hygiene/content), and use single-file as a clean demonstration of WHEN feedback does not help, tied to the long-context-window question: "if I can stuff the whole codebase into context, do I need the channel?". Direct test: PREREAD ablation — same multi-file tasks but ALL files placed in the prompt up front, so the checker's knowledge is already in context. Prediction (2x2 context{partial,full} × feedback{none,sync}): feedback helps only under PARTIAL context; preread-A ≈ preread-C-eager (channel redundant) and both > partial-A.
+
+**Built + verified:** `scripts/synth_mf.py --preread` (shows every workspace file's full contents in the prompt). Prompt construction confirmed (remote signature now in context). To run after the live arms (GPU serial): preread-A + preread-C-eager × 10 × 6.
+
+**New paper arc (to restructure once live + preread land):** (1) how to deliver in-loop checker feedback, and when it matters at all; (2) BOUNDARY — single-file + preread show all delivery ≈ none when info is already in context (the long-context-window angle); (3) MECHANISM — in the multi-file/partial-context regime that HAS headroom, does timing/hygiene/content matter: the hygiene result (naive live hurts, fixable — 78% self-inflicted) + live-vs-sync (running) + rich-vs-plain. Hygiene/self-inflicted-squiggle mechanism stays central; single-file parity becomes the boundary condition rather than the headline negative. Task #48.
+
+---
+
 <!-- Add new entries above this line. Format: ## YYYY-MM-DD — short title -->

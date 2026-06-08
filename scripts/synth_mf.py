@@ -40,6 +40,9 @@ ap.add_argument("--announce-lsp", action="store_true")
 ap.add_argument("--c-eager", action="store_true")
 ap.add_argument("--syntax-gate", action="store_true")
 ap.add_argument("--rich-signal", action="store_true")
+ap.add_argument("--preread", action="store_true",
+                help="put ALL workspace files in the prompt (context-saturation ablation: "
+                     "the diagnostic channel becomes informationally redundant)")
 A = ap.parse_args()
 
 tasks = TASKS_MF if not A.names else [t for t in TASKS_MF if t["name"] in set(A.names.split(","))]
@@ -58,10 +61,17 @@ def build_prompt(task):
     src = task["files"][task["target"]]
     numbered = "\n".join(f"{i+1:>3}| {ln}" for i, ln in enumerate(src.splitlines()))
     others = [f for f in sorted(task["files"]) if f != task["target"]]
+    if A.preread:
+        # context-saturation: show every other file's full contents up front, so all
+        # type information the checker reasons over is already in the model's context.
+        ctx = "\n".join(f"`{f}`:\n```python\n{task['files'][f]}```" for f in others)
+        whereabouts = (f"The rest of the workspace (read-only, shown in full):\n{ctx}\n\n")
+    else:
+        whereabouts = (f"The workspace also contains: {', '.join(others)} — you have NOT seen "
+                       f"their contents; use <read path=\"...\"/> if you need them.\n\n")
     return (f"Fix the bug(s) in `{task['target']}` so the test below passes.\n\n"
             f"`{task['target']}`:\n{numbered}\n\n"
-            f"The workspace also contains: {', '.join(others)} — you have NOT seen their "
-            f"contents; use <read path=\"...\"/> if you need them.\n\n"
+            f"{whereabouts}"
             f"The test that must pass (do NOT edit it; it is the spec):\n"
             f"```python\n{task['test']}\n```\n"
             f"Make line-range edits to `{task['target']}`, then run <test/>.")
