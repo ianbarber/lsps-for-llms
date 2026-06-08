@@ -1049,4 +1049,18 @@ Ian: don't make the single-file-redundancy insight the big thing (obvious to the
 
 ---
 
+## 2026-06-07 — CORRECTION: the multi-file n=60 channel effect was SEED LUCK. At n=120 it is NOT significant (+5.8pp, p1=0.17) — indistinguishable from the single-file effect. Redundancy hypothesis NOT supported at power.
+
+I reported the n=60 multi-file result ("C-eager > A +18pp, p=0.017; redundancy hypothesis confirmed") too eagerly, on data I had myself flagged as needing power. The power-up reverses it:
+- A: seeds 0-5 = 20/60, seeds 6-11 = **28/60** -> n=120 = 48/120 = 0.400.
+- C-eager: seeds 0-5 = 31/60, seeds 6-11 = **24/60** -> n=120 = 55/120 = 0.458.
+- **Full n=120 paired C-eager vs A: b=24 c=17, one-sided p=0.174, two-sided p=0.349 — NOT significant.** The seeds-6-11 block went the OTHER way. Textbook Bjarnason seed-variance (and a live demonstration for the paper's own methodology point).
+- By group n=120: plain A 22/60 vs C-eager 28/60 (p1=0.132, directional, the mechanistically-expected locus); rich 23/48 vs 22/48 (flat); control noisy.
+
+**Implication:** the multi-file channel effect (+5.8pp, p1=0.17) ≈ the single-file effect (+4.8pp, p1=0.13). Removing the redundancy confound did NOT measurably increase the channel's value. The redundancy hypothesis (Ian's + mine) is NOT supported at power. This is a STRONGER negative: even with engineered non-redundant cross-file information, the type-checker channel does not significantly help a 7B with a test loop. (Live-vs-sync still pending D-gate n=120; D-gate/C-eager n=60 numbers are likely seed-inflated too — do not trust until powered.)
+
+**In flight:** D-gate seeds 6-11 (-> n=120) + preread 2x2 (preread-A, preread-C-eager). Will give: live-vs-sync at power, and the context-saturation ablation. HOLD all conclusions until these land; report only n=120+ paired tests henceforth. Task #48.
+
+---
+
 <!-- Add new entries above this line. Format: ## YYYY-MM-DD — short title -->
