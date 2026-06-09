@@ -1166,4 +1166,24 @@ Verdict: every task fails behaviourally + is gold-solvable (good artifact), but 
 
 ---
 
+## 2026-06-09 — v2 task-set review: R2 SOLID, but "rich" over-claimed (~3-4 of 8 genuine); relabel/cut/extend + ~15 new rich proposals. + pyrefly-daemon concurrency deadlock.
+
+Review of `scripts/synth_tasks_mf2.py` (15 tasks, all pass verifier). Verdict: R2 (test<=>diag<=>correct) is the strongest part — re-attacked 8 tasks with type-valid-but-wrong edits, NONE produced false-all-clear or green-with-errors (v1 reverser class does not reproduce). BUT the verifier only checks R3 (no transcription) against the DIAGNOSTIC, never the TEST or the diagnostic TYPE -> "rich" is over-claimed:
+- GENUINE rich (fix value absent from target+test+diagnostic, needs the hidden remote def): **rich_field_rename, rich_method_rename, rich_return_obj_vs_tuple, rich_callback_sig** (the ARG-ORDER is type-invisible+remote-necessary even though arity is in the diag).
+- RELABEL -> plain (diagnostic already conveys the fact): **rich_field_type_change** (diag says `qty: str`), **rich_arity_drift** (diag prints full `tuple[str,int,float]` shape), **rich_generic_widened** (diag prints `list[int]`; sum-vs-max comes from the test).
+- CUT/rewrite **rich_enum_member** — R1 VIOLATION: the fix names ACTIVE/PAUSED appear VERBATIM in the test assertions -> solvable from test alone, no remote read. (Verifier missed it because R3 only scans the diagnostic.) Fix: assert on return values for inputs built by integer value (`Status(1)`) so member names never appear.
+- REPLACE **plain_bad_index_key** — violates the suite's OWN R5 (`t[str(k)]` strawman the header bans).
+- Controls well-matched (multi-file, multi-site, remote type used correctly, 0 diagnostics). R4 clean.
+- Too-easy / won't-discriminate: rich_enum_member, rich_arity_drift.
+
+**Verifier fix:** extend the R3 token scan to the TEST source (would auto-catch enum_member).
+
+**~15 NEW rich-weighted proposals (clear R1-R3): ** protocol/structural-typing mismatch (rename a Protocol method), wrong generic type-arg across files (`Box[Coord].value.x`->`.lat`), overload/Literal misuse, kw-only & positional-only signature changes, NewType swap (UserId vs OrgId), dict-value-changed-to-dataclass (`stock()[sku]+1`->`.count`), sync->async/coroutine (needs `await`), inherited-attr-moved-to-base, units/enum-confusion, overload-return-depends-on-arg, + a 4th control (accumulator-reset logic bug). Target ~28-30 tasks, ~13 genuine rich.
+
+**OPERATIONAL (new): pyrefly `init` opens a Unix socket to a shared daemon and DEADLOCKS under concurrency -> run MultiFileEnv/task eval STRICTLY SEQUENTIALLY, never parallelize the harness.**
+
+**Plan unchanged:** finalize v2 (relabel 4, cut enum_member, replace bad_index_key, extend verifier, implement ~10 strong new rich, re-verify -> ~28-30) -> ONE clean powered run across the full channel matrix (context{partial,preread} x delivery{none,sync-eager,sync-lazy,live-raw,live-clean,live-clean-UNGATED} x content{plain/rich} + mechanism{type-only,syntax-only}) -> re-skeptic -> reframe PAPER.md/README. Task #48.
+
+---
+
 <!-- Add new entries above this line. Format: ## YYYY-MM-DD — short title -->
