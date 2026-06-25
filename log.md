@@ -2124,3 +2124,34 @@ delegation, (3) difficulty floor. The main efficiency story does not depend on i
 left as an honest open. Did NOT auto-build a 4th iteration (per "focus on results, not the journey"). If wanted, a clean
 coverage test would need either a stronger model that can transcribe (e.g. 27B) or a fix whose content is short enough
 that the 7B's edit ability isn't the binding constraint. Infra: synth_tasks_effic_nodel.py, _item1_eval.sh.
+
+---
+
+## 2026-06-24 — COVERAGE-DISCOVERY: the cost-trained 27B reads exactly when needed, generalizing (closes the §1 hedge)
+
+The §1 hedge ("coverage supplied not discovered") came from the 7B / labelled setup. Tested it properly on the 27B with
+a clean instrument. METRIC: J = P(read | defn-insufficient) - P(read | defn-sufficient). Suites: 3 BYTE-IDENTICAL-surface
+variants per topic (suf / f1ins / f2ins) — the agent can only tell coverage by calling <defn> and inspecting the span.
+
+(1) cover (synth_tasks_cover.py, DEFN-CHAINABLE insufficiency: alias names _impl / body names _CUT). Floor cleared (27B
+solves all). But insufficiency was resolvable by a 2nd cheap <defn>, so: base reads-everything (J_read=0) + escalates via
+defn-chain on insuff (J_escalate=0.94, generalizing to held-out F2); cost-trained 27B (effic_lora_relabel2_27b, zero-shot)
+solves ALL variants 100% via cheap defn-chains, 2.4-8.2x cheaper, barely reading -> no clean read signal (the defn-chain
+escape). Informative but not a clean isolation.
+
+(2) cover2 (synth_tasks_cover2.py, NON-DEFN-CHAINABLE: value lives in a module-level _reg("k", 53) CALL [F1'] or a
+_CFG.attr = 53 ATTRIBUTE assignment [F2', held-out] — neither is a named top-level node, so goto_definition cannot return
+it for ANY name; verified EXHAUSTIVELY (enumerated every top-level name across all 18 tasks, 0 defn reaches the value;
+value read-only). Caught + fixed a filler leak (the value coincidentally appeared in _Aux53/_Aux50 filler -> offset all
+filler numerics to >=90000). RESULT (27B, seeds 3, n=18/variant): cost-trained reads suf 0.17 / f1ins 1.00 / f2ins 1.00,
+solves 1.00 across, ~1.5k tok on suf -> J_read = +0.83 on F1' AND held-out F2'; base reads everything (J_read=0). Because
+surface is byte-identical, the read-decision is content-driven not shape; because it transfers across two indirection
+mechanisms it is not a return-form heuristic. So the cost-trained model DISCOVERS coverage per-instance and reads only
+when the cheap defn fell short.
+
+VERDICT: coverage discovery is NOT a fundamental gap for a capable model — training the cost-preference instils the
+efficient read-only-when-needed policy on top of a coverage-perception the base already has but spends indiscriminately.
+PAPER.md §5.4 rewritten (positive), §7 boundary-limit + recipe caveat softened to "discovered per-instance." Caveats:
+one model, synthetic, modest n, suf-read 0.17 not 0, legible insufficiency signal; a dedicated shape-keyed baseline would
+make not-shape-keying airtight (next). Infra: synth_tasks_cover.py, synth_tasks_cover2.py, analysis/coverage_j.py,
+run_cover.sh; data cover{,2}_{base,sft}.json.

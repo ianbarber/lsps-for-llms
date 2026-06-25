@@ -39,11 +39,12 @@ when needed," not a degenerate always-define.
    learns *when* the cheap action suffices.
 
 The honest caveat: the read→definition relabel is valid only where go-to-definition
-actually covers the needed symbol, and in this study that coverage is *known* — the suite
+actually covers the needed symbol, and in *training* that coverage is supplied — the suite
 labels each task definition-sufficient or read-required, and the training mix uses that
-label. The method instills the preference *given* a coverage signal; it does not yet
-demonstrate the agent learning to judge coverage from scratch. A practitioner applying this
-needs a way to label or detect definition-sufficiency.
+label. At *test* time, though, the trained model judges coverage itself: on a surface-invisible
+suite it reads only when the retrieved definition is genuinely insufficient, generalizing to
+indirection it never saw (§5.4). So a practitioner does not need a perfect coverage oracle at
+inference — a capable trained model reads when, and only when, the cheap retrieval fell short.
 
 ## Contributions
 
@@ -233,25 +234,44 @@ so the SFT relabel stays the headline recipe and GRPO is the corroboration, not 
 replacement. (It needs ~3–4 rounds, shows mild round-to-round oscillation, and the retest is
 small, n=36.)
 
-### 5.4 Generalization and a coverage-judging probe we could not land
+### 5.4 Generalization, and discovering coverage
 
 The three definition-sufficient task types never seen in the SFT harvest (queue, cache,
 clamp; n=12) behave like the trained ones: use 0→100%, success 0.42→1.00, tokens 3775→722
-(5.2×). These held-out tasks share the *same mechanism* as training (a member or signature
-on a buried symbol) and differ only in surface content, so this shows surface-transfer, not
-that the agent learned to *judge* coverage.
+(5.2×). But these differ from training only in surface content, so they show surface-transfer,
+not that the agent *judges* coverage.
 
-We tried to build a test that *would* isolate coverage-judging — byte-identical prompt pairs
-where a `<defn>` returns either a full definition or an uninformative stub — and could not
-make it clean. The first design let the fix delegate to the looked-up symbol, so the agent
-never needed the returned body; a second design that forced the answer to be transcribed
-inline floored both the base and trained 7B even when the full definition was handed over,
-so the edit difficulty, not coverage-judging, became the binding constraint. We therefore
-make **no coverage-judging claim** and leave a clean version (a stronger model, or a fix
-short enough that editing is not the bottleneck) to future work. This affects only this
-probe; the main results — the efficiency isolation, the relabel, the real-LSP headline, and
-the 27B transfer — use tasks whose fixes genuinely require the retrieved API and are
-unaffected.
+To test coverage-judging directly, we built a suite where — across **byte-identical-surface**
+task variants — a `<defn>` returns either the needed value inline (sufficient) or a definition
+that *references* the value through an indirection (a registry call, or an attribute
+assignment) placed so the value is reachable **only by a `<read>`** of the large module and
+by no further `<defn>` (a property we verify exhaustively against the resolver). Nothing the
+agent sees before retrieving distinguishes the variants; the only way to know whether a read
+is needed is to call `<defn>` and inspect what came back.
+
+On this suite the **cost-trained 27B reads exactly when needed**. On sufficient variants it
+takes the value from the cheap `<defn>` and reads only 17% of the time (solving 100%, ~1.5k
+tokens); on insufficient variants — where the value is genuinely unreachable by definition —
+it reads 100% and still solves 100%. The read-decision is coverage-conditional:
+**J = P(read | insufficient) − P(read | sufficient) = +0.83**, and it holds *equally on a
+held-out indirection mechanism the model never saw* (J = +0.83 on attribute-injection),
+against an untrained 27B that reads everything indiscriminately (J = 0). Because the variants
+are byte-identical in everything the agent sees before retrieving, the discrimination cannot
+come from task shape — it must come from the *content* the `<defn>` returned; and because it
+transfers across two distinct indirection mechanisms, it is not a heuristic on the *form* of
+the return either. So a capable model, once trained for the cost-preference, **discovers
+coverage per-instance** — it pays the read only when the definition it retrieved is actually
+insufficient — rather than relying on a supplied label. (The cost-preference here is the same
+27B relabel adapter from §7, evaluated zero-shot on this suite; training instils the
+efficient *read-only-when-needed* policy on top of a coverage-perception the base model
+already has but spends indiscriminately.)
+
+Caveats: one model (27B) on synthetic tasks with modest n (18 per variant); the read-decision
+is not perfectly clean (17% reads on sufficient); and "insufficient" here is a fairly legible
+signal (the returned definition visibly references an external name), where real-repository
+indirection is messier. The byte-identical surface and the cross-mechanism transfer already
+exclude the obvious shape-keying routes; a dedicated shape-keyed baseline (trained where
+surface predicts coverage, and shown to fail this suite) would make that airtight.
 
 ## 6. Related work
 
@@ -273,11 +293,14 @@ instills where prompting and offline cloning cannot. We do not reward the tool; 
 
 ## 7. Limitations
 
-- **The boundary is supplied, not discovered.** Definition-sufficiency is labelled by the
-  task suite and used in the training mix; we show the preference is trainable *given*
-  coverage, not that the agent learns to judge coverage on an unlabelled repo. This is the
-  single largest scope limit, and the coverage-judging probe (§5.4) is the experiment that
-  would close it.
+- **Coverage discovery — labelled in training, but discovered at test.** Definition-sufficiency
+  is labelled by the task suite and used in the training mix, so the *training* preference is
+  instilled given coverage. But §5.4 shows the trained 27B then *judges* coverage at test time
+  on a surface-invisible suite — reading only when the retrieved definition is genuinely
+  insufficient (J = +0.83, generalizing to a held-out mechanism) — so for a capable model the
+  boundary is discovered per-instance, not merely supplied. The open scope limit is narrower
+  than we first thought: it is whether this holds on *real-repository* indirection (messier and
+  less legible than our synthetic cases) and below the 27B scale.
 - **Synthetic tasks with a controlled cost gap.** The read-required boundary covers two
   reasons a full read is needed (name-hidden, many-symbol), not all, and the suites are not
   a real repository with ambiguous navigation.

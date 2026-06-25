@@ -24,13 +24,24 @@ from scaffold.mock_env import MultiFileEnv
 from scripts.synth_tasks_effic import TASKS_EFFIC  # EFFICIENCY-as-policy: prefer cheap <defn> over reading a big lib
 from scripts.synth_tasks_efficread import TASKS_EFFICREAD  # READ-REQUIRED boundary: <defn> insufficient, must <read>
 from scripts.synth_tasks_effic_nodel import TASKS_EFFIC_ND  # NODEL no-delegation coverage probe (see log 2026-06-24)
+try:
+    from scripts.synth_tasks_cover import TASKS_COVER  # COVERAGE-JUDGING: read-on-insufficient-defn (suf/f1ins/f2ins)
+except Exception:
+    TASKS_COVER = []
+try:
+    from scripts.synth_tasks_cover2 import TASKS_COVER2  # COVERAGE v2: insufficiency is NON-DEFN-CHAINABLE (read forced)
+except Exception:
+    TASKS_COVER2 = []
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--suite", default="effic", choices=["effic", "efficread", "effmix", "effic_nodel"],
+ap.add_argument("--suite", default="effic",
+                choices=["effic", "efficread", "effmix", "effic_nodel", "cover", "cover2"],
                 help="task suite: effic (efficiency-as-policy: prefer cheap <defn> over reading a big lib), "
                      "efficread (read-required boundary: <defn> insufficient, must <read>), "
                      "effmix (effic + efficread), "
-                     "effic_nodel (no-delegation coverage probe; see log 2026-06-24)")
+                     "effic_nodel (no-delegation coverage probe; see log 2026-06-24), "
+                     "cover (coverage-judging: read-on-insufficient-defn, suf/f1ins/f2ins variants), "
+                     "cover2 (coverage v2: insufficiency is NON-DEFN-CHAINABLE, a <read> is forced)")
 ap.add_argument("--lsp-tools", action="store_true",
                 help="advertise PULL LSP actions <defn sym=.../> and <findrefs sym=.../> (oracle-backed, cheap) "
                      "alongside <read> — the efficiency-as-policy lever (does the model prefer the LSP over reading?)")
@@ -143,7 +154,8 @@ def build_oracle(buggy, gold, mode):
     return "Suggested fix (oracle):\n" + "\n".join(hunks)
 
 TASKS_MF = {"effic": TASKS_EFFIC, "efficread": TASKS_EFFICREAD,
-            "effmix": (TASKS_EFFIC + TASKS_EFFICREAD), "effic_nodel": TASKS_EFFIC_ND}[A.suite]
+            "effmix": (TASKS_EFFIC + TASKS_EFFICREAD), "effic_nodel": TASKS_EFFIC_ND,
+            "cover": TASKS_COVER, "cover2": TASKS_COVER2}[A.suite]
 tasks = TASKS_MF if not A.names else [t for t in TASKS_MF if t["name"] in set(A.names.split(","))]
 conds = A.conds.split(",")
 n_seeds = 1 if A.temp == 0 else A.seeds
