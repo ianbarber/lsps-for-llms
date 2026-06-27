@@ -25,7 +25,7 @@ CPU sanity (NO model load):
   python scripts/grpo_cost.py --dry-run-rewards runs/agent/relabel2_harvest.json --lambda 0.5
 """
 import os, sys, json, argparse, math
-os.environ.setdefault("HF_HOME", "/mnt/nas/hf-cache")
+os.environ.setdefault("HF_HOME", os.path.expanduser("~/.cache/huggingface"))
 os.environ.setdefault("HF_HUB_OFFLINE", "1"); os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
 
 ap = argparse.ArgumentParser()

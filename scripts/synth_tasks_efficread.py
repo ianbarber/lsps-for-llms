@@ -1,50 +1,22 @@
 #!/usr/bin/env python3
-"""READ-REQUIRED suite — the BOUNDARY / validity gate for the effic training result.
+"""Read-required boundary suite.
 
-We trained a 7B agent to PREFER a cheap `<defn sym/>` retrieval over an expensive `<read path/>`
-on tasks where ONE symbol's definition is SUFFICIENT to solve (synth_tasks_effic.py; 2%->100%
-defn-use). The risk this suite guards against: the model may have COLLAPSED to always emitting
-`<defn>` even when it shouldn't. So we need tasks where `<defn>` is GENUINELY INSUFFICIENT and the
-only-workable retrieval is `<read>` — to confirm the model learned "defn WHEN SUFFICIENT, READ WHEN
-NEEDED" rather than blindly always-defn.
+This suite guards against a degenerate always-`<defn>` policy. Tasks are designed so that
+`<defn>` is genuinely insufficient and the agent must read the whole `biglib.py` to solve.
 
-THE KEY DESIGN — what makes `<read>` genuinely required: `<defn sym="NAME"/>` requires the model to
-KNOW the symbol NAME. We deny it that name two ways:
+Two flavors:
+  A. Name-hidden (tasks 1-4): the stub describes the goal in prose but does not name the
+     required symbol. The real symbol has a non-obvious private name buried among distractors
+     with obvious names. The agent must read the file to discover the right symbol.
+  B. Many-symbol (tasks 5-6): the stub names four or more required symbols. Issuing separate
+     `<defn>` calls is more expensive and error-prone than one `<read>`, so reading is the
+     economical move.
 
-  FLAVOR A (name-hidden, tasks 1-4): the target's docstring describes the GOAL in PROSE
-    ("use the helper in biglib that validates/normalizes/encodes ... and return ...") WITHOUT naming
-    the function/class. The real symbol lives in biglib.py under a NON-OBVIOUS name (e.g. a private
-    `_canon_token`) buried among many `_filler` classes, ALONGSIDE several DISTRACTOR helpers with the
-    obvious/idiomatic names (`slugify`, `normalize`, `to_slug`) that do NOT solve the task. The model
-    cannot guess which symbol to call, nor its name, so `<defn sym="slugify"/>` returns a distractor
-    or `(no definition found)`. The ONLY workable move is `<read biglib.py>` to discover the right
-    symbol and its API.
+Task schema mirrors synth_tasks_effic.py with additional flags:
+  defn_sufficient=False, requires_read=True, many_symbol=bool.
 
-  FLAVOR B (many-symbol, tasks 5-6): the target legitimately needs >=4 DISTINCT symbols whose names
-    ARE known (named in the docstring). Issuing >=4 separate `<defn>` calls is strictly more expensive
-    and more error-prone than a single `<read biglib.py>`, so reading once is the natural / only
-    economical move. Marked many_symbol=True; requires_read=True.
-
-SCHEMA (per task dict), mirroring synth_tasks_effic.py:
-  name, group("readreq"), target("target.py"), symbol(the real symbol the gold must use; for FLAVOR B
-  the PRIMARY one — `symbols` lists all),
-  files{target.py(prose stub), biglib.py(big_src, real symbol buried + distractors)},
-  test(spec, passes on gold), gold_target(corrected, uses the real discoverable-only-by-reading symbol),
-  defn_sufficient=False, requires_read=True, many_symbol(bool),
-  lsp_oracle = minimal {"defn": {sym: src}} (the point here is READ, not defn).
-
-VERIFIER (__main__, mirrors synth_tasks_effic.py): per task print a row and assert
-  R1 stub FAILs the test;
-  R2 gold PASSes AND is pyrefly-clean;
-  R3 READ-REQUIRED — flavor-aware. FLAVOR A (name-hidden): the real symbol NAME does NOT appear in
-     target.py (so it cannot be defn'd straight from the stub) AND DOES appear in biglib.py (so it is
-     discoverable only by reading). FLAVOR B (many-symbol): >=4 distinct symbols, all present in
-     biglib.py — names are known but >=4 defn calls cost more than one read, so reading is required on
-     economic grounds (the names are SUPPOSED to be in the stub here);
-  R4 biglib big (>=200 lines);
-  R5 no-leak — the real symbol name / its member-access does not appear in the test.
-Prints "ALL OK" only when every task passes R1-R5. Run:
-  HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv-streams.system/bin/python scripts/synth_tasks_efficread.py
+Verifier checks R1-R5 from synth_tasks_effic.py plus a read-required condition appropriate
+for each flavor.
 """
 
 # ---- filler to make biglib.py genuinely expensive to read (each ~8 lines; many of them) ----
@@ -429,37 +401,37 @@ TASKS_EFFICREAD = [
          symbols=["_canon_token"], many_symbol=False,
          files={"target.py": _T1_STUB, "biglib.py": _BIGLIB1}, test=_T1_TEST, gold_target=_T1_GOLD,
          defn_sufficient=False, requires_read=True,
-         lsp_oracle={"defn": {"_canon_token": _T1_REAL}}),
+         symbol_defns={"defn": {"_canon_token": _T1_REAL}}),
 
     dict(name="readreq_checksum_mod10", group="readreq", target="target.py", symbol="_mod10_ok",
          symbols=["_mod10_ok"], many_symbol=False,
          files={"target.py": _T2_STUB, "biglib.py": _BIGLIB2}, test=_T2_TEST, gold_target=_T2_GOLD,
          defn_sufficient=False, requires_read=True,
-         lsp_oracle={"defn": {"_mod10_ok": _T2_REAL}}),
+         symbol_defns={"defn": {"_mod10_ok": _T2_REAL}}),
 
     dict(name="readreq_encode_packgroups", group="readreq", target="target.py", symbol="_pack_groups",
          symbols=["_pack_groups"], many_symbol=False,
          files={"target.py": _T3_STUB, "biglib.py": _BIGLIB3}, test=_T3_TEST, gold_target=_T3_GOLD,
          defn_sufficient=False, requires_read=True,
-         lsp_oracle={"defn": {"_pack_groups": _T3_REAL}}),
+         symbol_defns={"defn": {"_pack_groups": _T3_REAL}}),
 
     dict(name="readreq_duration_decodespan", group="readreq", target="target.py", symbol="_decode_span",
          symbols=["_decode_span"], many_symbol=False,
          files={"target.py": _T4_STUB, "biglib.py": _BIGLIB4}, test=_T4_TEST, gold_target=_T4_GOLD,
          defn_sufficient=False, requires_read=True,
-         lsp_oracle={"defn": {"_decode_span": _T4_REAL}}),
+         symbol_defns={"defn": {"_decode_span": _T4_REAL}}),
 
     dict(name="readreq_price_record_many", group="readreq", target="target.py", symbol="gross_amount",
          symbols=["net_amount", "tax_amount", "gross_amount", "currency_code"], many_symbol=True,
          files={"target.py": _T5_STUB, "biglib.py": _BIGLIB5}, test=_T5_TEST, gold_target=_T5_GOLD,
          defn_sufficient=False, requires_read=True,
-         lsp_oracle={"defn": {}}),
+         symbol_defns={"defn": {}}),
 
     dict(name="readreq_packet_header_many", group="readreq", target="target.py", symbol="checksum_byte",
          symbols=["version_nibble", "flag_bits", "length_byte", "checksum_byte"], many_symbol=True,
          files={"target.py": _T6_STUB, "biglib.py": _BIGLIB6}, test=_T6_TEST, gold_target=_T6_GOLD,
          defn_sufficient=False, requires_read=True,
-         lsp_oracle={"defn": {}}),
+         symbol_defns={"defn": {}}),
 ]
 
 

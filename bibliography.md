@@ -1,13 +1,16 @@
 # Bibliography
 
-References for the Streams project (asynchronous in-stream LSP feedback for local coding LLMs). Each entry includes a BibTeX block for direct export.
+References for *Making a Language Server Pay Off for a Coding Agent: Train It to Retrieve
+Cheaply*. The canonical BibTeX source is `docs/bibliography_efficiency.bib`.
 
 ---
 
-## Core substrate
+## Substrate and tooling
 
-### Su, Yang, Li, Geiping, *Multi-Stream LLMs* (2026)
-Architectural substrate. Stream-aware RoPE, learnable stream embeddings, cross-stream causal mask, interleaved packing for FlashAttention compatibility. Releases two checkpoints: `stream-qwen3-8b` (dense Qwen3-8B backbone, ~16.4 GB BF16) and `stream-qwen3.5-27b` (DeltaNet-hybrid backbone, ~53.8 GB BF16). Smaller variants discussed in `sec5_efficiency/` are training pipelines, not released weights. 10 fixed channels named for cognitive functions (User, Output, Analytical, Skeptical, Intuitive, Between, Curious, Void, Instinct, Synthesis). Inference API: `stream_generate_iter` returns a generator supporting `gen.send(tok)` for environment-driven input; `model.generate()` is intentionally disabled. Lists tool feedback as motivating but does not implement asynchronous tool streams. **[Foundational — D's architecture builds on this directly. v1 substrate is `stream-qwen3-8b`; 27B reserved for v2 follow-up due to dense vs DeltaNet-hybrid architecture difference.]**
+### Su, Yang, Li & Geiping, *Multi-Stream LLMs* (2026)
+Architectural substrate for the stream harness. Releases `stream-qwen3-8b` and
+`stream-qwen3.5-27b` checkpoints. The harness in `scaffold/stream_agent.py` builds on this,
+but the paper's contribution is retrieval efficiency, not the stream architecture.
 
 ```bibtex
 @article{su2026multistream,
@@ -19,210 +22,20 @@ Architectural substrate. Stream-aware RoPE, learnable stream embeddings, cross-s
 }
 ```
 
----
-
-## Adjacent prior work (asynchronous / streaming tool use)
-
-### Ginart et al., *Asynchronous Tool Usage for Real-Time Agents* (Salesforce, 2024)
-Event-driven FSM architecture wrapping a single-stream LLM; agent loop decomposed into states whose transitions are driven by external events (speech, tool returns, timeouts) rather than end-of-turn token. Integrated with ASR/TTS for concurrent voice interaction. **System demonstration, not a learned policy.** Distinguishing dimensions vs ours: (a) runtime FSM, not architectural multi-stream; (b) voice dialogue domain; (c) demonstrative rather than controlled comparison; (d) open-ended tool surface.
+### seal-rg/streaming (2026)
+Training code and checkpoints for Su et al.
 
 ```bibtex
-@misc{ginart2024async,
-  title        = {Asynchronous Tool Usage for Real-Time Agents},
-  author       = {Ginart, Antonio A. and Kodali, Naveen and Lee, Jason and
-                  Xiong, Caiming and Savarese, Silvio and Emmons, John},
-  year         = {2024},
-  eprint       = {2410.21620},
-  archivePrefix= {arXiv},
-  primaryClass = {cs.AI},
-  howpublished = {arXiv:2410.21620}
+@misc{sealrgstreaming,
+  title  = {seal-rg/streaming: Multi-Stream {LLM} Training Code},
+  author = {Su, Guinan and Yang, Yanwu and Li, Xueyan and Geiping, Jonas},
+  year   = {2026},
+  url    = {https://github.com/seal-rg/streaming}
 }
 ```
 
-### Hooper et al., *Speculative Interaction Agents* (UC Berkeley, May 2026)
-**Closest prior work in spirit.** Asynchronous I/O + speculative tool calling for real-time agents. Introduces *clock-based training*: timestamps interleaved into the token stream so the model learns time-aware behaviour, with a synthetic SFT corpus pairing streaming inputs with async tool returns. Reports **1.3–2.2× wall-clock speedup** on HotpotQA / conversational tasks with minor accuracy degradation. Distinguishing dimensions vs ours: (a) single-stream transformer with inline clock tokens, not separate streams; (b) latency target, not capability; (c) generic tools vs LSP; (d) open-domain Q&A, not SWE. Their synthetic-trace construction is a direct reference for our §7.3 corpus.
-
-```bibtex
-@misc{hooper2026speculative,
-  title        = {Speculative Interaction Agents: Building Real-Time Agents
-                  with Asynchronous I/O and Speculative Tool Calling},
-  author       = {Hooper, Coleman and Kang, Minwoo and Moon, Suhong and
-                  Lee, Nicholas and Wen, Eric and Wawrzynek, John and
-                  Mahoney, Michael W. and Shao, Yakun Sophia and
-                  Gholami, Amir and Keutzer, Kurt},
-  year         = {2026},
-  eprint       = {2605.13360},
-  archivePrefix= {arXiv},
-  primaryClass = {cs.LG},
-  howpublished = {arXiv:2605.13360}
-}
-```
-
-### Gong et al., *GhostShell* (Aug 2025)
-Streaming LLM function calls for concurrent embodied programming. Three components: streaming XML function-token parser; dynamic function-interface mapper; **multi-channel scheduler** coordinating *intra-channel synchronous* and *inter-channel asynchronous* calls. Evaluated on robot prototype "COCO," 34 real-world interaction tasks, behavioural-correctness 0.85 (Claude-4-Sonnet), up to **66× faster** than native LLM function-calling. Distinguishing dimensions vs ours: (a) external scheduler, no architectural change to LLM; (b) embodied robotics; (c) system demonstration; (d) **outgoing** robot commands on parallel channels — direction of asynchrony is reversed from ours (we stream incoming diagnostics).
-
-```bibtex
-@misc{gong2025ghostshell,
-  title        = {GhostShell: Streaming LLM Function Calls for
-                  Concurrent Embodied Programming},
-  author       = {Gong, Jian and Huang, Youwei and Yuan, Bo and Zhu, Ming and
-                  Liao, Zhou and Liang, Jianhang and Zhan, Juncheng and
-                  Wang, Jinke and Shu, Hang and Xiong, Mingyue and
-                  Ye, Yanjun and Zu, Yufan and Zhou, Yang and Ding, Yihan and
-                  Chen, Xuannian and Lu, Xingyu and Ban, Runjie and
-                  Huang, Bingchao and Liu, Fusen},
-  year         = {2025},
-  eprint       = {2508.05298},
-  archivePrefix= {arXiv},
-  primaryClass = {cs.RO},
-  howpublished = {arXiv:2508.05298}
-}
-```
-
----
-
-## Methodology / evaluation
-
-### Bjarnason, Silva & Monperrus, *On Randomness in Agentic Evals* (Feb 2026)
-**Methodological backbone for our power analysis.** ~60 000 agent trajectories across three models × two scaffolds on SWE-bench Verified. Headline findings: single-run pass@1 estimates **vary by 2.2–6.0 pp**; standard deviations **exceed 1.5 pp even at T=0**; trajectories diverge within the first few percent of tokens. Many claimed 2–3 pp improvements in the SWE-bench literature are statistically indistinguishable from noise. Recommends (1) multiple runs per task, (2) explicit power analysis, (3) reporting pass@k *and* pass^k (probability every of k attempts passes) as a consistency metric.
-
-```bibtex
-@misc{bjarnason2026randomness,
-  title        = {On Randomness in Agentic Evals},
-  author       = {Bjarnason, Bjarni Haukur and Silva, Andr\'{e} and
-                  Monperrus, Martin},
-  year         = {2026},
-  eprint       = {2602.07150},
-  archivePrefix= {arXiv},
-  primaryClass = {cs.LG},
-  howpublished = {arXiv:2602.07150}
-}
-```
-
----
-
-## LSP as RL signal (orthogonal but adjacent)
-
-### Zhang et al., *RL from Compiler and Language Server Feedback* (2025)
-Uses LSP and compiler diagnostics as RL reward. Orthogonal to our work: their contribution is policy shaping; ours is in-context delivery form.
-
-```bibtex
-@article{zhang2025rlcls,
-  title   = {Reinforcement Learning from Compiler and Language Server Feedback},
-  author  = {Zhang, Yifan and others},
-  journal = {arXiv preprint arXiv:2510.22907},
-  year    = {2025},
-  url     = {https://arxiv.org/abs/2510.22907}
-}
-```
-
-### Gehring et al., *RLEF* (2024)
-Execution feedback as RL signal. Related prior art to Zhang et al.
-
-```bibtex
-@article{gehring2024rlef,
-  title   = {{RLEF}: Grounding Code {LLM}s in Execution Feedback with Reinforcement Learning},
-  author  = {Gehring, Jonas and others},
-  journal = {arXiv preprint arXiv:2410.02089},
-  year    = {2024},
-  url     = {https://arxiv.org/abs/2410.02089}
-}
-```
-
----
-
-## Coding-agent substrate
-
-### DeepSWE (Together AI / Agentica, 2025)
-Qwen3-32B RL-post-trained on R2E-Gym; 59% SWE-bench Verified w/ TTS, 42.2% pass@1. External reference baseline. Open weights, dataset, training code.
-
-```bibtex
-@misc{deepswe2025,
-  title  = {{DeepSWE}: Training a Fully Open-sourced, State-of-the-Art Coding Agent by Scaling {RL}},
-  author = {{Together AI and Agentica}},
-  year   = {2025},
-  month  = jul,
-  url    = {https://www.together.ai/blog/deepswe}
-}
-```
-
----
-
-## Benchmarks
-
-### SWE-bench Verified (Jimenez et al., OpenAI)
-Primary benchmark. 500 human-verified tasks from 12 Python repos.
-
-```bibtex
-@misc{swebenchverified,
-  title  = {{SWE}-bench Verified},
-  author = {Jimenez, Carlos E. and others},
-  year   = {2024},
-  url    = {https://www.swebench.com/verified.html}
-}
-```
-
-### *The SWE-Bench Illusion* (2025)
-Contamination audit. Cited as a contamination-defense motivation; informs the held-out-subset design.
-
-```bibtex
-@article{swebenchillusion2025,
-  author  = {Liang, Shanchao and Garg, Spandan and {Zilouchian Moghaddam}, Roshanak},
-  title   = {The {SWE}-Bench Illusion: When State-of-the-Art {LLM}s Remember Instead of Reason},
-  journal = {arXiv preprint arXiv:2506.12286},
-  year    = {2025},
-  url     = {https://arxiv.org/abs/2506.12286}
-}
-```
-
----
-
-## Training methodology
-
-### Thinking Machines Lab, *On-Policy Distillation* (Oct 2025)
-Student matches teacher distribution under student rollouts; dense per-token supervision. Mechanism for E (distilled stream model).
-
-```bibtex
-@misc{tml2025distillation,
-  title  = {On-Policy Distillation},
-  author = {{Thinking Machines Lab}},
-  year   = {2025},
-  month  = oct,
-  url    = {https://thinkingmachines.ai/blog/on-policy-distillation/}
-}
-```
-
-### Thinking Machines Lab, *Modular Manifolds* (Sept 2025)
-Manifold-constrained weight optimization. Not load-bearing for v1 but adjacent.
-
-```bibtex
-@misc{tml2025manifolds,
-  title  = {Modular Manifolds},
-  author = {Bernstein, Jeremy},
-  year   = {2025},
-  month  = sep,
-  url    = {https://thinkingmachines.ai/blog/modular-manifolds/}
-}
-```
-
----
-
-## Hardware / tooling
-
-### NVIDIA DGX Spark / GB10 Grace Blackwell
-Local hardware target: 128 GB unified LPDDR5X, ~1 PFLOP FP4.
-
-```bibtex
-@misc{nvidiadgxspark,
-  title  = {{NVIDIA DGX Spark}},
-  author = {{NVIDIA}},
-  year   = {2025},
-  url    = {https://www.nvidia.com/en-us/products/workstations/dgx-spark/}
-}
-```
-
-### Pyrefly (Meta)
-Rust-based Python type checker. v1.0 released May 2026. Daemon mode, incremental analysis.
+### Pyrefly (Meta, 2026)
+Rust-based Python type checker and LSP. Used as the real go-to-definition resolver.
 
 ```bibtex
 @misc{pyrefly,
@@ -233,95 +46,65 @@ Rust-based Python type checker. v1.0 released May 2026. Daemon mode, incremental
 }
 ```
 
-### seal-rg/streaming
-Code release accompanying Su, Yang, Li, Geiping. Source of `stream-qwen3-8b` and `stream-qwen3.5-27b` checkpoints. No LICENSE file as of 2026-05-26 (HF weights themselves are Apache-2.0); to be clarified with authors before publication.
-
-```bibtex
-@misc{sealrgstreaming,
-  title  = {seal-rg/streaming: Multi-Stream {LLM} Training Code},
-  author = {Su and Yang and Li and Geiping, Jonas},
-  year   = {2026},
-  url    = {https://github.com/seal-rg/streaming}
-}
-```
-
 ---
 
-## Tooling references (non-academic)
+## Method: on-policy imitation and cost-aware tool use
 
-### Claude Code LSP integration (Dec 2025)
-Native LSP support with edit-hook diagnostics. Production precedent for Condition C.
+### Agarwal et al., *On-Policy Distillation of Language Models* (ICLR 2024)
+GKD: distillation under the student's own rollout distribution.
 
 ```bibtex
-@misc{claudecodelsp2025,
-  title  = {{LSP} Tools: Bringing {IDE} Intelligence to {C}laude {C}ode (community plugin)},
-  author = {Allen, Robert},
-  year   = {2025},
-  month  = dec,
-  url    = {https://zircote.com/blog/2025/12/lsp-tools-plugin-for-claude-code/}
+@inproceedings{agarwal2024gkd,
+  title     = {On-Policy Distillation of Language Models: Learning from Self-Generated Mistakes},
+  author    = {Agarwal, Rishabh and Vieillard, Nino and Zhou, Yongchao and Stanczyk, Piotr and Ramos, Sabela and Geist, Matthieu and Bachem, Olivier},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2024},
+  note      = {arXiv:2306.13649}
 }
 ```
 
-@article{hui2024qwen25coder,
-  title   = {Qwen2.5-Coder Technical Report},
-  author  = {Hui, Binyuan and Yang, Jian and Cui, Zeyu and others},
-  journal = {arXiv preprint arXiv:2409.12186},
-  year    = {2024}
-}
+### Ross, Gordon & Bagnell, *DAgger* (AISTATS 2011)
+Dataset Aggregation: roll out the current policy and relabel with an expert.
 
-@inproceedings{hu2022lora,
-  title     = {{LoRA}: Low-Rank Adaptation of Large Language Models},
-  author    = {Hu, Edward J. and Shen, Yelong and Wallis, Phillip and Allen-Zhu, Zeyuan and Li, Yuanzhi and Wang, Shean and Chen, Weizhu},
-  booktitle = {International Conference on Learning Representations (ICLR)},
-  year      = {2022}
+```bibtex
+@inproceedings{ross2011dagger,
+  title     = {A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning},
+  author    = {Ross, St{\'e}phane and Gordon, Geoffrey J. and Bagnell, J. Andrew},
+  booktitle = {Proceedings of the 14th International Conference on Artificial Intelligence and Statistics (AISTATS)},
+  year      = {2011},
+  note      = {PMLR v15:627--635}
 }
+```
 
-@misc{swerebench2025,
-  title  = {{SWE}-rebench: A Continuously Updated, Decontaminated Benchmark for Software Engineering Agents},
-  author = {{Nebius}},
-  year   = {2025},
-  note   = {arXiv:2505.20411; dataset: \url{https://huggingface.co/datasets/nebius/SWE-rebench}}
+### Ross & Bagnell, *AggreVaTe* (arXiv 2014)
+Cost-aware interactive imitation learning.
+
+```bibtex
+@article{ross2014aggrevate,
+  title   = {Reinforcement and Imitation Learning via Interactive No-Regret Learning},
+  author  = {Ross, St{\'e}phane and Bagnell, J. Andrew},
+  journal = {arXiv preprint arXiv:1406.5979},
+  year    = {2014}
 }
+```
 
-@inproceedings{madaan2023selfrefine,
-  title     = {Self-Refine: Iterative Refinement with Self-Feedback},
-  author    = {Madaan, Aman and Tandon, Niket and Gupta, Prakhar and others},
-  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
-  year      = {2023},
-  note      = {arXiv:2303.17651}
+### Li et al., *Revisiting DAgger in the Era of LLM-Agents* (2026)
+Applies DAgger-style on-policy imitation to tool-using LLM agents.
+
+```bibtex
+@article{li2026revisitingdagger,
+  title   = {Revisiting {DAgger} in the Era of {LLM}-Agents},
+  author  = {Li, Changhao and Qiang, Rushi and Huang, Jiawei and Gao, Chenxiao and Zhang, Chao and He, Niao and Dai, Bo},
+  journal = {arXiv preprint arXiv:2605.12913},
+  year    = {2026}
 }
+```
 
-@inproceedings{shinn2023reflexion,
-  title     = {Reflexion: Language Agents with Verbal Reinforcement Learning},
-  author    = {Shinn, Noah and Cassano, Federico and Berman, Edward and Gopinath, Ashwin and Narasimhan, Karthik and Yao, Shunyu},
-  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
-  year      = {2023},
-  note      = {arXiv:2303.11366}
-}
+### Zelikman et al., *STaR* (NeurIPS 2022)
+Bootstraps reasoning from the model's own generated rationales; analogous in spirit to
+bootstrapping a cost preference from the model's own trajectories.
 
-@inproceedings{huang2024cannot,
-  title     = {Large Language Models Cannot Self-Correct Reasoning Yet},
-  author    = {Huang, Jie and Chen, Xinyun and Mishra, Swaroop and others},
-  booktitle = {International Conference on Learning Representations (ICLR)},
-  year      = {2024},
-  note      = {arXiv:2310.01798}
-}
-
-@inproceedings{shi2023distracted,
-  title     = {Large Language Models Can Be Easily Distracted by Irrelevant Context},
-  author    = {Shi, Freda and Chen, Xinyun and Misra, Kanishka and others},
-  booktitle = {International Conference on Machine Learning (ICML)},
-  year      = {2023},
-  note      = {arXiv:2302.00093}
-}
-
-@misc{chen2023selfdebug,
-  title  = {Teaching Large Language Models to Self-Debug},
-  author = {Chen, Xinyun and Lin, Maxwell and Sch{\"a}rli, Nathanael and Zhou, Denny},
-  year   = {2023},
-  note   = {arXiv:2304.05128}
-}
-
+```bibtex
 @inproceedings{zelikman2022star,
   title     = {{STaR}: Bootstrapping Reasoning With Reasoning},
   author    = {Zelikman, Eric and Wu, Yuhuai and Mu, Jesse and Goodman, Noah D.},
@@ -329,31 +112,65 @@ Native LSP support with edit-hook diagnostics. Production precedent for Conditio
   year      = {2022},
   note      = {arXiv:2203.14465}
 }
+```
 
-@misc{zhang2025onetool,
-  title  = {One Tool Is Enough: Reinforcement Learning for Repository-Level LLM Agents},
-  author = {Zhang, Yifan and others},
-  year   = {2025},
-  note   = {arXiv:2512.20957. RepoNavigator: a single LSP-style jump-to-definition tool, RL-trained.}
-}
+### Wang et al., *OTC-PO* (2025)
+Teaches models to act efficiently by rewarding fewer tool calls.
 
-@misc{lin2025asyncvoice,
-  title  = {AsyncVoice Agent: Real-Time Explanation for LLM Planning and Reasoning},
-  author = {Lin, and others},
-  year   = {2025},
-  note   = {arXiv:2510.16156. Interruptible real-time dialogue with a live LLM reasoning stream.}
+```bibtex
+@article{wang2025otcpo,
+  title   = {Acting Less is Reasoning More! Teaching Model to Act Efficiently},
+  author  = {Wang, Hongru and Qian, Cheng and Zhong, Wanjun and Chen, Xiusi and Qiu, Jiahao and Huang, Shijue and Jin, Bowen and Wang, Mengdi and Wong, Kam-Fai and Ji, Heng},
+  journal = {arXiv preprint arXiv:2504.14870},
+  year    = {2025},
+  note    = {OTC-PO}
 }
+```
 
-@misc{du2025contextlength,
-  title  = {Context Length Alone Hurts LLM Performance Despite Perfect Retrieval},
-  author = {Du, and others},
-  year   = {2025},
-  note   = {arXiv:2510.05381}
-}
+### Huang et al., *IKEA* (2025)
+Reinforced internal-external knowledge reasoning for efficient adaptive search.
 
-@misc{kang2025acon,
-  title  = {{ACON}: Optimizing Context Compression for Long-Horizon LLM Agents},
-  author = {Kang, and others},
-  year   = {2025},
-  note   = {arXiv:2510.00615. Observation/history compression for agents.}
+```bibtex
+@article{huang2025ikea,
+  title   = {Reinforced Internal-External Knowledge Synergistic Reasoning for Efficient Adaptive Search Agent},
+  author  = {Huang, Ziyang and Yuan, Xiaowei and Ju, Yiming and Zhao, Jun and Liu, Kang},
+  journal = {arXiv preprint arXiv:2505.07596},
+  year    = {2025},
+  note    = {IKEA}
 }
+```
+
+---
+
+## Closest prior work: language servers as RL signal
+
+### Zhang et al., *RLCSF* (2025)
+Reinforcement Learning from Compiler and Language Server Feedback. Rewards LSP/compiler
+diagnostics during RL. The closest prior work: RLCSF treats LSP feedback as a useful signal;
+we find its information redundant on our suites and focus on its retrieval efficiency.
+
+```bibtex
+@article{zhang2025rlcsf,
+  title   = {Reinforcement Learning from Compiler and Language Server Feedback},
+  author  = {Zhang, Yifan and others},
+  journal = {arXiv preprint arXiv:2510.22907},
+  year    = {2025},
+  note    = {RLCSF}
+}
+```
+
+---
+
+## Hardware note
+
+### NVIDIA DGX Spark / GB10 Grace Blackwell
+Local hardware target for the reported runs: 128 GB unified LPDDR5X.
+
+```bibtex
+@misc{nvidiadgxspark,
+  title  = {{NVIDIA DGX Spark}},
+  author = {{NVIDIA}},
+  year   = {2025},
+  url    = {https://www.nvidia.com/en-us/products/workstations/dgx-spark/}
+}
+```

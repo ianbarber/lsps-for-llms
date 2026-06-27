@@ -31,7 +31,14 @@ os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-PYREFLY = "/home/ianbarber/Projects/Streams/.venv-streams/bin/pyrefly"
+PYREFLY = os.path.abspath(
+    os.path.expanduser(
+        os.environ.get(
+            "STREAMS_PYREFLY",
+            "/home/ianbarber/Projects/Streams/.venv-streams/bin/pyrefly",
+        )
+    )
+)
 READ_TIMEOUT = 20.0   # seconds per JSON-RPC read; a hang fails loudly not forever
 
 

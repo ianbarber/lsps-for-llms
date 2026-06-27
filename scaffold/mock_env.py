@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
-"""MockEnv: a single-file controlled environment for validating the StreamAgent
-mechanism (edit-detect -> real pyrefly -> splice) before wiring the real TaskEnv.
-Runs REAL pyrefly (one-shot CLI) so diagnostics are authentic; run_tests execs
-the file against an assertion."""
+"""Single-file environment for smoke-testing the StreamAgent.
+
+Runs real pyrefly via its CLI so diagnostics are authentic. Tests are executed against
+an assertion file."""
 import os, re, json, subprocess, tempfile, multiprocessing as mp
 
-PYREFLY = os.path.expanduser("/home/ianbarber/Projects/Streams/.venv-streams/bin/pyrefly")  # NOTE: point at your own pyrefly binary (pip install pyrefly)
-SEV = {0:"error",1:"error",2:"warning",3:"info"}
+PYREFLY = os.path.abspath(
+    os.path.expanduser(
+        os.environ.get(
+            "STREAMS_PYREFLY",
+            "/home/ianbarber/Projects/Streams/.venv-streams/bin/pyrefly",
+        )
+    )
+)
+SEV = {0: "error", 1: "error", 2: "warning", 3: "info"}
 
 class MockEnv:
     def __init__(self, buggy_code, test_src, entry_point, force_diag=None):

@@ -11,7 +11,7 @@ Usage:
       --model Qwen/Qwen2.5-Coder-7B-Instruct --out runs/sft/effic_lora --epochs 3 --lr 1e-4
 """
 import os, sys, json, argparse, math
-os.environ.setdefault("HF_HOME", "/mnt/nas/hf-cache")
+os.environ.setdefault("HF_HOME", os.path.expanduser("~/.cache/huggingface"))
 os.environ.setdefault("HF_HUB_OFFLINE", "1"); os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer

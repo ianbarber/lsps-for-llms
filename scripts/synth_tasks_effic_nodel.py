@@ -63,7 +63,7 @@ SCHEMA (per task dict) — a SUPERSET of synth_tasks_effic.py's schema plus the 
   defn_sufficient (bool), requires_read (bool; True only on B),
   files{target.py(buggy inlined table), biglib.py(SPEC + decoys)}, test(checksum, passes on gold),
   gold_target(corrected inlined table), inputs, real_body (the gold target body used for the digest),
-  lsp_oracle={"defn": {SPEC: <what goto_definition returns>}, ...},
+  symbol_defns={"defn": {SPEC: <what goto_definition returns>}, ...},
   wrong_guess (idiomatic-wrong gold splice — proves non-guessability), wrong_kind("value"),
   wrong_note, real_api (the substring the FIX must transcribe — a distinctive arbitrary constant/branch;
   the verifier asserts A's defn CONTAINS it and B's defn-stub does NOT but the full read DOES),
@@ -458,7 +458,7 @@ for _p in _PAIRS:
         symbol="SPEC", defn_sufficient=True, requires_read=False,
         files={"target.py": _buggy, "biglib.py": _biglib_a(_p)},
         test=_test, gold_target=_gold, inputs=_p["inputs"], real_body=_real_body, local=_p["local"],
-        lsp_oracle={"defn": {"SPEC": _biglib_a(_p)},  # placeholder; verifier uses LIVE goto_definition
+        symbol_defns={"defn": {"SPEC": _biglib_a(_p)},  # placeholder; verifier uses LIVE goto_definition
                     "members": {"SPEC": "SPEC: flat (key, value, ...) reference table"},
                     "refs": {"SPEC": ["biglib.py"]}},
         wrong_guess=_wrong, wrong_kind="value", wrong_note=_p["wrong_note"],
@@ -471,7 +471,7 @@ for _p in _PAIRS:
         symbol="SPEC", defn_sufficient=False, requires_read=True,
         files={"target.py": _buggy, "biglib.py": _biglib_b_src},
         test=_test, gold_target=_gold, inputs=_p["inputs"], real_body=_real_body, local=_p["local"],
-        lsp_oracle={"defn": {"SPEC": _alias_b(_p)}},
+        symbol_defns={"defn": {"SPEC": _alias_b(_p)}},
         wrong_guess=_wrong, wrong_kind="value", wrong_note=_p["wrong_note"],
         real_api=_p["real_api"], delegate_syms=_delegate))
 

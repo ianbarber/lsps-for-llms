@@ -1,47 +1,27 @@
 #!/usr/bin/env python3
-"""Efficiency-as-POLICY suite — the one untested axis: not whether the LSP INFORMS the model
-(it doesn't — the model reads and learns the same thing) but whether USING the LSP is a more
-token-efficient retrieval ACTION than reading whole files, and whether the model can be made to
-PREFER it.
+"""Definition-sufficient efficiency suite.
 
-THE ECONOMICS: the token win is largest for go-to-def / hover on a BIG file — the model reads a
-~300-600-line `biglib.py` to extract ONE class/signature, whereas `<defn sym=X/>` returns ~6 lines.
-Same information, ~50-100x cheaper. So each task: the target must use ONE symbol whose definition
-lives in a big, mostly-irrelevant module. Tools available (PULL): <read path/> (returns the whole
-big file), <defn sym/> (just that symbol's def — go-to-def/hover), <findrefs sym/> (its use sites).
+Each task asks the agent to use one symbol defined in a large `biglib.py`. Reading the whole
+file costs thousands of tokens; `<defn sym/>` returns the same definition in a few dozen.
+The suite tests whether the agent learns to prefer the cheaper retrieval action.
 
-THE EXPERIMENT (run via synth_mf --suite effic, cond A, varying flags):
-  read-only  : no --lsp-tools          -> pure reader baseline (pays the big read)
-  lsp-avail  : --lsp-tools (no steer)   -> tools present; does the model SPONTANEOUSLY prefer <defn>?
-  lsp-steer  : --lsp-tools --steer preferlsp -> hard-prompted "prefer the LSP over reading whole files"
-Metric: net tokens-to-solve, n_lsp (LSP calls), n_reads, success. If steering shifts the policy to
-<defn> and cuts net tokens while holding success -> a PROMPT suffices (cheap positive; no RL needed).
-If the model reverts to reading despite the prompt -> the motivated case for training (self-distill /
-RL on the steered+solved trajectories).
+Tasks are intentionally non-guessable: the correct member names and call signatures are
+un-idiomatic, so a model that does not retrieve fails. Retrieval via `<read>` or the cheaper
+`<defn>` is required to solve.
 
-WHY NON-GUESSABILITY IS LOAD-BEARING (the lesson we learned): if the model can guess the symbol's
-API from names/idiom it solves WITHOUT retrieving and the task can't distinguish a reader from a
-<defn>-user (we observed a guessable `transfer(acct, cents)` solved 6/6 with reads=0). So EVERY task
-here makes the idiomatic guess WRONG: the real member names / call signature are deliberately
-un-idiomatic, so a model that does not retrieve emits the attractor and FAILS (pyrefly error or test
-failure). Retrieval — via <read> or the cheaper <defn> — is genuinely required to solve.
+Task schema:
+  name, group, target, symbol,
+  files = {target.py: stub, biglib.py: large source with the symbol buried},
+  test, gold_target,
+  symbol_defns = {"defn": {sym: src}, "members": ..., "refs": ...},
+  wrong_guess, wrong_kind, wrong_note.
 
-SCHEMA (per task dict):
-  name, group("rich"), target("target.py"), symbol(the un-guessable symbol the target must use),
-  files{target.py(stub), biglib.py(big_src)}, test(spec, passes on gold), gold_target(corrected),
-  lsp_oracle = {"defn": {sym: src}, "members": {sym: "<one-line API summary>"}, "refs": {sym: [paths]}},
-  wrong_guess(a concrete gold-splice that substitutes the idiomatic-WRONG API into the gold — R4
-  proves it FAILs), wrong_kind("type"|"value"), wrong_note(human-readable name of the wrong guess).
-
-VERIFIER (__main__): per task print a row and assert
-  R1 stub FAILs the test;
-  R2 gold PASSes AND is pyrefly-clean;
-  R3 biglib big enough that defn_lines*5 < biglib_lines (the LSP is materially cheaper);
-  R4 NON-GUESSABLE: splice the idiomatic-wrong guess into the gold => pyrefly error (type) OR test
-     FAIL (value), so retrieval is genuinely required;
-  R5 no-leak: the real member-access / call-signature text does not appear in the test.
-Prints "ALL OK" only when every task passes R1-R5. Run:
-  HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv-streams.system/bin/python scripts/synth_tasks_effic.py
+Verifier (run as `__main__`) checks for each task:
+  R1 the stub fails the test;
+  R2 the gold passes and is pyrefly-clean;
+  R3 biglib is large enough that `<defn>` is materially cheaper than `<read>`;
+  R4 the idiomatic wrong guess fails, so retrieval is required;
+  R5 the test does not leak the correct symbol name or signature.
 """
 
 # ---- filler to make biglib.py genuinely expensive to read (each ~8 lines; many of them) ----
@@ -490,7 +470,7 @@ _T12_WRONG = _T12_GOLD.replace("return pack(0, 0, 255)", "return pack(255, 0, 0)
 TASKS_EFFIC = [
     dict(name="effic_account_defn", group="rich", target="target.py", symbol="Account",
          files={"target.py": _T1_STUB, "biglib.py": _BIGLIB1}, test=_T1_TEST, gold_target=_T1_GOLD,
-         lsp_oracle={"defn": {"Account": _ACCOUNT},
+         symbol_defns={"defn": {"Account": _ACCOUNT},
                      "members": {"Account": "Account: credit(self, n: int) -> None ; worth(self) -> int"},
                      "refs": {"Account": ["target.py"]}},
          wrong_guess=_T1_WRONG, wrong_kind="type",
@@ -498,7 +478,7 @@ TASKS_EFFIC = [
 
     dict(name="effic_transfer_defn", group="rich", target="target.py", symbol="transfer",
          files={"target.py": _T2_STUB, "biglib.py": _BIGLIB2}, test=_T2_TEST, gold_target=_T2_GOLD,
-         lsp_oracle={"defn": {"transfer": _TRANSFER},
+         symbol_defns={"defn": {"transfer": _TRANSFER},
                      "members": {"transfer": "transfer(dest: str, amount: int, *, memo: str = '') -> tuple"},
                      "refs": {"transfer": ["target.py"]}},
          wrong_guess=_T2_WRONG, wrong_kind="type",
@@ -506,7 +486,7 @@ TASKS_EFFIC = [
 
     dict(name="effic_queue_defn", group="rich", target="target.py", symbol="WorkQueue",
          files={"target.py": _T3_STUB, "biglib.py": _BIGLIB3}, test=_T3_TEST, gold_target=_T3_GOLD,
-         lsp_oracle={"defn": {"WorkQueue": _QUEUE},
+         symbol_defns={"defn": {"WorkQueue": _QUEUE},
                      "members": {"WorkQueue": "WorkQueue: offer(self, x: int) ; poll(self) -> int ; depth(self) -> int"},
                      "refs": {"WorkQueue": ["target.py"]}},
          wrong_guess=_T3_WRONG, wrong_kind="type",
@@ -514,7 +494,7 @@ TASKS_EFFIC = [
 
     dict(name="effic_span_defn", group="rich", target="target.py", symbol="Span",
          files={"target.py": _T4_STUB, "biglib.py": _BIGLIB4}, test=_T4_TEST, gold_target=_T4_GOLD,
-         lsp_oracle={"defn": {"Span": _SPAN},
+         symbol_defns={"defn": {"Span": _SPAN},
                      "members": {"Span": "Span: lo(self) -> int ; hi(self) -> int ; width(self) -> int"},
                      "refs": {"Span": ["target.py"]}},
          wrong_guess=_T4_WRONG, wrong_kind="type",
@@ -522,7 +502,7 @@ TASKS_EFFIC = [
 
     dict(name="effic_store_defn", group="rich", target="target.py", symbol="Store",
          files={"target.py": _T5_STUB, "biglib.py": _BIGLIB5}, test=_T5_TEST, gold_target=_T5_GOLD,
-         lsp_oracle={"defn": {"Store": _STORE},
+         symbol_defns={"defn": {"Store": _STORE},
                      "members": {"Store": "Store: fetch(self, k) -> int ; put(self, k, v) ; keys_sorted(self) -> list[str]"},
                      "refs": {"Store": ["target.py"]}},
          wrong_guess=_T5_WRONG, wrong_kind="type",
@@ -530,7 +510,7 @@ TASKS_EFFIC = [
 
     dict(name="effic_point_defn", group="rich", target="target.py", symbol="make_point",
          files={"target.py": _T6_STUB, "biglib.py": _BIGLIB6}, test=_T6_TEST, gold_target=_T6_GOLD,
-         lsp_oracle={"defn": {"make_point": _POINT},
+         symbol_defns={"defn": {"make_point": _POINT},
                      "members": {"make_point": "make_point(row: int, col: int) -> tuple  # (y, x), ROW first"},
                      "refs": {"make_point": ["target.py"]}},
          wrong_guess=_T6_WRONG, wrong_kind="value",
@@ -538,7 +518,7 @@ TASKS_EFFIC = [
 
     dict(name="effic_config_defn", group="rich", target="target.py", symbol="read_setting",
          files={"target.py": _T7_STUB, "biglib.py": _BIGLIB7}, test=_T7_TEST, gold_target=_T7_GOLD,
-         lsp_oracle={"defn": {"read_setting": _CONFIG},
+         symbol_defns={"defn": {"read_setting": _CONFIG},
                      "members": {"read_setting": "read_setting(name: str, *, fallback: int) -> int  # fallback kw-only required"},
                      "refs": {"read_setting": ["target.py"]}},
          wrong_guess=_T7_WRONG, wrong_kind="type",
@@ -546,7 +526,7 @@ TASKS_EFFIC = [
 
     dict(name="effic_cache_defn", group="rich", target="target.py", symbol="Cache",
          files={"target.py": _T8_STUB, "biglib.py": _BIGLIB8}, test=_T8_TEST, gold_target=_T8_GOLD,
-         lsp_oracle={"defn": {"Cache": _CACHE},
+         symbol_defns={"defn": {"Cache": _CACHE},
                      "members": {"Cache": "Cache: insert(self, k, v) ; lookup(self, k) -> int ; size(self) -> int"},
                      "refs": {"Cache": ["target.py"]}},
          wrong_guess=_T8_WRONG, wrong_kind="type",
@@ -554,7 +534,7 @@ TASKS_EFFIC = [
 
     dict(name="effic_matrix_defn", group="rich", target="target.py", symbol="cell",
          files={"target.py": _T9_STUB, "biglib.py": _BIGLIB9}, test=_T9_TEST, gold_target=_T9_GOLD,
-         lsp_oracle={"defn": {"cell": _MATRIX},
+         symbol_defns={"defn": {"cell": _MATRIX},
                      "members": {"cell": "cell(grid, col: int, row: int) -> int  # COLUMN index first"},
                      "refs": {"cell": ["target.py"]}},
          wrong_guess=_T9_WRONG, wrong_kind="value",
@@ -562,7 +542,7 @@ TASKS_EFFIC = [
 
     dict(name="effic_lexer_defn", group="rich", target="target.py", symbol="Lexer",
          files={"target.py": _T10_STUB, "biglib.py": _BIGLIB10}, test=_T10_TEST, gold_target=_T10_GOLD,
-         lsp_oracle={"defn": {"Lexer": _PARSER},
+         symbol_defns={"defn": {"Lexer": _PARSER},
                      "members": {"Lexer": "Lexer(text: str): tokens(self) -> list[str] ; count(self) -> int"},
                      "refs": {"Lexer": ["target.py"]}},
          wrong_guess=_T10_WRONG, wrong_kind="type",
@@ -570,7 +550,7 @@ TASKS_EFFIC = [
 
     dict(name="effic_clamp_defn", group="rich", target="target.py", symbol="clamp",
          files={"target.py": _T11_STUB, "biglib.py": _BIGLIB11}, test=_T11_TEST, gold_target=_T11_GOLD,
-         lsp_oracle={"defn": {"clamp": _CLAMP},
+         symbol_defns={"defn": {"clamp": _CLAMP},
                      "members": {"clamp": "clamp(low: int, high: int, value: int) -> int  # value LAST"},
                      "refs": {"clamp": ["target.py"]}},
          wrong_guess=_T11_WRONG, wrong_kind="value",
@@ -578,7 +558,7 @@ TASKS_EFFIC = [
 
     dict(name="effic_color_defn", group="rich", target="target.py", symbol="pack",
          files={"target.py": _T12_STUB, "biglib.py": _BIGLIB12}, test=_T12_TEST, gold_target=_T12_GOLD,
-         lsp_oracle={"defn": {"pack": _COLOR},
+         symbol_defns={"defn": {"pack": _COLOR},
                      "members": {"pack": "pack(blue: int, green: int, red: int) -> int  # BGR order"},
                      "refs": {"pack": ["target.py"]}},
          wrong_guess=_T12_WRONG, wrong_kind="value",
@@ -632,7 +612,7 @@ if __name__ == "__main__":
 
         # R3: biglib big enough that the LSP defn is materially cheaper (defn_lines*5 < biglib_lines)
         big_n = len(t["files"]["biglib.py"].splitlines())
-        defn_n = len(t["lsp_oracle"]["defn"][sym].splitlines())
+        defn_n = len(t["symbol_defns"]["defn"][sym].splitlines())
         r3 = defn_n * 5 < big_n
 
         # R4: NON-GUESSABLE — splice the idiomatic-wrong guess into the gold; it must FAIL.

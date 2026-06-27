@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "streams"
+dynamic = ["version"]
+description = "Training coding agents to prefer cheap LSP go-to-definition retrieval"
+requires-python = ">=3.10"
+dependencies = [
+    "torch",
+    "transformers",
+    "peft",
+    "accelerate",
+]
+
+[project.optional-dependencies]
+# `pip install -e '.[dev]'` for the development stack.
+dev = [
+    "pytest",
+]
+
+[project.urls]
+Homepage = "https://github.com/ianbarber/Streams"
+Repository = "https://github.com/ianbarber/Streams"
+
+[tool.setuptools]
+packages = ["scaffold", "scripts", "scripts.analysis"]
+
+[tool.setuptools_scm]
+write_to = "_version.py"
