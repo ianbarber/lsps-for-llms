@@ -53,7 +53,13 @@ The result is a deployable account of when a language server pays off in an agen
 to get the agent to use it. On the synthetic efficiency suite a 7B moves from 0% to 100%
 go-to-definition use and from 3086 to 688 input tokens after one on-policy training round; an
 untrained 27B reaches 88 to 95% use from prompt framing; a frontier model in a tool-calling loop
-reaches 100% use and a 4.0 times token reduction at equal success.
+reaches 100% use and a 4.0 times token reduction at equal success (Figure 1).
+
+![Tool-value ablation across models](docs/figures/fig1.png)
+
+*Figure 1. The tool-value ablation. Removing the go-to-definition action, so the same model can
+only read whole files, costs 3.7 to 5.3 times more input tokens at the same (ceiling) success, for
+a 27B and two frontier models on the obscure real-code suite. Tokens on a log scale.*
 
 ## 2. Setup
 
@@ -120,6 +126,12 @@ A language server computes from the same source the agent can read. Across the c
 capable agent self-retrieves and self-infers, so the information is redundant and the residual value
 of a language server is the cost of retrieval, not its content.
 
+![The type-inference channel does not lift success](docs/figures/fig2.png)
+
+*Figure 2. The information channel is redundant. A `check_types()` tool that surfaces the
+type-checker's inferred types does not raise pass@1 on inference-hard tasks; both frontier models
+solve 16 of 16 with and without it, and read the source to infer the type themselves.*
+
 ## 4. Retrieval efficiency is real, under three conditions (C2)
 
 Because `<read X>` and `<defn X>` usually return the same symbol, the cheap action saves tokens
@@ -175,6 +187,12 @@ the agent chooses the cheap action, is the practitioner's lever, and it depends 
 | deepseek-chat-v3.1 | n/a | 95% | not needed |
 | claude-sonnet-4.5 | n/a | 100% | not needed |
 
+![Go-to-definition use by model](docs/figures/fig3.png)
+
+*Figure 3. Election is capability-gated, on the obscure real-code suite. A 7B uses go-to-definition
+2% of the time by default and 100% after one on-policy training round; a 27B and two frontier models
+reach 95 to 100% from prompt framing alone.*
+
 **A weak model needs training.** The 7B uses `<defn>` 2% of the time by default, and a prompt
 instructing it to prefer `<defn>` leaves use near 0%. Offline imitation of cheap `<defn>` trajectories
 also fails: use stays near 0% and tokens do not fall, because the demonstrations never show the
@@ -203,6 +221,17 @@ option, gives 88% use and 1237 tokens. Frontier models go further: `claude-sonne
 100% of rollouts and `deepseek-chat-v3.1` on 95%, with no training. For a weak model the cheap-retrieval
 preference is learned on-policy; for a capable model it follows from framing the tool as the cheaper
 option.
+
+![The 7B on-policy training win](docs/figures/fig4.png)
+
+*Figure 4. The on-policy training win for a 7B on definition-sufficient tasks (12 seeds):
+go-to-definition use rises to 100%, mean input tokens fall, and success rises on all tasks and on
+held-out task types.*
+
+![The learned policy is a boundary](docs/figures/fig5.png)
+
+*Figure 5. The learned policy is a boundary, not a collapse. On definition-sufficient tasks the
+trained 7B uses go-to-definition; on read-required tasks it still reads.*
 
 ## 6. Related work
 
