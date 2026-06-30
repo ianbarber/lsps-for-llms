@@ -170,7 +170,9 @@ for task in tasks:
     target, editable, gold_map, _shown = task_meta(task)
     for c in conds:
         for seed in range(A.seed_start, A.seed_start + n_seeds):
-            env = MultiFileEnv(task["files"], target, task["test"])
+            # cond A never reads pyrefly_diagnostics; skip `pyrefly init` (esp. under --lsp-defn, where the
+            # persistent `pyrefly lsp` daemon backs <defn> and a second init-daemon would contend on the socket).
+            env = MultiFileEnv(task["files"], target, task["test"], skip_pyrefly=True)
             agent = StreamAgent(model, tok, env,
                                 max_new_tokens=A.max_new, max_reads=A.max_reads,
                                 max_turns=A.max_turns, edit_mode="line",

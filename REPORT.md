@@ -75,10 +75,18 @@ actions as function tools, the modality production agents use.
 tool AST-resolves that symbol's top-level definition against the live workspace and returns its
 source span, what a language server's go-to-definition returns, with no privileged knowledge of
 which symbol or what the answer is, and returning "(no definition found)" on an unresolvable name.
-We validated the static resolver against a production language server: a live `pyrefly lsp` daemon
-(`textDocument/definition`) resolves all 12 evaluation symbols to the same definition (12/12), and
-a run with `<defn>` backed by the live daemon reproduces the headline (use 0 to 100%, 2894 to 689
-tokens, 58 to 100% success).
+We validated the static resolver against a production language server. On the synthetic suite a live
+`pyrefly lsp` daemon (`textDocument/definition`) resolves all 12 evaluation symbols to the same
+definition as the static resolver (12/12), and a run with `<defn>` backed by the live daemon
+reproduces the headline (use 0 to 100%, 2894 to 689 tokens, 58 to 100% success). On the real-code
+suite the agreement holds wherever pyrefly resolves: 9 of 11 `toolz`/`more_itertools` symbols agree
+with the static resolver and none disagree (pyrefly returns null on 2 `more_itertools` re-exports,
+where the agent falls back to the static resolver). For real-LSP runs a persistent `pyrefly lsp`
+daemon is started once per task workspace and reused across the rollout (`--lsp-defn`), rather than
+spawned per query. A trained-7B run on the real-code suite with `<defn>` backed by the per-task daemon
+matches the static-resolver run exactly: 18 of 22 solved, 100% go-to-definition use, identical mean
+input tokens. The resolver backing the action does not change the result, because both return the same
+definition span.
 
 **Environments, synthetic and real.** We use both, as two views of the same experiment. The
 synthetic *effic* suite buries one needed symbol in a ~370-line module, so `<read>` returns ~3500
