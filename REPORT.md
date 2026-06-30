@@ -2,23 +2,22 @@
 
 ## Abstract
 
-We ask two questions about giving a coding agent a language server: does it help by supplying
-information, and does it help by making retrieval cheaper. We measure both across synthetic and
-real-repository tasks, a 7B and a 27B open model, and frontier models in a tool-calling loop, by
-toggling each language-server capability at fixed model capability. The information (diagnostics,
-references, completion, type inference) does not raise success, because a model that can read
-files derives the same facts itself. A go-to-definition action does help, cutting input tokens
-3.5 to 4.7 times at equal success, but only when retrieval is required, the alternative is a
-whole-file read, and the agent chooses the cheap action. A capable model chooses it from prompt
-framing alone (a frontier model on 100% of rollouts); a 7B has to be trained to (0% to 100% use,
-4.5 times fewer tokens).
+Do language servers help coding agents by supplying information, and do they make retrieval cheaper?
+We measure both across synthetic and real-repository tasks, a 7B and a 27B open model, and frontier
+models in a tool-calling loop, by toggling each language-server capability at fixed model capability.
+The payoff is retrieval efficiency: a go-to-definition action cuts input tokens 3.5 to 4.7 times at
+equal success, but only when retrieval is required, the alternative is a whole-file read, and the
+agent chooses the cheap action. A capable model chooses it from prompt framing alone (a frontier model
+on 100% of rollouts); a 7B has to be trained to (0% to 100% use, 4.5 times fewer tokens). The
+information itself (diagnostics, references, completion, type inference, and even the program's runtime
+behavior) does not raise success when the agent can derive the same fact by reading the source, which
+held on every channel and task we tested. This covers a lot of real code, but not all of it: a very
+large or highly complex codebase, where the needed fact is not readable in the steps available, may
+carry information we did not test.
 
 ## Contributions
 
-- **Information is redundant.** Across correction, completeness, navigation, prevention, scale,
-  and type inference, handing a self-retrieving agent the language server's information does not
-  raise pass@1. The agent reads the source and derives the fact itself.
-- **Efficiency is real, under three conditions.** A go-to-definition action reduces input tokens
+- **Efficiency is the win, under three conditions.** A go-to-definition action reduces input tokens
   3.5 to 4.7 times at equal success, and only when retrieval is required, the counterfactual is a
   whole-file read, and the agent chooses the cheap action. We show this on synthetic and real
   vendored-library tasks, for a 7B, a 27B, and three frontier models.
@@ -26,6 +25,12 @@ framing alone (a frontier model on 100% of rollouts); a 7B has to be trained to 
   prompt frames it as cheaper (a 27B at 88 to 93%, a frontier model at 100%); a 7B needs on-policy
   training (0% to 100%). We give the training recipe and show that prompting and offline imitation
   fail for the weak model.
+- **Information is redundant when it is readable.** When the fact a language server would supply is
+  derivable from the source by reading, handing it to a self-retrieving agent does not raise pass@1.
+  This held on every channel we tested (correction, completeness, navigation, prevention, scale, type
+  inference) and even on the program's runtime behavior. It covers a lot of real code. We did not test
+  very large or highly complex codebases, or facts that appear only at run time, where the fact may not
+  be readable in the steps available and a language server may then carry information that helps.
 
 ---
 
@@ -39,8 +44,8 @@ under what conditions.
 A capable agent can read files on its own. Whatever a language server computes, it computes from
 source the agent can also read, so its information may be redundant. Prior work treats
 language-server feedback as a useful reward or context signal (Zhang et al., 2025); we find that
-for a self-retrieving agent the information does not raise success, and the residual value is the
-cost of retrieval.
+for a self-retrieving agent the information does not raise success wherever the agent can read the
+source and derive it, and the residual value is the cost of retrieval.
 
 Whether an agent then uses a cheaper retrieval action is a policy question, not an information one.
 An agent will not use a cheaper action because it exists. We separate the information value from
@@ -88,7 +93,7 @@ matches the static-resolver run exactly: 18 of 22 solved, 100% go-to-definition 
 input tokens. The resolver backing the action does not change the result, because both return the same
 definition span.
 
-**Environments, synthetic and real.** We use both, as two views of the same experiment. The
+**Environments, synthetic and real.** The
 synthetic *effic* suite buries one needed symbol in a ~370-line module, so `<read>` returns ~3500
 tokens and `<defn>` returns ~50; tasks are non-guessable, so retrieval is required. A
 *read-required* boundary suite inverts this: the needed symbol is unknowable without reading, so
@@ -105,7 +110,9 @@ units.
 ## 3. Language-server information is redundant (C1)
 
 We tested whether the information a language server provides, as opposed to a cheaper way to
-retrieve it, raises success for a self-retrieving agent. It does not, on any channel we tested.
+retrieve it, raises success for a self-retrieving agent. It does not, on any channel we tested. The
+agent reads the source and derives the same fact, so the information is redundant wherever it is
+readable.
 
 **Correction.** An oracle ladder replaces the diagnostic with progressively stronger feedback: no
 feedback, synchronous diagnostics, perfect error localization, and the gold fix. For a 7B, perfect
@@ -132,12 +139,14 @@ with and without the checker, and even when they elect it (`deepseek-chat-v3.1` 
 rollout, `claude-sonnet-4.5` on more than half). The models write the correct fix by careful reading
 and do not ship the inference bug for the checker to catch.
 
-A language server computes from the same source the agent can read. Across correction, completeness,
-navigation, prevention, scale, and type inference, a capable agent self-retrieves, so the information
-is redundant and the residual value of a language server is the cost of retrieval, not its content.
-The one regime we could not trigger is an inference a frontier model *reliably gets wrong* while the
-visible test misses it; these tasks were an adversarial reviewer's plausible-error designs and the
-models still did not err (§7).
+A language server computes from source the agent can also read. Across correction, completeness,
+navigation, prevention, scale, and type inference, a capable agent reads that source and derives the
+same fact, so the information is redundant and the value of a language server is the cost of retrieval,
+not its content. This holds wherever the fact is readable, which covers most everyday code. It need not
+hold where the fact is not readable in the steps available: a codebase too large or too tangled to read
+under budget, or an inference a frontier model reliably gets wrong while the visible test misses it. We
+did not find such a case, the inference tasks were an adversarial reviewer's plausible-error designs and
+the models still did not err, but we did not rule one out (§7).
 
 ![A type checker does not reduce latent bugs, even with held-out scoring](docs/figures/fig2.png)
 
@@ -145,6 +154,30 @@ models still did not err (§7).
 frontier models solve 18/18 with zero latent bugs, with the checker, without it, and in a realistic
 no-hint condition. The plausible wrong fix passes the visible test the agent runs but fails the hidden
 test and is flagged by pyrefly; the models write the correct fix anyway.*
+
+**Execution.** Every channel above serves a fact already in the source. We also tested a fact that is
+not in the text: the program's runtime behavior, which the agent can get right only by mentally
+executing the code and verify only by running it. Fourteen small bug-fix tasks each have a plausible
+wrong fix that fails a visible test (so running is a detector) yet is well-typed (so a checker is
+useless and execution is the only in-budget detector), scored held-out. Two frontier models run under
+three arms: no execution (the run-tests tool is removed and the agent reasons from the source and the
+shown spec), elect-to-run (the agent may run the visible test), and feedback-handed-over (the
+environment volunteers the test result after every edit). Five tasks are Python-semantic traps whose
+plausible reimplementation mis-simulates a real behavior (`str.lstrip` strips a character set, not a
+prefix; `int(x/k)` truncates where `//` floors; `round` is banker's rounding). Across 252 rollouts both
+models solve every task in every arm, 100% held-out pass@1, including with no execution at all. The only
+quantity that moves is efficiency: handing the result over (1.39 turns) is cheaper than electing to run
+it (2.42) at identical success. So execution feedback does not raise correctness here, it only saves
+turns, where the code is small enough to read or simulate reliably. Execution feedback does raise success
+in other regimes, harder generation and weaker models (§6); we did not find the scale at which it becomes
+the only detector for a frontier agent (§7).
+
+![Execution feedback does not change correctness, only efficiency](docs/figures/fig6.png)
+
+*Figure 6. Execution feedback is redundant for a frontier agent on small bug-fixes. Across 14 tasks,
+two models, and three seeds, held-out pass@1 is 100% whether the agent cannot run the code, elects to
+run it, or is handed the result for free (a). The only effect is efficiency: volunteering the result
+finishes in fewer turns (b).*
 
 ## 4. Retrieval efficiency is real, under three conditions (C2)
 
@@ -182,12 +215,11 @@ trained to retrieve via `<read>` spends 3191 input tokens against a model traine
 `<defn>` at 684, on tasks both solve (4.7× cheaper, sign test p=6.8e-4, n=40). Both retrieve and
 solve, so the saving is the action choice itself.
 
-**Off-the-shelf refactoring benchmarks do not isolate this.** We evaluated RefactorBench
-(Gautam et al., 2025) for a non-constructed real-code test and found it structurally unsuited to the
-cost-gap question: its tasks edit the symbol's own large file, so the agent loads that file to edit it
-regardless of `<defn>`; the rename variants exercise find-references, the channel §3 finds redundant;
-and three of four candidate symbols sit past the editable-view truncation. The cost-gap question needs
-a task where the symbol is consulted, not edited.
+The cost-gap question needs a task where the agent must read one file to edit another, so a cheaper
+read can pay off; the symbol is consulted, not edited. The vendored-library suites are built for this.
+An off-the-shelf option, RefactorBench (Gautam et al., 2025), edits the symbol's own file, so the agent
+loads that file to edit it regardless of `<defn>` and efficiency has nothing to save, which is why we
+did not use it.
 
 ## 5. Election is capability-gated (C3)
 
@@ -227,14 +259,12 @@ reaches the same operating point (Appendix A), so an independent training signal
 preference.
 
 **A capable model needs only framing.** The same prompt that leaves the 7B at 2% moves an untrained 27B
-to 88% use. The driver is the system-prompt framing of the action as cheaper than a read, not the
-repository and not a trained preference. A prompt-versus-structure control confirms it: on the identical
-synthetic 2-file suite, an older prompt that advertised `<defn>` only in the task message gave 0% use and
-4058 tokens, while the current prompt, which presents `<defn>` beside the read instruction as the cheaper
-option, gives 88% use and 1237 tokens. Frontier models go further: `claude-sonnet-4.5` chooses `<defn>` on
-100% of rollouts and `deepseek-chat-v3.1` on 93%, with no training. For a weak model the cheap-retrieval
-preference is learned on-policy; for a capable model it follows from framing the tool as the cheaper
-option.
+to 88% use, with no training. Framing the action in the system prompt as cheaper than a read is what does
+it. A control isolates the framing from the rest of the prompt: on the identical synthetic 2-file suite,
+an older prompt that mentioned `<defn>` only in the task message gave 0% use and 4058 tokens, while the
+current prompt, which presents `<defn>` beside the read instruction as the cheaper option, gives 88% use
+and 1237 tokens. Frontier models go further: `claude-sonnet-4.5` chooses `<defn>` on 100% of rollouts and
+`deepseek-chat-v3.1` on 93%, with no training.
 
 ![The 7B on-policy training win](docs/figures/fig4.png)
 
@@ -260,9 +290,32 @@ not a model.
 Cost-aware tool use through RL is the alternative we corroborate but do not require. OTC-PO (Wang et al.,
 2025) and IKEA (Huang et al., 2025) reward fewer or cheaper tool calls; their results motivate that a
 token-cost reward learns the same preference we obtain by on-policy imitation, which our GRPO
-corroboration confirms (Appendix A). The closest prior work on language servers is RLCSF (Zhang et al.,
-2025), which rewards compiler and language-server diagnostics during RL; we find its information redundant
-for a self-retrieving agent and locate the residual value in retrieval cost.
+corroboration confirms (Appendix A).
+
+Language servers as a supervision signal. RLCSF (Zhang et al., 2025) takes the complementary view that
+compiler and language-server signals, including diagnostics, symbol resolution, type information, and
+references, are a valuable supervision signal for a coding agent, and builds a reinforcement-learning
+system around exposing them. It is a methodology contribution and reports no empirical comparison of that
+information against plain source reading. Our result supplies one: in the channels we tested, a
+self-retrieving agent recovers those facts by reading, so supplying them does not raise pass@1, and the
+value we measure is retrieval cost.
+
+Redundant retrieval for capable models. Outside code, the same pattern is documented: a tool or retrieval
+call can be redundant or net-negative when the model already holds the answer. "To Call or Not to Call"
+(arXiv:2605.00737) reports tool calls with negative utility in roughly a third of cases when the model
+succeeds without them, and IKEA (Huang et al., 2025) reports search agents over-retrieving rather than
+using what they already know. Our finding is the language-server instance of the same effect, measured
+against code-agent pass@1.
+
+Feedback that carries new information. Execution-grounded feedback can raise code-generation success:
+Self-Debugging (Chen et al., 2024) feeds runtime results back to the model, RLTF (Liu et al., 2023) trains
+on unit-test outcomes, and type-constrained decoding (Mündler et al., 2025) enforces well-typedness during
+generation; self-repair gives only modest gains once its cost is counted (Olausson et al., 2024). These
+signals are not in the source text the agent reads: they are the program's behavior at run time, or a
+constraint imposed during decoding. Our §3 execution test is the case where the agent can recover the
+behavior from small code by reading or simulating it, and there the feedback only saves turns. Execution
+feedback helps in the harder-generation and weaker-model settings these works study, and is redundant in
+ours.
 
 ## 7. Limitations
 
@@ -270,10 +323,11 @@ for a self-retrieving agent and locate the residual value in retrieval cost.
   and the non-guessability of tasks. We validate that the effect survives on real vendored library code
   and at the frontier in the tool-calling modality (§4), but the read-required boundary covers two reasons
   a read is needed (name-hidden, many-symbol), not all.
-- **Redundancy is a majority result, not an absolute.** Across the six channels we tested, the language
-  server's information is redundant for a self-retrieving agent. We do not claim it is redundant for every
-  task: a fact the agent cannot recover by reading (a non-readable runtime value, an inference beyond the
-  model's reach) could make it non-redundant.
+- **Redundancy holds where the fact is readable.** Across the channels we tested, the language server's
+  information is redundant for a self-retrieving agent, because the agent reads the source and derives the
+  fact. A fact the agent cannot recover by reading, a runtime value it would have to execute for, an
+  inference beyond the model's reach, or a codebase too large to read under budget, could make it
+  non-redundant. We did not find such a case but did not rule one out.
 - **The inference null is bounded by task difficulty.** Our held-out-scored inference test (§3) covers the
   regime where a type checker is usually the unique detector (a wrong usage the visible test misses), and
   frontier models still solve 18/18 with zero latent bugs. We did not find an inference a frontier model
@@ -281,18 +335,26 @@ for a self-retrieving agent and locate the residual value in retrieval cost.
   plausible-error designs and the models did not err, so we cannot rule out that harder inference exists
   where a checker would prove non-redundant. We also did not test the cross-file regime where the relevant
   definitions are too many to read under the budget.
+- **The execution null is bounded by task scale.** The execution test (§3) covers small, self-contained
+  bug-fixes where a frontier model simulates the code reliably, and there both models solve 14/14 in every
+  arm. We deliberately stress-tested simulation with Python-semantic traps and the models still did not err,
+  but we did not find the scale or opacity (long programs, behavior behind a dependency the agent did not
+  read, genuine nondeterminism) at which execution becomes the unique in-budget detector. Published results
+  show execution feedback helps in harder-generation and weaker-model regimes (§6); our null is the
+  frontier-on-small-tasks corner, not a claim that execution never helps.
 - **Tool-calling token accounting.** The API harness re-sends context each turn, so its absolute token
   counts are not comparable to the local harness; we report within-harness ratios at equal success.
 
 ## 8. Conclusion
 
-A language server does not raise a coding agent's success by supplying information, because across the
-channels we tested the agent reads the source and derives the same facts itself. Its value is a cheaper
-retrieval action, which cuts input tokens 3.5 to 4.7 times at equal success, under three conditions:
-retrieval is required, the alternative is a whole-file read, and the agent chooses the cheap action.
-Election is the practitioner's lever. A capable model chooses the cheap action when the prompt frames it as
-cheaper; a weak model learns to through one round of on-policy imitation, where prompting and offline
-cloning fail.
+A language server's payoff for a coding agent is a cheaper retrieval action. A go-to-definition cuts input
+tokens 3.5 to 4.7 times at equal success, under three conditions: retrieval is required, the alternative is
+a whole-file read, and the agent chooses the cheap action. Election is the practitioner's lever. A capable
+model chooses the cheap action when the prompt frames it as cheaper; a weak model learns to through one
+round of on-policy imitation, where prompting and offline cloning fail. The information a language server
+supplies does not raise success when the agent can read the source and derive the same fact, which held on
+every channel and task we tested. A very large or highly tangled codebase, where the needed facts are not
+readable in the steps available, is where its information might still pay off; we did not test that regime.
 
 **The recipe.** Expose go-to-definition as an action, not diagnostics as context. Frame it in the system
 prompt as cheaper than a whole-file read; a capable model then uses it without training. If the model is

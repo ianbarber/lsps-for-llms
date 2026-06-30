@@ -1,0 +1,974 @@
+{
+  "model": "deepseek/deepseek-chat-v3.1",
+  "matched_pricing_id": "deepseek/deepseek-chat-v3.1",
+  "suite": "runtime",
+  "config": {
+    "out": "runs/agent/rt_deepseek_r2_auto.json",
+    "model": "deepseek/deepseek-chat-v3.1",
+    "suite": "runtime",
+    "no_hint": true,
+    "names": null,
+    "seeds": 3,
+    "seed_start": 0,
+    "no_defn": false,
+    "no_test": false,
+    "auto_feedback": true,
+    "with_check": false,
+    "budget_usd": 3.0,
+    "max_turns": 10,
+    "max_reads": 3,
+    "temperature": 0.7
+  },
+  "total_cost_usd": 0.011511,
+  "budget_hit": false,
+  "rows": [
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_window_sum",
+      "group": "hard",
+      "seed": 0,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 0,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 1,
+      "prompt_tokens": 901,
+      "completion_tokens": 184,
+      "est_cost_usd": 0.000335,
+      "trace": [
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "1-4",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 17.3
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_window_sum",
+      "group": "hard",
+      "seed": 1,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 0,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 1,
+      "prompt_tokens": 901,
+      "completion_tokens": 231,
+      "est_cost_usd": 0.000372,
+      "trace": [
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "1-4",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 22.8
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_window_sum",
+      "group": "hard",
+      "seed": 2,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 0,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 1,
+      "prompt_tokens": 901,
+      "completion_tokens": 184,
+      "est_cost_usd": 0.000335,
+      "trace": [
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "1-4",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 24.1
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_split_bill",
+      "group": "hard",
+      "seed": 0,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 1,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 2,
+      "prompt_tokens": 1990,
+      "completion_tokens": 212,
+      "est_cost_usd": 0.000585,
+      "trace": [
+        {
+          "t": "read",
+          "path": "target.py"
+        },
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "5-5",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 20.1
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_split_bill",
+      "group": "hard",
+      "seed": 1,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 1,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 2,
+      "prompt_tokens": 2023,
+      "completion_tokens": 272,
+      "est_cost_usd": 0.00064,
+      "trace": [
+        {
+          "t": "read",
+          "path": "target.py"
+        },
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "5-5",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 31.9
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_split_bill",
+      "group": "hard",
+      "seed": 2,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 0,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 1,
+      "prompt_tokens": 925,
+      "completion_tokens": 298,
+      "est_cost_usd": 0.00043,
+      "trace": [
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "1-5",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 31.7
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_run_lengths",
+      "group": "hard",
+      "seed": 0,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 0,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 1,
+      "prompt_tokens": 931,
+      "completion_tokens": 247,
+      "est_cost_usd": 0.000391,
+      "trace": [
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "1-4",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 19.0
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_run_lengths",
+      "group": "hard",
+      "seed": 1,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 0,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 1,
+      "prompt_tokens": 931,
+      "completion_tokens": 242,
+      "est_cost_usd": 0.000387,
+      "trace": [
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "1-4",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 24.3
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_run_lengths",
+      "group": "hard",
+      "seed": 2,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 0,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 1,
+      "prompt_tokens": 931,
+      "completion_tokens": 253,
+      "est_cost_usd": 0.000395,
+      "trace": [
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "1-4",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 23.7
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_discount_tiers",
+      "group": "hard",
+      "seed": 0,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 1,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 2,
+      "prompt_tokens": 2043,
+      "completion_tokens": 304,
+      "est_cost_usd": 0.000669,
+      "trace": [
+        {
+          "t": "read",
+          "path": "target.py"
+        },
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "1-5",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 37.2
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_discount_tiers",
+      "group": "hard",
+      "seed": 1,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 0,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 1,
+      "prompt_tokens": 934,
+      "completion_tokens": 306,
+      "est_cost_usd": 0.000438,
+      "trace": [
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "1-5",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 39.0
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_discount_tiers",
+      "group": "hard",
+      "seed": 2,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 0,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 1,
+      "prompt_tokens": 934,
+      "completion_tokens": 287,
+      "est_cost_usd": 0.000423,
+      "trace": [
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "1-5",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 37.1
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_increasing_run",
+      "group": "hard",
+      "seed": 0,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 0,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 1,
+      "prompt_tokens": 1100,
+      "completion_tokens": 382,
+      "est_cost_usd": 0.000533,
+      "trace": [
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "1-4",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 8.7
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_increasing_run",
+      "group": "hard",
+      "seed": 1,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 0,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 1,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 2,
+      "prompt_tokens": 2052,
+      "completion_tokens": 283,
+      "est_cost_usd": 0.000654,
+      "trace": [
+        {
+          "t": "test",
+          "resolved": false
+        },
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "1-4",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 32.3
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_increasing_run",
+      "group": "hard",
+      "seed": 2,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 1,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 2,
+      "prompt_tokens": 1953,
+      "completion_tokens": 298,
+      "est_cost_usd": 0.000646,
+      "trace": [
+        {
+          "t": "read",
+          "path": "target.py"
+        },
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "4-4",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 33.2
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_abs_gap",
+      "group": "easy",
+      "seed": 0,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 0,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 1,
+      "prompt_tokens": 862,
+      "completion_tokens": 106,
+      "est_cost_usd": 0.000265,
+      "trace": [
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "1-3",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 21.4
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_abs_gap",
+      "group": "easy",
+      "seed": 1,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 1,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 2,
+      "prompt_tokens": 2239,
+      "completion_tokens": 264,
+      "est_cost_usd": 0.000679,
+      "trace": [
+        {
+          "t": "read",
+          "path": "target.py"
+        },
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "1-3",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 12.1
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_abs_gap",
+      "group": "easy",
+      "seed": 2,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 1,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 2,
+      "prompt_tokens": 2245,
+      "completion_tokens": 300,
+      "est_cost_usd": 0.000708,
+      "trace": [
+        {
+          "t": "read",
+          "path": "target.py"
+        },
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "1-3",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 13.5
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_clamp",
+      "group": "easy",
+      "seed": 0,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 0,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 1,
+      "prompt_tokens": 888,
+      "completion_tokens": 182,
+      "est_cost_usd": 0.00033,
+      "trace": [
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "1-4",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 27.1
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_clamp",
+      "group": "easy",
+      "seed": 1,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 0,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 1,
+      "prompt_tokens": 888,
+      "completion_tokens": 171,
+      "est_cost_usd": 0.000322,
+      "trace": [
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "1-4",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 23.4
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_clamp",
+      "group": "easy",
+      "seed": 2,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 0,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 1,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 2,
+      "prompt_tokens": 2230,
+      "completion_tokens": 334,
+      "est_cost_usd": 0.000732,
+      "trace": [
+        {
+          "t": "test",
+          "resolved": false
+        },
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "1-4",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 13.6
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_first_or",
+      "group": "easy",
+      "seed": 0,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 0,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 1,
+      "prompt_tokens": 871,
+      "completion_tokens": 119,
+      "est_cost_usd": 0.000277,
+      "trace": [
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "1-3",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 14.9
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_first_or",
+      "group": "easy",
+      "seed": 1,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 0,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 1,
+      "prompt_tokens": 871,
+      "completion_tokens": 137,
+      "est_cost_usd": 0.000291,
+      "trace": [
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "1-3",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 16.7
+    },
+    {
+      "model": "deepseek/deepseek-chat-v3.1",
+      "task": "rt_first_or",
+      "group": "easy",
+      "seed": 2,
+      "no_defn": false,
+      "with_check": false,
+      "resolved": true,
+      "visible_pass": true,
+      "stop_reason": "tests_pass",
+      "no_test": false,
+      "auto_feedback": true,
+      "n_read": 1,
+      "n_defn": 0,
+      "n_findrefs": 0,
+      "n_test": 0,
+      "n_auto_test": 1,
+      "n_edit": 1,
+      "n_check": 0,
+      "turns": 2,
+      "prompt_tokens": 2259,
+      "completion_tokens": 255,
+      "est_cost_usd": 0.000676,
+      "trace": [
+        {
+          "t": "read",
+          "path": "target.py"
+        },
+        {
+          "t": "edit",
+          "path": "target.py",
+          "lines": "1-3",
+          "ok": true
+        },
+        {
+          "t": "auto_test",
+          "resolved": true
+        }
+      ],
+      "final_failure": "",
+      "sec": 12.9
+    }
+  ]
+}

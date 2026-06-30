@@ -3,11 +3,14 @@
 grayscale-legible, vector PDF output (+ PNG previews). Every number is read from runs/agent/*.json;
 nothing is hardcoded. Run: .venv-streams.system/bin/python scripts/make_figures.py
 
-Figures -> docs/figures/fig{1,2,3,4}.pdf:
+Figures -> docs/figures/fig{1..6}.pdf:
   fig1  C2  tool-value ablation: input tokens with <defn> vs read-only, per model
   fig2  C1  information redundant: held-out-scored inference test (check_types does not reduce latent bugs)
   fig3  C3  election is capability-gated: <defn> use by model on the obscure real-code suite
   fig4  C3  the 7B on-policy training win (use / cost / success), with held-out types
+  fig5  C3  the learned policy is a boundary (action use by definition-sufficient vs read-required)
+  fig6  C1  execution feedback is redundant for a frontier agent: held-out pass@1 flat across the
+            no-run / elect-to-run / handed-over arms, only efficiency (turns) moves
 """
 import json, os, sys
 import matplotlib
@@ -166,4 +169,53 @@ ax.set_xticks(list(xx)); ax.set_xticklabels(cats); ax.set_ylabel("action use (%)
 ax.set_title("The learned policy is a boundary, not a collapse")
 ax.legend(frameon=False, fontsize=8, ncol=2, loc="upper center")
 save(fig, "fig5")
+
+# ---------- Figure 6 (C1): execution feedback is redundant, an efficiency lever only ----------
+# Runtime-feedback test: hold model+task fixed, vary execution access across three arms
+# (no run_tests / elect to run / result handed over for free). Held-out pass@1 is flat; only
+# turns move. Combines the structural and trap tiers per (model, arm).
+def _rows_opt(p):
+    fp = A(p)
+    return (json.load(open(fp)).get("rows", []) if os.path.exists(fp) else [])
+
+
+def _pct(rs, k="resolved"):
+    rs = [r for r in rs if r.get(k) is not None]
+    return 100.0 * sum(bool(r[k]) for r in rs) / len(rs) if rs else 0.0
+
+
+RT_MODELS = [("deepseek-v3.1", "deepseek"), ("sonnet-4.5", "sonnet45")]
+RT_ARMS = [("no\nexecution", "r0_notest", "r0_trap", C["grey"]),
+           ("elect to\nrun", "r1_run", "r1_trap", C["blue"]),
+           ("feedback\nhanded over", "r2_auto", "r2_trap", C["green"])]
+rt_data = {mk: {ax[1]: _rows_opt(f"rt_{mk}_{ax[1]}.json") + _rows_opt(f"rt_{mk}_{ax[2]}.json")
+                for ax in RT_ARMS} for _, mk in RT_MODELS}
+if all(rt_data[mk][ax[1]] for _, mk in RT_MODELS for ax in RT_ARMS):
+    fig, (axA, axB) = plt.subplots(1, 2, figsize=(9.6, 3.6), constrained_layout=True)
+    xs0 = range(len(RT_MODELS)); bw = 0.26
+    for ai, (alabel, sx, tx, col) in enumerate(RT_ARMS):
+        leg = alabel.replace("\n", " ")
+        va = [_pct(rt_data[mk][sx]) for _, mk in RT_MODELS]
+        vb = [mean(rt_data[mk][sx], lambda r: r.get("turns", 0)) for _, mk in RT_MODELS]
+        xa = [i + (ai - 1) * bw for i in xs0]
+        axA.bar(xa, va, bw, color=col, label=leg)
+        axB.bar(xa, vb, bw, color=col, label=leg)
+        for xi, v in zip(xa, va):
+            axA.text(xi, v + 1.5, f"{v:.0f}", ha="center", fontsize=8.5)
+        for xi, v in zip(xa, vb):
+            axB.text(xi, v + 0.05, f"{v:.2f}", ha="center", fontsize=8.5)
+    axA.set_xticks(list(xs0)); axA.set_xticklabels([m for m, _ in RT_MODELS])
+    axA.set_ylabel("held-out pass@1 (%)"); axA.set_ylim(0, 116)
+    axA.set_title("(a) correctness is unchanged")
+    axA.legend(frameon=False, fontsize=8, ncol=3, loc="upper center")
+    axA.text(0.5, 0.04, "identical across all three arms", transform=axA.transAxes,
+             ha="center", fontsize=8.5, style="italic", color="#444444")
+    axB.set_xticks(list(xs0)); axB.set_xticklabels([m for m, _ in RT_MODELS])
+    axB.set_ylabel("mean turns to finish"); axB.set_ylim(0, 3.4)
+    axB.set_title("(b) only efficiency moves")
+    fig.suptitle("Execution feedback for a frontier agent: redundant for correctness, an "
+                 "efficiency lever only (14 tasks, 3 seeds)", y=1.07, fontsize=11)
+    save(fig, "fig6")
+else:
+    print("skip fig6: runtime run JSONs (runs/agent/rt_*.json) not all present")
 print("done")

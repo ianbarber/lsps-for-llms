@@ -64,6 +64,9 @@ def load_suite(suite):
     if suite == "effic_real2":
         from scripts.synth_tasks_effic_real2 import TASKS_EFFIC_REAL2
         return TASKS_EFFIC_REAL2
+    if suite == "runtime":
+        from scripts.synth_tasks_runtime import TASKS_RUNTIME
+        return TASKS_RUNTIME
     if suite in ("gapd", "gapd2"):
         # Loaded lazily so this harness imports even if the suite file does not exist yet.
         mod = "synth_tasks_gapd" if suite == "gapd" else "synth_tasks_gapd2"
@@ -140,9 +143,11 @@ def _numbered(src):
     return "\n".join(f"{i+1:>3}| {ln}" for i, ln in enumerate(src.splitlines()))
 
 
-def system_prompt(no_defn, with_check):
+def system_prompt(no_defn, with_check, no_test=False):
     """Mirror SYS_LINE's framing for the tool-calling modality. When --no-defn,
-    defn / find_references are not mentioned anywhere."""
+    defn / find_references are not mentioned anywhere. When --no-test, run_tests is
+    absent: the agent cannot execute the code and must reason about correctness from
+    the source and the shown spec (the R0 "no-execution" arm of the runtime test)."""
     lines = [
         "You are a coding agent fixing a bug in a Python repository. The bug is in "
         "the file `target.py`. Fix it so the test passes. Work iteratively using the "
@@ -163,28 +168,39 @@ def system_prompt(no_defn, with_check):
             "symbol's signature or shape.",
             "- find_references(symbol): list the files where a symbol is used.",
         ]
-    lines += [
-        "- run_tests(): run the test suite; returns \"ALL TESTS PASS\" or the failure.",
-    ]
+    if not no_test:
+        lines += [
+            "- run_tests(): run the test suite; returns \"ALL TESTS PASS\" or the failure.",
+        ]
     if with_check:
         lines += [
             "- check_types(): run the static type checker and return its diagnostics "
             "(file, line, code, message) — use it to catch type mismatches before "
             "running the tests.",
         ]
-    lines += [
-        "- done(): call this once the tests pass to finish.",
-        "",
-        "Loop: edit_lines -> run_tests; if it still fails, read the failure, fix, and "
-        "run_tests again, until tests pass; then call done. Reason briefly between "
-        "tool calls.",
-    ]
+    if no_test:
+        lines += [
+            "- done(): call this when you believe the fix is correct.",
+            "",
+            "You CANNOT run the tests in this task: there is no run_tests tool. Reason "
+            "carefully about what the code does on the inputs in the shown spec, make your "
+            "edit, and call done() when you are confident the fix is correct.",
+        ]
+    else:
+        lines += [
+            "- done(): call this once the tests pass to finish.",
+            "",
+            "Loop: edit_lines -> run_tests; if it still fails, read the failure, fix, and "
+            "run_tests again, until tests pass; then call done. Reason briefly between "
+            "tool calls.",
+        ]
     return "\n".join(lines)
 
 
-def user_prompt(task, no_hint=False):
+def user_prompt(task, no_hint=False, no_test=False):
     """Mirror build_prompt: show ONLY the target (numbered) + names of the other
-    workspace files + the test (the spec)."""
+    workspace files + the test (the spec). The test is shown as static text in every
+    arm, including --no-test, so the R0 agent knows the spec but cannot execute it."""
     target = task["target"]
     body = f"`{target}`:\n{_numbered(task['files'][target])}"
     head = f"Fix the bug(s) in `{target}` so the test below passes.\n\n{body}\n\n"
@@ -195,7 +211,9 @@ def user_prompt(task, no_hint=False):
                        f"read_file(path).\n\n")
     else:
         whereabouts = ""
-    tail = f"Make line-range edits to `{target}` with edit_lines, then run run_tests."
+    tail = (f"Make line-range edits to `{target}` with edit_lines, then call done()."
+            if no_test else
+            f"Make line-range edits to `{target}` with edit_lines, then run run_tests.")
     note = ""
     if task.get("held_out") and not no_hint:
         note = ("\n\nImportant: the shown test is a partial spec — it does NOT exercise every input "
@@ -209,7 +227,7 @@ def user_prompt(task, no_hint=False):
 # ---------------------------------------------------------------------------
 # tool schemas
 # ---------------------------------------------------------------------------
-def build_tools(no_defn, with_check):
+def build_tools(no_defn, with_check, no_test=False):
     def fn(name, desc, props, required):
         return {"type": "function", "function": {
             "name": name, "description": desc,
@@ -236,9 +254,12 @@ def build_tools(no_defn, with_check):
             "end": {"type": "integer", "description": "1-based last line, inclusive"},
             "new_text": {"type": "string", "description": "replacement code"}},
            ["path", "start", "end", "new_text"]),
-        fn("run_tests", "Run the test suite. Returns 'ALL TESTS PASS' or the failure.",
-           {}, []),
     ]
+    if not no_test:
+        tools += [
+            fn("run_tests", "Run the test suite. Returns 'ALL TESTS PASS' or the failure.",
+               {}, []),
+        ]
     if with_check:
         tools += [
             fn("check_types", "Run the static type checker; returns diagnostics.", {}, []),
@@ -257,7 +278,8 @@ class Rollout:
         self.env = env
         self.target = target
         self.max_reads = max_reads
-        self.counts = {"read": 0, "defn": 0, "findrefs": 0, "test": 0, "edit": 0, "check": 0}
+        self.counts = {"read": 0, "defn": 0, "findrefs": 0, "test": 0, "edit": 0,
+                       "check": 0, "auto_test": 0}
         self.trace = []
         self.last_test = None   # last model-invoked run_tests dict
         self.done = False
@@ -349,10 +371,10 @@ def run_rollout(client, model, task, seed, args, price, spent_so_far):
                        held_out_src=task.get("held_out"))
     try:
         ro = Rollout(env, target, args.max_reads)
-        tools = build_tools(args.no_defn, args.with_check)
+        tools = build_tools(args.no_defn, args.with_check, args.no_test)
         messages = [
-            {"role": "system", "content": system_prompt(args.no_defn, args.with_check)},
-            {"role": "user", "content": user_prompt(task, args.no_hint)},
+            {"role": "system", "content": system_prompt(args.no_defn, args.with_check, args.no_test)},
+            {"role": "user", "content": user_prompt(task, args.no_hint, args.no_test)},
         ]
         pp, cp = price
         est_cost = 0.0
@@ -364,14 +386,27 @@ def run_rollout(client, model, task, seed, args, price, spent_so_far):
             if spent_so_far + est_cost >= args.budget_usd:
                 stop_reason = "budget"
                 break
-            try:
-                resp = client.chat.completions.create(
-                    model=model, messages=messages, tools=tools,
-                    tool_choice="auto", temperature=args.temperature, seed=seed,
-                )
-            except Exception as e:
-                stop_reason = f"api_error: {type(e).__name__}: {str(e)[:200]}"
-                ro.trace.append({"t": "api_error", "err": str(e)[:200]})
+            resp = None
+            last_err = None
+            for attempt in range(4):   # transient-error resilience (rate limits under concurrency)
+                try:
+                    resp = client.chat.completions.create(
+                        model=model, messages=messages, tools=tools,
+                        tool_choice="auto", temperature=args.temperature, seed=seed,
+                    )
+                    break
+                except Exception as e:
+                    last_err = e
+                    msg = str(e).lower()
+                    transient = any(s in msg for s in ("429", "rate", "timeout", "timed out",
+                                                       "502", "503", "overload", "temporarily"))
+                    if attempt < 3 and transient:
+                        time.sleep(2 * (attempt + 1))
+                        continue
+                    break
+            if resp is None:
+                stop_reason = f"api_error: {type(last_err).__name__}: {str(last_err)[:200]}"
+                ro.trace.append({"t": "api_error", "err": str(last_err)[:200]})
                 break
             turns += 1
             u = getattr(resp, "usage", None)
@@ -412,6 +447,21 @@ def run_rollout(client, model, task, seed, args, price, spent_so_far):
                 messages.append({"role": "tool", "tool_call_id": tc.id,
                                  "content": str(result)})
 
+            # R2 (--auto-feedback): the environment VOLUNTEERS the visible-test result after
+            # any edit, so the agent gets the execution signal for free without electing to
+            # run_tests. Skip if it already ran the test itself this turn (no double-run).
+            names_this_turn = [tc.function.name for tc in tcs]
+            if (args.auto_feedback and "edit_lines" in names_this_turn
+                    and "run_tests" not in names_this_turn):
+                tr = env.run_tests()
+                ro.last_test = tr
+                ro.counts["auto_test"] += 1
+                ro.trace.append({"t": "auto_test", "resolved": bool(tr.get("resolved"))})
+                fb = ("ALL TESTS PASS." if tr.get("resolved")
+                      else f"FAIL: {tr.get('failure', 'test failed')}")
+                messages.append({"role": "user",
+                                 "content": f"[automatic test run after your edit] {fb}"})
+
             if ro.done:
                 stop_reason = "done"
                 break
@@ -434,8 +484,10 @@ def run_rollout(client, model, task, seed, args, price, spent_so_far):
             "model": model, "task": task["name"], "group": task.get("group"),
             "seed": seed, "no_defn": args.no_defn, "with_check": args.with_check,
             "resolved": resolved, "visible_pass": visible_pass, "stop_reason": stop_reason,
+            "no_test": args.no_test, "auto_feedback": args.auto_feedback,
             "n_read": ro.counts["read"], "n_defn": ro.counts["defn"],
             "n_findrefs": ro.counts["findrefs"], "n_test": ro.counts["test"],
+            "n_auto_test": ro.counts["auto_test"],
             "n_edit": ro.counts["edit"], "n_check": ro.counts["check"],
             "turns": turns, "prompt_tokens": in_tok, "completion_tokens": out_tok,
             "est_cost_usd": round(est_cost, 6), "trace": ro.trace,
@@ -453,7 +505,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("out")
     ap.add_argument("--model", required=True)
-    ap.add_argument("--suite", required=True, choices=["effic_real2", "gapd", "gapd2"])
+    ap.add_argument("--suite", required=True,
+                    choices=["effic_real2", "gapd", "gapd2", "runtime"])
     ap.add_argument("--no-hint", action="store_true",
                     help="REALISTIC deployment: omit the 'visible test is partial' note and stop when "
                          "the visible test passes (measures the natural latent-bug rate on held-out tasks)")
@@ -462,6 +515,12 @@ def main():
     ap.add_argument("--seed-start", type=int, default=0)
     ap.add_argument("--no-defn", action="store_true",
                     help="tool-value ablation: defn/find_references genuinely absent (read-only)")
+    ap.add_argument("--no-test", action="store_true",
+                    help="runtime-feedback ablation R0: NO run_tests tool — the agent cannot execute "
+                         "the code and must reason from the source + the shown spec, then call done()")
+    ap.add_argument("--auto-feedback", action="store_true",
+                    help="runtime-feedback arm R2: the env volunteers the visible-test result after "
+                         "every edit (execution handed over for free, no election needed)")
     ap.add_argument("--with-check", action="store_true",
                     help="offer the check_types tool (Gap D info condition; default OFF)")
     ap.add_argument("--budget-usd", type=float, default=5.0)

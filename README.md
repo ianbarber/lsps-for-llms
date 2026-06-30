@@ -3,20 +3,17 @@
 Code, result data, and reproduction scripts for the tech report [REPORT.md](./REPORT.md),
 *Making a Language Server Pay Off for a Coding Agent: Redundant Information, Cheaper Retrieval*.
 
-We ask two questions about giving a coding agent a language server: does it help by supplying
-**information**, and does it help by making retrieval **cheaper**. The answer to the first is no
-(a model that can read files derives the same types and references itself). The answer to the
-second is yes, but only under three conditions, and getting the agent to use the cheap action is
-free for capable models and trainable for weak ones.
+Do language servers help coding agents by supplying **information**, and do they make retrieval
+**cheaper**? The win is the second: a cheap go-to-definition action saves tokens at equal success
+under three conditions, and getting the agent to use it is free for capable models and trainable for
+weak ones. The first is no wherever the agent can read the source and derive the fact, which held on
+every channel and task we tested. That covers a lot of real code; a very large or highly complex
+codebase, where the fact is not readable in the steps available, is where a language server's
+information might still help, and we did not test that.
 
 ## The result
 
-1. **Information is redundant.** Across correction, completeness, navigation, prevention, scale,
-   and type inference, handing a self-retrieving agent the language server's information does not
-   raise pass@1. At the frontier a `check_types()` tool is solved 32/32 with and without it, and
-   `claude-sonnet-4.5` never calls it.
-
-2. **Efficiency is real, under three conditions.** A `<defn>` action cuts input tokens 3.5 to 4.7
+1. **Efficiency is the win, under three conditions.** A `<defn>` action cuts input tokens 3.5 to 4.7
    times at equal success, when retrieval is required, the counterfactual is a whole-file read, and
    the agent chooses the cheap action. The tool-value ablation toggles the action on the same model:
 
@@ -26,10 +23,20 @@ free for capable models and trainable for weak ones.
    | claude-sonnet-4.5 (tool-calling) | 6018 | 21985 | 3.7× |
    | deepseek-chat-v3.1 (tool-calling) | 7705 | 36192 | 4.7× |
 
-3. **Election is capability-gated.** A 7B uses `<defn>` 2% by default and ignores a prompt telling
+2. **Election is capability-gated.** A 7B uses `<defn>` 2% by default and ignores a prompt telling
    it to prefer the action; one on-policy training round takes it to 100% use and 4.5 times fewer
    tokens. A capable model needs no training: framing `<defn>` in the system prompt as cheaper than
    a read moves an untrained 27B to 88 to 93% use and a frontier model to 100%.
+
+3. **Information is redundant when it is readable.** When the fact a language server would supply is
+   derivable from the source by reading, handing it to a self-retrieving agent does not raise pass@1,
+   on every channel we tested (correction, completeness, navigation, prevention, scale, type
+   inference). Both frontier models solve the held-out-scored inference test 18/18 with zero latent
+   bugs, with a `check_types()` tool and without it. The same holds for execution feedback, a fact not
+   in the text: on 14 small bug-fixes two frontier models score 100% held-out whether they can run the
+   code, elect to run it, or are handed the result free, and only efficiency (turns) moves. We did not
+   test very large or highly complex codebases, where the fact may not be readable and a language
+   server may then help.
 
 ## The recipe
 
@@ -58,6 +65,8 @@ real-code and tool-ablation runs. The `scripts/run_*.sh` drivers regenerate the 
 | `run_toolablation.sh` | tool-value ablation, with `<defn>` vs read-only, report §4 |
 | `run_frontier.sh` | frontier election and efficiency via OpenRouter, report §4 to §5 |
 | `run_gapd_frontier.sh` | the type-inference information channel, report §3 |
+| `run_gapd2_frontier.sh` | the held-out-scored fair inference test, report §3 |
+| `run_runtime_frontier.sh` | the execution-feedback boundary test (no-run / run / handed-over), report §3 |
 | `run_relabel2_27b.sh` | 27B cross-scale transfer, Appendix B |
 | `run_grpo.sh` | cost-reward RL corroboration, Appendix A |
 
@@ -77,6 +86,9 @@ python scripts/api_agent.py out_ro.json --model anthropic/claude-sonnet-4.5 \
 # the information channel (a check_types() tool available vs not):
 python scripts/api_agent.py out_gd.json --model anthropic/claude-sonnet-4.5 \
     --suite gapd --with-check --seeds 2 --budget-usd 6
+# the execution-feedback boundary (no-run / elect-to-run / handed-over arms):
+python scripts/api_agent.py out_rt.json --model anthropic/claude-sonnet-4.5 \
+    --suite runtime --no-hint --no-test --seeds 3 --budget-usd 6   # R0: drop --no-test for R1, add --auto-feedback for R2
 ```
 
 The local harness (`scripts/synth_mf.py`) does the same for open-weight models, with `--no-defn`
@@ -93,7 +105,8 @@ The local harness (`scripts/synth_mf.py`) does the same for open-weight models, 
 | `scripts/synth_tasks_effic.py` | synthetic definition-sufficient efficiency suite |
 | `scripts/synth_tasks_efficread.py` | read-required boundary suite |
 | `scripts/synth_tasks_effic_real{,2}.py` | real vendored-library suites (`effic_real_vendor/`) |
-| `scripts/synth_tasks_gapd.py` | type-inference (information-channel) suite |
+| `scripts/synth_tasks_gapd.py`, `scripts/synth_tasks_gapd2.py` | type-inference suite (gapd2 adds held-out scoring) |
+| `scripts/synth_tasks_runtime.py` | execution-feedback boundary suite (structural, easy, and semantic-trap tiers) |
 | `scripts/synth_mf.py`, `scripts/real_mf.py` | local condition runners |
 | `scripts/sft_lora.py` | on-policy LoRA-SFT trainer |
 | `scripts/validate_pyrefly_lsp.py` | validates `<defn>` against a live `pyrefly lsp` daemon |

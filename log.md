@@ -2164,3 +2164,97 @@ in what <defn> returned, NOT on the surface form of the return (it does NOT read
 there). So coverage-judging is content-driven, not a form/shape heuristic. Verified cover3 exhaustively myself (sufx
 value defn-reachable; f1ins/f2ins read-only; 4 variants surface-identical). PAPER.md §5.4 control folded in. Infra:
 synth_tasks_cover3.py, _cover3_run.sh; data cover3_sft.json.
+
+---
+
+## 2026-06-28 — REFRAME around the LSP criteria recipe; real vendored-library + frontier arms
+
+Reframed the write-up (PAPER.md) from a single D-vs-C′ comparison into the criteria recipe: (1) information is
+redundant for a self-retrieving agent, (2) efficiency is the residual value under three conditions, (3) election is
+capability-gated. Added the real-code arm and the frontier arm so the result is not synthetic-only.
+
+REAL CODE: synth_tasks_effic_real.py / effic_real2.py vendor real `toolz` / `more_itertools` source (effic_real_vendor/).
+effic_real uses familiar functions (model often guesses the API from memory -> retrieval not required, saving vanishes);
+effic_real2 uses OBSCURE ones a model is unlikely to have memorised (guess fails -> retrieval required, clean ratios).
+This is why the headline ratios are reported on the obscure suite.
+
+FRONTIER: scripts/api_agent.py drives OpenRouter models through a turn-based tool-calling loop (read_file / defn /
+find_references / edit_lines / run_tests / done as function tools), the modality production agents use. TOOL-VALUE
+ABLATION (--no-defn genuinely removes defn + its prompt mention, read-only counterfactual): same model, action toggled.
+27B 1302 vs 4563 tok (3.5x), claude-sonnet-4.5 6018 vs 21985 (3.7x), deepseek-chat-v3.1 7705 vs 36192 (4.7x), all at
+matched (ceiling) success. ELECTION by framing: untrained 27B 88-93%, frontier 100% from the system-prompt framing of
+<defn> as cheaper than a read; an older prompt that mentioned <defn> only in the task message gave 0% (prompt-vs-structure
+control). 4-seed refresh of the 27B + frontier numbers; figures regenerated from runs/agent/*.json (make_figures.py, every
+number read from JSON, nothing hardcoded). Budget guard: pricing fetched from /models, hard --budget-usd cap before each
+call. RefactorBench evaluated as an off-the-shelf option and NOT used: its tasks edit the symbol's own file, so the agent
+loads that file to edit it regardless of <defn> and efficiency has nothing to save. Infra: api_agent.py,
+synth_tasks_effic_real{,2}.py, run_toolablation.sh, run_frontier.sh, run_effic_real.sh.
+
+---
+
+## 2026-06-29 — FAIR inference test (gapd2, held-out scoring) + real-LSP hardening (per-task pyrefly daemon)
+
+INFERENCE, done right. A skeptical re-read found the original gapd suite RIGGED toward "checker redundant": every wrong
+fix ALSO crashed the single visible test the agent runs, so a model that just ran the test already caught the bug and
+check_types could never be the UNIQUE in-budget detector. Rebuilt as gapd2 (synth_tasks_gapd2.py) with HELD-OUT SCORING:
+the visible test PASSES the plausible wrong fix (exercises only dormant-bug inputs) and a hidden held-out test FAILS it
+(hits the buggy path), and pyrefly flags the wrong fix statically (no-matching-overload, bad-typed-dict-key,
+missing-attribute, etc.). 6 rich tasks + 1 pyrefly-blind control; verifier enforces the fair-test invariant V1-V4.
+api_agent.py records `resolved` = held-out score, `visible_pass` = the test the agent could run; auto-stop on visible-pass
+disabled for held-out tasks unless --no-hint. RESULT (deepseek-v3.1, sonnet-4.5; conditions realistic-no-hint / no-check /
+with-check): both models solve 18/18 with ZERO latent bugs in EVERY condition, with and without check_types, even when
+they elect it (deepseek every rollout, sonnet > half). The type checker is redundant even given a fair chance; the models
+write the correct fix by careful reading.
+
+REAL-LSP HARDENING. Replaced the per-call pyrefly spawn with a persistent per-task `pyrefly lsp` daemon (mock_env.py:
+_ensure_lsp starts one daemon per workspace, init + didOpen-all once, reused across the rollout, killed at close;
+textDocument/definition). AGREEMENT CHECK static AST resolver vs live daemon: 12/12 synthetic symbols agree; on real
+toolz/more_itertools 9/11 agree and 0 disagree (pyrefly returns null on 2 more_itertools re-exports, where the agent falls
+back to the AST resolver). A trained-7B real-code run with <defn> backed by the daemon reproduces the static-resolver run
+exactly (18/22 solved, 100% defn use, identical mean input tokens). The resolver backing the action does not change the
+result. GOTCHA logged: `pkill -9 -f "[p]yrefly"` self-kills the calling shell when the SAME command also spells the
+pyrefly binary path; bracket EVERY -f pattern and prefer killing by PID. Infra: synth_tasks_gapd2.py, run_gapd2_frontier.sh,
+mock_env.py (persistent daemon), validate_pyrefly_lsp.py.
+
+---
+
+## 2026-06-30 — Literature review + EXECUTION-feedback boundary test (the dynamic null) + editorial/framing pass
+
+LIT REVIEW (deep-research, 95 agents, 15 sources, 25 claims adversarially verified). No published work states the combined
+thesis (LSP info redundant for a self-retriever, cheap-retrieval efficiency must be elicited/trained). Closest = RLCSF /
+Lanser-CLI (Zhang et al., arXiv:2510.22907), the INVERSE premise (LSP signals are "the missing supervision signal"),
+methodology-only with NO pass@1 ablation of navigation vs reading. Redundancy theme adjacent in QA/web-search ("To Call or
+Not to Call" 2605.00737, 34% negative tool utility; IKEA 2505.07596, over-retrieval). Execution feedback helps in OTHER
+regimes (Self-Debugging 2304.05128, RLTF 2307.04349, type-constrained decoding 2504.09246; self-repair modest once cost
+counted, 2306.09896). §6 reworked collegially (RLCSF framed as the complementary view, not adversarially).
+
+EXECUTION-FEEDBACK BOUNDARY TEST. Question: §3 shows static LSP info is redundant because it is in the source; is a fact
+NOT in the text, the program's runtime behaviour, also redundant for a frontier agent? Source is a program; its behaviour
+is that program executed, so to derive it the model must mentally execute, and that can be wrong. Suite synth_tasks_runtime.py:
+14 small bug-fixes, each a plausible wrong fix that FAILS a visible test (so running is the detector) yet is WELL-TYPED (so
+a checker is useless, execution is the only in-budget detector), scored HELD-OUT. Three tiers: 5 structural-hard
+(sliding-window off-by-one, the forgotten RLE flush, tier boundaries, run counting), 3 easy (missing abs / one-sided clamp /
+empty guard), 6 Python-semantic TRAPS whose plausible reimplementation mis-simulates real behaviour (str.lstrip is a
+char-set not a prefix, int(x/k) truncates where // floors, round is banker's, slice composition, multi-wrap modulo).
+Verifier enforces W1-W4 (stub fails held-out; gold passes both; wrong fails BOTH visible+held-out; wrong is type-clean).
+api_agent.py gained THREE arms: --no-test (R0, run_tests tool removed, agent reasons from source + shown spec then done()),
+default (R1, elect to run), --auto-feedback (R2, env volunteers the visible-test result after each edit, n_auto_test). All
+run --no-hint (the visible test is informative here, not a partial spec). Added transient-error retry (rate-limit
+resilience under concurrency).
+
+RESULT (deepseek-v3.1 + sonnet-4.5, 3 seeds, both tiers = 252 rollouts): 100% HELD-OUT pass@1 in EVERY arm for BOTH
+models, including blind R0, including the semantic traps. Robust NULL. The only quantity that moves is EFFICIENCY: pooled
+turns R0 2.33 / R1 2.42 / R2 1.39 (handing the result over saves ~1 turn at identical success). So execution feedback is
+redundant for correctness on small self-contained tasks too, mirroring the static-info result, and is only an efficiency
+lever, where the code is small enough to read/simulate reliably. This is the frontier-on-small-tasks corner; execution DOES
+help in harder-generation / weaker-model regimes (Self-Debugging, RLTF). Total API spend across all runtime runs ~$2 (well
+under the $50 cap). Folded into REPORT §3 (Execution paragraph + fig6), §6, §7 (execution-null bounded by task scale).
+Infra: synth_tasks_runtime.py, run_runtime_frontier.sh, analyze_runtime.py, make_figures.py (fig6), data rt_*_{r0,r1,r2}_*.json.
+
+EDITORIAL / FRAMING PASS (per live review). Frame the report PRIMARILY around the efficiency win; scope the no-information
+result to "redundant WHERE READABLE" rather than absolute, and be honest that very large / highly complex / runtime-opaque
+codebases are untested (help a reader self-identify when the finding applies). Reordered contributions to Efficiency,
+Election, Information. Trimmed flowery framing sentences that only structure or signal importance ("we ask two questions",
+"two views of the same experiment", "the boundary, not a contradiction", "this is the secondary result"); state conclusions
+directly. RefactorBench reframed as the criterion for why we built the vendored-library bench, not a catalogue of what
+didn't work. Same framing applied to README. 0 em dashes maintained in REPORT/README.
