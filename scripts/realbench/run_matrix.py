@@ -255,7 +255,7 @@ def main():
 
     os.environ.setdefault("HF_HUB_OFFLINE", "0"); os.environ.setdefault("HF_DATASETS_OFFLINE", "0")
     want = set(args.tasks.split(","))
-    tasks = {t["instance_id"]: t for t in L.load_tasks(n=400) if t["instance_id"] in want}
+    tasks = {t["instance_id"]: t for t in L.load_tasks() if t["instance_id"] in want}
     missing = want - set(tasks)
     if missing:
         print(f"[warn] instance_ids not found: {missing}", file=sys.stderr)

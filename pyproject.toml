@@ -23,6 +23,11 @@ dev = [
 api = [
     "openai",
 ]
+# `pip install -e '.[realbench]'` for the real-repo SWE-bench experiment (scripts/realbench/).
+realbench = [
+    "datasets",
+    "swebench",
+]
 
 [project.urls]
 Homepage = "https://github.com/ianbarber/retrieve-cheaply"

@@ -79,6 +79,34 @@ and produced no edit. Two things this tells us, and a fork for you:
 I did **not** run the matrix for real (it needs the fork decided + the audited task set); ~$0.29 of API
 spend on smokes, no more.
 
+## Pilot result (2026-07-01): score-only does not work; test feedback is required
+
+Ran a real pilot on the auto-selected audit-ready tasks (invariant-selected, not human-audited, as
+agreed): astropy-14182, django-11138, sphinx tasks, with `claude-sonnet-4.5` under R/D/I and tight read
+caps. The definitive finding:
+
+- **A score-only agent (no test feedback) does not resolve real tasks.** On django-11138 the read-only
+  patch was **unresolved** (wrong fix) and the go-to-definition run produced an **empty patch** (no
+  edit); both hit the turn limit without converging. The gold patch resolves through the same oracle, so
+  this is the agent, not the harness. Frontier models cannot one-shot these fixes from the issue + code
+  alone; they need to iterate against the failing test.
+- **Rollouts are expensive.** Each real-repo tool-calling rollout is ~200k input tokens (the API re-sends
+  the growing context every turn, times multi-turn exploration), ~$0.6 at sonnet pricing. A full matrix
+  (8 tasks x 3 conds x 2 models x 2 seeds) would be $20-40 for data that, score-only, does not resolve.
+- **Emulated scoring is fast for light repos, slow for heavy ones.** django/sphinx score in ~90s; astropy
+  (heavy test suite under qemu) takes 5+ minutes. Favour pure-Python fast-test repos.
+- **Early efficiency signal is confounded**, not clean: on astropy-14182 the D (defn) run used *more*
+  tokens than R because it hit the turn limit, and the agent reads broadly for context regardless of
+  defn, diluting the retrieval saving. We cannot conclude the efficiency win from score-only data.
+
+**Conclusion and the path that will work:** the experiment needs **test feedback in the loop** so the
+agent converges, which on this ARM64 host means **native venvs** for the pure-Python repos (django,
+sphinx, sympy, pytest install and test natively and fast on ARM64; no emulation for the loop, Docker only
+for the final canonical score). That is the next build: per-repo venv setup (reuse the swebench install
+spec), route `RealRepoEnv.run_tests` to it, give the agent `run_tests`, then re-run the matrix. Budget it
+at ~$0.5-1.0/rollout, so a focused 8-task x R/D/I x 2-model x 2-seed run is ~$30; keep it tight. Total
+spend so far: ~$2.60 (smokes + this pilot), no more until this is decided.
+
 ## Honest next steps (for discussion / next session)
 
 1. **Hand-audit the top ~15** from `candidates.json`. The scanner is a ranked shortlist, not the final

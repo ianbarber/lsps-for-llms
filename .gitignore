@@ -65,3 +65,5 @@ runs/realbench/repos/
 logs/
 *.goldval*.json
 runs/realbench/eval/
+runs/realbench/pilot/
+runs/realbench/matrix*/
