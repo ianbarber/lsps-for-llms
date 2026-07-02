@@ -219,6 +219,59 @@ mechanism behind the null token result, and why the heaviest-codenav arm (astrop
 not leaner. The efficiency premise ("defn replaces an expensive whole-file read") fails twice over:
 the agent rarely whole-file-reads, and when it defn's it reads the file regardless.
 
+## Where could a language server still beat grep+sed? semantic vs textual (subagent analysis, 2026-07-02)
+
+grep/sed are textual; a language server is semantic (it resolves receiver types, imports/re-exports,
+overloads, inheritance). A subagent mapped where semantic resolution supplies information textual search
+cannot, verified against the local blobless clones at each task's base_commit. Key results:
+
+**Our AST resolver already ran the experiment by accident.** The `SymbolResolver` behind
+`candidates.json` is shallow-semantic (barely more than grep; keyed on `^\s*(def|class) NAME`), and it
+mis-resolved exactly the common-method-name deps - grep's blind spot:
+- django-11138 `lower` -> flagged the `lower` template filter; truth is `lookup_type.lower()`, builtin
+  `str.lower`. django-11141 `add` -> flagged the `add` filter; truth is `set.add` (`def add` has **15**
+  non-test defs in django, all wrong). django-11206 `rjust`, astropy-13579 `append` (`list.append`;
+  `def append` has **7** defs in astropy) - same pattern. `template/defaultfilters.py` defines **58**
+  collision-prone filter names (`lower/add/join/first/slice/...`), so any `.lower()/.add()` on a builtin
+  textually collides there. All four "cross-file deps" that made these tasks admissible are
+  textual-collision **false positives**; a type-aware go-to-definition resolves the receiver type first
+  and never chases the filter. (Generalises the earlier note that django-11138's dep was a false positive
+  - the pattern is systematic.)
+
+**Two regimes where semantic beats textual:**
+1. **Receiver-type / overload disambiguation** - bites constantly, changes outcome rarely. `x.foo()`
+   binds to `foo` on `type(x)`; grep returns every `foo` on every class, and when the receiver is a
+   builtin the real def is not in the repo at all. But a capable agent usually infers the type from the
+   call site by reading, so this saves *steps, not correctness* - except for weaker models that trust the
+   first hit.
+2. **Indirection grep AND codenav cannot follow** - rarer, but a genuine capability gap. Factory/
+   singleton/re-export bindings have no `def`/`class`: xarray `take = _dask_or_eager_func("take")` (zero
+   `def take` in the repo), sympy `I = S.ImaginaryUnit`. def-grep and our `codenav defn` both return
+   nothing; only a binding-aware LSP resolves them. **Implication: `codenav` shares grep's blind spot, so
+   a real test of the hypothesis needs a true type-aware server (pyright/pylsp/jedi), not our AST
+   resolver.**
+3. **Semantic find-references / find-implementations** - sphinx `get` = **666** textual hits vs 4 `def
+   get`; django `get_prep_value` = **25** overrides. Matters on dispatch-shaped bugs (edit the right
+   override), a minority of tasks.
+
+**Honest read:** the precision advantage is real but concentrated - it changes *outcomes* mainly for
+weaker agents and on indirection/dispatch-shaped tasks; for a strong agent on a localized fix it changes
+path length, not correctness (astropy-14182's grep-only arm patched a `QTable` task with zero codenav).
+This *tightens* the thesis rather than contradicting it: LSP precision, like LSP information, is largely
+redundant for a strong agent; the efficiency/policy value is what survives.
+
+**Proposed next experiment.** Select 10-15 tasks for textual ambiguity **at the fix site** (receiver-type
+collisions like `add`/`append`/`rjust`; indirection like `take`), not just cross-file cost-gap. Two arms
+on a strong scaffold with test feedback: **G** grep/sed only vs **T** grep/sed + a genuinely type-aware
+goto/refs (pyright/jedi-backed, NOT the AST `codenav`). Metrics: resolved@1 (F2P) and a **mis-localization
+rate** (did the patch edit the wrong same-named symbol/override, vs the gold hunks); steps/tokens
+secondary. Include a **weaker model**, since the effect is predicted capability-gated. Predicted: G ~ T on
+resolved@1 for a strong model (T lower on mis-localization/steps); T > G only for the weaker model or the
+indirection subset. Confounds to control: test feedback masks mis-localization (a wrong edit just fails
+and retries, so precision shows up as fewer loops unless the budget is tight), and selection must be at
+the fix site or you measure resolver artifacts (as our scanner did). A null (T does not beat G on
+correctness for a capable agent) is itself the publishable result.
+
 ## Honest next steps (for discussion / next session)
 
 1. **Hand-audit the top ~15** from `candidates.json`. The scanner is a ranked shortlist, not the final

@@ -433,14 +433,22 @@ ours.
   than whole-file reads, so go-to-definition saves little against it, and when prompted to use it the
   agent reads the file anyway. This is early evidence (one model, three tasks, one seed), but it scopes
   the efficiency result to the whole-file-read counterfactual. The sharper open question is where a
-  language server's *semantic* resolution supplies information a *textual* `grep` cannot: receiver-type or
-  overload disambiguation when a symbol name is common (a method like `save`, `add`, or `take` defined on
-  many classes), definitions reached through re-exports or aliases that a text search resolves to the
-  wrong site or misses entirely, and find-references that exclude same-named unrelated symbols. The next
-  experiment isolates whether that precision changes a capable agent's *outcome* (correctness,
-  mis-localization) rather than its token count, on tasks where the cross-file symbol is textually
-  ambiguous. We expect the effect to be small if the agent can disambiguate by reading a few `grep` hits,
-  and are testing that directly.
+  language server's *semantic* resolution supplies information a *textual* `grep` cannot. Two regimes look
+  promising. Receiver-type and overload disambiguation: `x.foo()` binds to `foo` on the type of `x`, but
+  `grep def foo` returns every same-named method on every class (`def add` has 15 definitions in django,
+  `def append` has 7 in astropy), and when the receiver is a builtin the real definition is not in the
+  repo at all. Indirection: factory-assigned, singleton, and re-exported symbols have no `def`/`class`
+  statement (`take = _dask_or_eager_func("take")` in xarray, `I = S.ImaginaryUnit` in sympy), so grep and
+  our AST resolver both return nothing, and only a binding-aware server resolves them. We have in-house
+  evidence the failure is real: the shallow AST resolver that built our candidate pool mis-resolved
+  exactly these common-name cases (it flagged `add`/`lower`/`append`/`rjust` to a same-named template
+  filter when the true receiver is a builtin), which a type-aware go-to-definition would not. The honest
+  counter is that a capable agent infers the receiver type by reading the call site, so this likely
+  changes its path (steps, mis-localization) more than its *outcome*; we expect the effect to be
+  capability-gated, larger for a weaker model. The next experiment isolates this: tasks selected for
+  textual ambiguity at the fix site, a grep-only arm versus a genuinely type-aware go-to-definition arm
+  (backed by a real language server, not the AST resolver, which shares grep's blind spot), scored on
+  resolved@1 and a mis-localization rate, with a weaker model included.
 - **Redundancy holds where the fact is readable in budget.** Across the channels we tested, the language
   server's information is redundant for a self-retrieving agent, because the agent reads the source and
   derives the fact within its read budget. A fact the agent cannot recover by reading, a runtime value it would have to execute for, an
