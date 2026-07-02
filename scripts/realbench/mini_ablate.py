@@ -66,6 +66,17 @@ CODENAV_PARA = """
     cheaper than reading the file. Read whole files only when you actually need broad context.
 """
 
+# D+ arm: strong SYSTEM-level framing (the elicitation lever the report found flips election on a
+# capable model). Prepended to the system message, which carries more weight than an instance note.
+STRONG_SYS_PREFIX = """You have a `codenav` command that is much cheaper than reading source files.
+STRONGLY PREFER it whenever you need to see a definition or find usages:
+  - `codenav defn SYMBOL` instead of cat/sed-ing a file to read a function/class definition
+  - `codenav refs SYMBOL` instead of grep to find where a symbol is used
+Minimise reading whole files or large line ranges: fetch exactly the definition you need with
+`codenav defn`. Only read a file directly when codenav cannot give you what you need.
+
+"""
+
 
 def _sum_tokens(messages):
     """Sum prompt_tokens over model responses (total input processed = what you pay), and
@@ -81,19 +92,34 @@ def _sum_tokens(messages):
     return total_in, total_out, peak_in
 
 
-def _codenav_calls(messages):
-    """Count executed bash actions that invoked codenav (behavioural election signal)."""
-    n_defn = n_refs = n_calls = 0
+def _read_behavior(messages):
+    """Classify executed bash actions to see HOW the agent retrieves: the point of the ablation is
+    whether the agent does the expensive whole-file read that codenav would replace, or already
+    self-retrieves cheaply (grep + ranged sed), or elects codenav."""
+    import re
+    b = {"codenav_calls": 0, "codenav_defn": 0, "codenav_refs": 0,
+         "grep": 0, "sed_range": 0, "cat_whole_py": 0, "cat_ranged_py": 0, "total_actions": 0}
     for m in messages:
         for a in (m.get("extra") or {}).get("actions", []) or []:
             cmd = a.get("command", "") if isinstance(a, dict) else ""
+            if not cmd:
+                continue
+            b["total_actions"] += 1
             if "codenav" in cmd:
-                n_calls += 1
-                if "codenav defn" in cmd:
-                    n_defn += 1
-                if "codenav refs" in cmd:
-                    n_refs += 1
-    return {"codenav_calls": n_calls, "codenav_defn": n_defn, "codenav_refs": n_refs}
+                b["codenav_calls"] += 1
+                b["codenav_defn"] += "codenav defn" in cmd
+                b["codenav_refs"] += "codenav refs" in cmd
+            if re.search(r"\bgrep\b", cmd):
+                b["grep"] += 1
+            if re.search(r"\bsed -n\b", cmd):
+                b["sed_range"] += 1
+            # whole-file read of a .py = `cat file.py` with no range/head/tail (the codenav-replaceable action)
+            for mm in re.finditer(r"\bcat\s+([^\s|;&><]+\.py)\b", cmd):
+                if re.search(r"\b(head|tail|sed)\b", cmd):
+                    b["cat_ranged_py"] += 1
+                else:
+                    b["cat_whole_py"] += 1
+    return b
 
 
 def run_arm(arm, instance, base_cfg, model_name, model_class, out_dir, step_limit, wall_seconds):
@@ -117,9 +143,12 @@ def run_arm(arm, instance, base_cfg, model_name, model_class, out_dir, step_limi
     cfg["model"]["model_kwargs"].setdefault("temperature", 0.0)
     cfg["model"]["cost_tracking"] = "ignore_errors"
 
-    if arm == "on":
+    if arm in ("on", "onx"):
         cfg.setdefault("run", {})["env_startup_command"] = INJECT_CMD
         cfg["agent"]["instance_template"] = cfg["agent"]["instance_template"] + CODENAV_PARA
+    if arm == "onx":
+        # strong system-prompt framing (the election lever), on top of the instance advertisement
+        cfg["agent"]["system_template"] = STRONG_SYS_PREFIX + cfg["agent"]["system_template"]
 
     t0 = time.time()
     env = get_sb_environment(cfg, instance)           # starts container, runs the inject on 'on'
@@ -140,16 +169,19 @@ def run_arm(arm, instance, base_cfg, model_name, model_class, out_dir, step_limi
             pass
 
     tin, tout, peak = _sum_tokens(agent.messages)
+    real_cost = sum((((m.get("extra") or {}).get("response") or {}).get("usage") or {}).get("cost", 0.0)
+                    for m in agent.messages)
     rec = {"arm": arm, "instance_id": iid, "exit_status": exit_status,
            "input_tokens": tin, "output_tokens": tout, "peak_context": peak,
            "model_calls": agent.n_calls, "wall_s": round(time.time() - t0, 1),
-           "patch_bytes": len(patch), **_codenav_calls(agent.messages)}
+           "cost_usd": round(real_cost, 4), "patch_bytes": len(patch), **_read_behavior(agent.messages)}
     # swebench-format predictions for scoring
     preds = {iid: {"model_name_or_path": f"mini-{arm}", "instance_id": iid, "model_patch": patch}}
     (out_dir / f"preds_{arm}.json").write_text(json.dumps(preds, indent=2))
     (out_dir / f"summary_{arm}.json").write_text(json.dumps(rec, indent=2))
     print(f"[{arm}] exit={exit_status} calls={rec['model_calls']} in_tok={tin} peak={peak} "
-          f"codenav={rec['codenav_calls']}(defn={rec['codenav_defn']}) patch={rec['patch_bytes']}B "
+          f"codenav={rec['codenav_calls']}(defn={rec['codenav_defn']}) cat_whole={rec['cat_whole_py']} "
+          f"sed={rec['sed_range']} grep={rec['grep']} ${rec['cost_usd']} patch={rec['patch_bytes']}B "
           f"wall={rec['wall_s']}s", flush=True)
     return rec
 
@@ -201,14 +233,16 @@ def main():
                                                              "model": args.model, "arms": recs}, indent=2))
     print("\n=== ablation summary (score preds_*.json with scripts/realbench/score.py) ===")
     for r in recs:
-        print(f"  {r['arm']:3} in_tok={r['input_tokens']:>8} peak={r['peak_context']:>7} "
-              f"calls={r['model_calls']:>3} codenav_defn={r['codenav_defn']} "
-              f"exit={r['exit_status']} patch={r['patch_bytes']}B")
-    if len(recs) == 2 and recs[0]["input_tokens"] and recs[1]["input_tokens"]:
-        off = next(r for r in recs if r["arm"] == "off")
-        on = next(r for r in recs if r["arm"] == "on")
-        if on["input_tokens"]:
-            print(f"  input-token ratio off/on = {off['input_tokens']/on['input_tokens']:.2f}x")
+        print(f"  {r['arm']:4} in_tok={r['input_tokens']:>8} peak={r['peak_context']:>7} "
+              f"calls={r['model_calls']:>3} codenav_defn={r['codenav_defn']:>2} cat_whole={r['cat_whole_py']:>2} "
+              f"sed={r['sed_range']:>2} grep={r['grep']:>2} ${r['cost_usd']} exit={r['exit_status']} "
+              f"patch={r['patch_bytes']}B")
+    base = next((r for r in recs if r["arm"] == "off"), None)
+    if base and base["input_tokens"]:
+        for r in recs:
+            if r["arm"] != "off" and r["input_tokens"]:
+                print(f"  input-token ratio off/{r['arm']} = {base['input_tokens']/r['input_tokens']:.2f}x "
+                      f"(>1 means {r['arm']} is cheaper)")
 
 
 if __name__ == "__main__":

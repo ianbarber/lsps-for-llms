@@ -149,6 +149,59 @@ finding, the right next run is 2-3 tasks with a *genuine* large-type-definition 
 the agent ever does a whole-file read that `codenav` would replace, or whether grep+ranged-read
 always dominates. Prediction: small-to-zero gap. Spend so far this build: ~$0.65.
 
+## Prompt-framing confirming run: election is elicitable, but the token payoff is not (2026-07-01)
+
+Followed up the smoke's premise problem with the prompting question it raised: the report's own
+finding is that a capable model elects the cheap action *when the system prompt frames it that
+way*. So a third arm was added and run on three genuine large-definition tasks (astropy-14182
+`QTable` 4247L, sympy-14531 `Normal` 2987L, sphinx-8265 `Index`), one seed each:
+
+- **R (off)** bash only; **D (on)** codenav available, mild instance advertisement; **D+ (onx)**
+  codenav + a STRONG system-prompt directive to prefer `codenav defn/refs` over reading files.
+
+Per-arm (`codenav` = defn+refs calls, `cat_whole` = whole-file .py reads, the codenav-replaceable
+action; in/call = avg input tokens per model call, which normalises for step count):
+
+| task | arm | in/call | codenav | cat_whole | exit | patch |
+|---|---|---:|---:|---:|---|---:|
+| astropy | off | 16952 | 0 | 3 | Submitted | 1508B |
+| astropy | on | 16721 | 1 | 3 | Limit | 0 |
+| astropy | onx | 17975 | 7 | 2 | Limit | 0 |
+| sympy | off | 19763 | 0 | 2 | Submitted | 3246B |
+| sympy | on | 19742 | 0 | 2 | Limit | 0 |
+| sympy | onx | 18651 | 5 | 1 | Limit | 0 |
+| sphinx | off | 22951 | 0 | 1 | Limit | 0 |
+| sphinx | on | 17217 | 8 | 0 | Limit | 0 |
+| sphinx | onx | 17262 | 0 | 3 | Limit | 0 |
+
+**What holds up (robust to the confounds below):**
+
+1. **Election is prompt-liftable, even in a real bash agent.** Strong system framing raised codenav
+   use where mild advertisement did not: astropy 0/1/**7**, sympy 0/0/**5**. Consistent with the
+   report's election finding, now shown in mini-swe-agent. (Noisy at one seed: sphinx went 0/**8**/0
+   - mild used it heavily, strong not at all.)
+2. **Eliciting codenav use does NOT lower token cost.** Normalised per-call input tokens do not drop
+   when codenav is used: astropy-onx (7 codenav) is *fatter* than off; sympy-onx (5) is ~5% leaner;
+   sphinx's two lean arms include onx which used codenav **0** times. No consistent codenav->savings
+   effect. The raw off/arm ratios (0.69-1.33x) are confounded by termination (only R arms converged)
+   and are not a clean measurement.
+3. **The whole-file-read counterfactual barely occurs.** `cat_whole` is 0-3 across all 9 arms (of
+   44-60 actions each); retrieval is dominated by `grep` + ranged `sed -n`. The expensive read that
+   the synthetic 3.5-4.7x beat is simply not what a capable bash agent does.
+4. **Self-retrieval is sufficient to solve.** astropy-14182's R arm **submitted a real patch**
+   (1508B) in 44 calls using 8 grep + 2 sed + 3 cat + **0 codenav** - it fixed a task involving
+   `QTable` (4247L) without ever reading QTable's definition or using the language server.
+
+**Bottom line for the report framing.** The prompting lever works (election is capability/prompt
+gated - confirmed in the wild), but pulling it buys no efficiency in a real bash agent, because the
+counterfactual is grep+ranged-read, not a whole-file read. The retrieval-efficiency headline is
+real only against a forced-whole-file-read baseline (our synthetic env); it does not transfer to a
+capable agent with shell primitives. Recommend scoping the efficiency claim accordingly.
+
+Caveats: one seed/cell; 3 tasks; one model (sonnet); step cap 60 so only 2/9 arms converged (no
+matched-success cell, hence per-call tokens / behaviour are the reliable lenses, not raw ratios).
+Spend: ~$5.65 (confirm) + $0.65 (smoke) = ~$6.30.
+
 ## Honest next steps (for discussion / next session)
 
 1. **Hand-audit the top ~15** from `candidates.json`. The scanner is a ranked shortlist, not the final
