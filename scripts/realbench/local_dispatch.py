@@ -214,22 +214,39 @@ def main():
                  s["mean_n_defn"], s["mean_n_grep"], s["mean_read_whole"], s["mean_read_ranged"]),
               flush=True)
 
-    # matched-success token ratio grep_base / defn_prompt (tasks+seeds resolved in BOTH)
-    ratio = None
-    if "grep_base" in by and "defn_prompt" in by:
-        gb = {(r["task"], r["seed"]): r for r in by["grep_base"] if r["resolved"]}
-        dp = {(r["task"], r["seed"]): r for r in by["defn_prompt"] if r["resolved"]}
-        both = sorted(set(gb) & set(dp))
-        if both:
-            gb_toks = _mean([gb[k]["in_toks"] for k in both])
-            dp_toks = _mean([dp[k]["in_toks"] for k in both])
-            ratio = round(gb_toks / dp_toks, 3) if dp_toks else None
-            print("\n  matched success (n=%d): grep_base mean_in_toks=%s  defn_prompt=%s  ratio=%s"
-                  % (len(both), gb_toks, dp_toks, ratio), flush=True)
-        else:
-            print("\n  matched success: no task+seed resolved in BOTH grep_base and defn_prompt", flush=True)
+    # matched-success paired EFFICIENCY DELTA: grep_base vs each defn condition, on tasks resolved in
+    # BOTH. Reports the ratio, the mean signed token delta (>0 = defn cheaper), and the per-task pairs so
+    # the distribution is visible, not just the mean.
+    def _paired(base_c, defn_c):
+        b = {(r["task"], r["seed"]): r for r in by.get(base_c, []) if r["resolved"]}
+        d = {(r["task"], r["seed"]): r for r in by.get(defn_c, []) if r["resolved"]}
+        return [{"task": k[0], "seed": k[1], "base_in_toks": b[k]["in_toks"],
+                 "defn_in_toks": d[k]["in_toks"], "delta": b[k]["in_toks"] - d[k]["in_toks"]}
+                for k in sorted(set(b) & set(d))]
 
-    summary["matched_success_ratio_grep_over_defnprompt"] = ratio
+    deltas = {}
+    for defn_c in [c for c in conds if c != "grep_base"]:
+        if "grep_base" not in by:
+            break
+        pairs = _paired("grep_base", defn_c)
+        if not pairs:
+            print("\n  [%s vs grep_base] no task resolved in BOTH conditions" % defn_c, flush=True)
+            deltas[defn_c] = {"n": 0}
+            continue
+        gb_m = _mean([p["base_in_toks"] for p in pairs])
+        dn_m = _mean([p["defn_in_toks"] for p in pairs])
+        d_m = _mean([p["delta"] for p in pairs])
+        ratio = round(gb_m / dn_m, 3) if dn_m else None
+        deltas[defn_c] = {"n": len(pairs), "grep_base_mean": gb_m, "defn_mean": dn_m,
+                          "mean_delta_toks": d_m, "ratio_grep_over_defn": ratio, "pairs": pairs}
+        print("\n  [%s vs grep_base] matched n=%d: grep_base=%s  %s=%s  ratio=%s  "
+              "mean_delta=%s toks (>0 = defn cheaper)"
+              % (defn_c, len(pairs), gb_m, defn_c, dn_m, ratio, d_m), flush=True)
+        for p in pairs:
+            print("      %-18s grep_base=%-6d %s=%-6d delta=%+d"
+                  % (p["task"], p["base_in_toks"], defn_c, p["defn_in_toks"], p["delta"]), flush=True)
+
+    summary["efficiency_deltas"] = deltas
     json.dump({"model": args.model, "adapter": args.adapter, "config": vars(args),
                "summary": summary, "rows": rows}, open(out, "w"), indent=2)
     print("\n-> %s" % out, flush=True)
