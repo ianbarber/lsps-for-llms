@@ -219,6 +219,35 @@ mechanism behind the null token result, and why the heaviest-codenav arm (astrop
 not leaner. The efficiency premise ("defn replaces an expensive whole-file read") fails twice over:
 the agent rarely whole-file-reads, and when it defn's it reads the file regardless.
 
+## Dispatch-ambiguity experiment: x86 host (chunklebox) + pyrefly type-aware goto, validated (2026-07-02)
+
+qemu on the ARM host cannot run pyrefly (the x86 binary segfaults even on `--version`), so the
+in-container pyrefly path is impossible under emulation. Moved to **chunklebox** (native x86, 16-core,
+Ubuntu 24.04, Docker 29). There the whole stack runs natively, no qemu: SWE-bench images run for real,
+mini-swe-agent runs in-container with real test feedback, AND pyrefly runs in-container. Ported the repo
+(rsync), lean venv (`datasets`, `swebench`, `mini-swe-agent`, `openai`, `pyrefly` 1.1.1 x86).
+
+**`scripts/realbench/pyrefly_nav.py`** is the treatment tool: an in-container CLI wrapping the (validated)
+pyrefly LSP client, `pyrefly_nav goto FILE LINE SYMBOL` (type-aware, receiver-correct go-to-definition)
+and `impls` (find-implementations). Validated in a native django container:
+- **Receiver-aware goto works.** Synthetic `x.foo()` with `x: Sub` -> resolves to `Sub.foo`, not
+  `Base.foo` or the unrelated `Other.foo`. Real cross-file: `self.to_python(value)` ->
+  `django/db/models/fields/__init__.py:560` (the class's override), ~6s incl. cold index. This is the
+  exact thing grep cannot do (grep `def to_python` returns ~24 candidates).
+- pyrefly advertises `implementationProvider: True`, but `impls` is not the differentiator: **grep
+  `def NAME` already enumerates the override set**, so for dynamic-dispatch cases (sympy printers via
+  `getattr`, django `connection.ops` chosen at runtime) grep ~ find-implementations and the LSP adds
+  nothing. The LSP's UNIQUE win is single-target goto on a **static receiver**.
+
+**Experiment design (scoped by the above).** Arms: **G** = mini-swe-agent bash only (grep/sed); **T** =
+G + `pyrefly_nav goto`. Task set: static-receiver dispatch where the fix edits one override among many,
+from `dispatch_candidates.json` — django-11211 (`get_prep_value`, 21 Field classes), sklearn-10908
+(`inverse_transform`, 24 transformers), sympy-12419 (`_eval_derivative`, 28), plus django-11138. Primary
+metric: **mis-localization** (does the agent read/edit the RIGHT override vs the gold hunks) — needs no
+test run; secondary: resolved@1 via the in-container tests / swebench score. Include a weaker model
+(effect predicted capability-gated). Honest prior: a strong agent may disambiguate by reading a few grep
+hits, so T may beat G on mis-localization/steps more than on final correctness.
+
 ## Where could a language server still beat grep+sed? semantic vs textual (subagent analysis, 2026-07-02)
 
 grep/sed are textual; a language server is semantic (it resolves receiver types, imports/re-exports,
