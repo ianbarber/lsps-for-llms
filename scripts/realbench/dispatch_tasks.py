@@ -2325,19 +2325,190 @@ def _locate_line_in_method(src, cls, method, needle):
     raise RuntimeError("needle %r not found in %s.%s" % (needle, cls, method))
 
 
+# --------------------------------------------------------------------------- typing-ablation variants
+# Three levels move the receiver's TYPE progressively farther from the call site,
+# to measure how much the receiver annotation is worth to a type-aware goto:
+#   annotated (L0): def run(x: BuggyClass, ...): return x.NAME(...)   -- type at the call site
+#   stripped  (L1): def run(x, ...):            return x.NAME(...)    -- annotation removed
+#   indirection(L2): def make_recv() -> BuggyClass: ...; def run(...): x = make_recv(); return x.NAME(...)
+# The bug, the override files, `editable`, `gold`, and `n_overrides` are IDENTICAL across
+# levels; only app.py (and, for L2, the test's call form) change, so use_site is recomputed.
+TYPING_LEVELS = ("annotated", "stripped", "indirection")
+
+
+def _strip_receiver_annotation(app_src, buggy_class):
+    """L1: drop the receiver param's type annotation `x: BuggyClass` -> `x`.
+
+    The receiver annotation in every app.py equals `buggy_class`, so this is exact.
+    Nothing else changes; the test still builds the receiver via `run(BuggyClass(), ...)`.
+    """
+    s = app_src.replace("x: %s, " % buggy_class, "x, ", 1)
+    if s == app_src:  # no trailing method params -> `def run(x: BuggyClass)`
+        s = app_src.replace("x: %s" % buggy_class, "x", 1)
+    if s == app_src:
+        raise RuntimeError("could not strip `x: %s` annotation from app.py" % buggy_class)
+    return s
+
+
+def _unparse_arg(a):
+    return a.arg + ((": " + ast.unparse(a.annotation)) if a.annotation else "")
+
+
+def _test_import_lines(test_src):
+    """Test module-level imports, minus `from pkg.app import run` (app.py owns run)."""
+    tree = ast.parse(test_src)
+    out = []
+    for n in tree.body:
+        if (isinstance(n, ast.ImportFrom) and n.module == "pkg.app"
+                and any(a.name == "run" for a in n.names)):
+            continue
+        if isinstance(n, (ast.Import, ast.ImportFrom)):
+            out.append(ast.unparse(n))
+    return out
+
+
+def _test_ctor_expr(test_src):
+    """The receiver-construction expression the test passes as run(...)'s FIRST arg,
+    resolving a local variable if the test assigns it first (e.g. `order = X(...); run(order)`).
+    This is what the L2 factory must reconstruct so the test's result is unchanged."""
+    tree = ast.parse(test_src)
+    assigns = {}
+    for n in ast.walk(tree):
+        if isinstance(n, ast.Assign):
+            for tgt in n.targets:
+                if isinstance(tgt, ast.Name):
+                    assigns[tgt.id] = n.value
+    for n in ast.walk(tree):
+        if (isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
+                and n.func.id == "run" and n.args):
+            first = n.args[0]
+            if isinstance(first, ast.Name) and first.id in assigns:
+                return ast.unparse(assigns[first.id])
+            return ast.unparse(first)
+    raise RuntimeError("no run(...) call with a receiver argument found in test")
+
+
+def _build_indirection_app(app_src, test_src, buggy_class):
+    """L2: replace the annotated receiver param with a return-annotated factory.
+
+    `make_recv() -> BuggyClass` rebuilds exactly the receiver the test used to pass (so
+    base-fail / gold-pass are preserved), and `run` drops the receiver param, calls the
+    factory into a local `x`, then dispatches `x.NAME(...)` exactly as before. The receiver
+    type is now reachable ONLY by tracing make_recv's return annotation.
+    """
+    tree = ast.parse(app_src)
+    run = next(n for n in tree.body
+               if isinstance(n, ast.FunctionDef) and n.name == "run")
+    rest = run.args.args[1:]  # method params (drop the receiver `x`)
+    params = ", ".join(_unparse_arg(a) for a in rest)
+    ret = (" -> %s" % ast.unparse(run.returns)) if run.returns else ""
+    doc = ast.get_docstring(run)
+    ret_stmt = ast.unparse(run.body[-1])  # `return x.NAME(...)` verbatim
+
+    imports = [ast.unparse(n) for n in tree.body
+               if isinstance(n, (ast.Import, ast.ImportFrom))]
+    for imp in _test_import_lines(test_src):  # add ctor deps (e.g. NumNode), dedup
+        if imp not in imports:
+            imports.append(imp)
+
+    ctor = _test_ctor_expr(test_src)
+    lines = list(imports)
+    lines += ["", "",
+              "def make_recv() -> %s:" % buggy_class,
+              "    return %s" % ctor,
+              "", "",
+              "def run(%s)%s:" % (params, ret)]
+    if doc:
+        lines.append('    """%s"""' % doc)
+    lines += ["    x = make_recv()", "    " + ret_stmt]
+    return "\n".join(lines) + "\n"
+
+
+class _DropFirstRunArg(ast.NodeTransformer):
+    def visit_Call(self, node):
+        self.generic_visit(node)
+        if isinstance(node.func, ast.Name) and node.func.id == "run" and node.args:
+            node.args = node.args[1:]
+        return node
+
+
+def _build_indirection_test(test_src):
+    """L2 test: call run(method_args...) with the receiver argument dropped, and remove the
+    now-unused receiver assignment(s) and import(s). The result/assertions are unchanged."""
+    tree = ast.parse(test_src)
+    tree = _DropFirstRunArg().visit(tree)
+    ast.fix_missing_locations(tree)
+
+    def _loaded():
+        return {n.id for n in ast.walk(tree)
+                if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Load)}
+
+    live = _loaded()
+
+    class _DropDeadAssign(ast.NodeTransformer):
+        def visit_Assign(self, node):
+            if node.targets and all(isinstance(t, ast.Name) and t.id not in live
+                                    for t in node.targets):
+                return None
+            return node
+
+    tree = _DropDeadAssign().visit(tree)
+    ast.fix_missing_locations(tree)
+    live = _loaded()  # recompute: dropping an assignment can free an import
+
+    class _DropDeadImport(ast.NodeTransformer):
+        def visit_ImportFrom(self, node):
+            node.names = [a for a in node.names if (a.asname or a.name) in live]
+            return node if node.names else None
+
+        def visit_Import(self, node):
+            node.names = [a for a in node.names
+                          if (a.asname or a.name.split(".")[0]) in live]
+            return node if node.names else None
+
+    tree = _DropDeadImport().visit(tree)
+    ast.fix_missing_locations(tree)
+    return ast.unparse(tree) + "\n"
+
+
+def _variant_files(spec, typing):
+    """Return the spec's file map with app.py (and, for L2, the test) rewritten for `typing`."""
+    files = dict(spec["files"])
+    app_src = files["pkg/app.py"]
+    test_src = files["test_dispatch.py"]
+    if typing == "annotated":
+        pass
+    elif typing == "stripped":
+        app_src = _strip_receiver_annotation(app_src, spec["buggy_class"])
+    elif typing == "indirection":
+        new_app = _build_indirection_app(app_src, test_src, spec["buggy_class"])
+        test_src = _build_indirection_test(test_src)
+        app_src = new_app
+    else:
+        raise ValueError("unknown typing level %r (want one of %s)" % (typing, TYPING_LEVELS))
+    files["pkg/app.py"] = app_src
+    files["test_dispatch.py"] = test_src
+    return files
+
+
 # --------------------------------------------------------------------------- builder
-def build_tasks(tmp_root):
+def build_tasks(tmp_root, typing="annotated"):
     """Materialize K=15 self-contained dispatch repos under tmp_root; return a task
     dict each (name, repo_dir, editable, target_file, symbol, use_site, n_overrides,
-    gold, base_commit, test_spec)."""
+    gold, base_commit, test_spec, typing).
+
+    `typing` selects how far the receiver's TYPE sits from the call site:
+    "annotated" (default, current), "stripped", or "indirection" (see TYPING_LEVELS).
+    Default reproduces the original repos byte-for-byte, so existing runs are unchanged."""
     os.makedirs(tmp_root, exist_ok=True)
     tasks = []
     for spec in TASK_SPECS:
+        files = _variant_files(spec, typing)
         repo_dir = os.path.join(tmp_root, spec["name"])
         if os.path.exists(repo_dir):
             shutil.rmtree(repo_dir)
         os.makedirs(repo_dir)
-        for rel, content in spec["files"].items():
+        for rel, content in files.items():
             _write(repo_dir, rel, content)
 
         # commit the base tree so RealRepoEnv(base_commit=...) restores a clean state per run
@@ -2347,9 +2518,9 @@ def build_tasks(tmp_root):
              "commit", "-q", "-m", "base")
         base_commit = _git(repo_dir, "rev-parse", "HEAD").stdout.strip()
 
-        app_src = spec["files"]["pkg/app.py"]
+        app_src = files["pkg/app.py"]
         use_line, use_col = _find_use_site(app_src, spec["symbol"])
-        gold_line = _locate_line_in_method(spec["files"][spec["buggy_rel"]],
+        gold_line = _locate_line_in_method(files[spec["buggy_rel"]],
                                            spec["buggy_class"], spec["buggy_method"],
                                            spec["buggy_needle"])
         gold = {"path": spec["buggy_rel"], "start": gold_line, "end": gold_line,
@@ -2368,6 +2539,7 @@ def build_tasks(tmp_root):
             # run from repo root (test_cwd=".") so `import pkg` resolves; command form.
             "test_spec": '%s -m pytest -q test_dispatch.py' % sys.executable,
             "buggy_rel": spec["buggy_rel"],
+            "typing": typing,
         })
     return tasks
 
@@ -2384,69 +2556,114 @@ def make_env(task, lsp_index_sleep=2.0, lsp_timeout=25.0):
 
 
 # --------------------------------------------------------------------------- GATE 1
+def _validate_one(t):
+    """Run the four checks for one task variant; return a dict of results."""
+    env = make_env(t)
+    try:
+        # (a) fails at base
+        base_fail = not env.run_tests().get("resolved")
+
+        # (c) textual grep for `def NAME` returns >= 8 hits (over the curated file list)
+        pat = re.compile(r"\bdef\s+" + re.escape(t["symbol"]) + r"\b")
+        grep_hits = 0
+        for rel in env.list_files():
+            try:
+                src = env.read_file(rel)
+            except Exception:
+                continue
+            grep_hits += sum(1 for ln in src.splitlines() if pat.search(ln))
+
+        # (d) pyrefly receiver-aware goto -> the RIGHT (buggy) override file
+        us = t["use_site"]
+        span, relpath = env.lsp_definition(t["symbol"], file=us["file"],
+                                           line=us["line"], col=us["col"])
+        lsp_ok = (relpath == t["buggy_rel"])
+
+        # (b) gold fix makes it pass, then revert
+        g = t["gold"]
+        ok_edit, _info = env.apply_line_edit(g["path"], g["start"], g["end"], g["new_text"])
+        gold_pass = ok_edit and env.run_tests().get("resolved")
+        env.reset()
+
+        return {"base_fail": base_fail, "gold_pass": gold_pass, "grep": grep_hits,
+                "lsp_ok": lsp_ok, "relpath": relpath or "(none)", "span": span,
+                "use_site": dict(us)}
+    finally:
+        env.close()
+
+
 def _gate1():
-    tmp_root = os.path.join(tempfile.gettempdir(), "streams_dispatch_gate1")
-    tasks = build_tasks(tmp_root)
-    print("# GATE 1 (no model): dispatch task validation")
-    print("# tmp_root = %s\n" % tmp_root)
-    hdr = ("%-16s %-10s %-4s %6s %6s %6s  %-24s %s"
-           % ("task", "symbol", "N", "base", "gold", "grep", "lsp_relpath", "== buggy?"))
+    base_root = os.path.join(tempfile.gettempdir(), "streams_dispatch_gate1")
+    print("# GATE 1 (no model): dispatch TYPING-ABLATION validation")
+    print("# base_root = %s" % base_root)
+    print("# levels: annotated (type at call site) / stripped (no annotation) / "
+          "indirection (type via factory return)\n")
+
+    # Build all three variant sets under separate sub-roots so repos never collide.
+    variant_tasks = {ty: build_tasks(os.path.join(base_root, ty), typing=ty)
+                     for ty in TYPING_LEVELS}
+
+    # results[name][typing] = validation dict
+    results = {}
+    order = []
+    for ty in TYPING_LEVELS:
+        for t in variant_tasks[ty]:
+            if t["name"] not in results:
+                results[t["name"]] = {}
+                order.append((t["name"], t["symbol"], t["n_overrides"]))
+            results[t["name"]][ty] = _validate_one(t)
+
+    # --- detailed table: one row per (task, variant) ---
+    hdr = ("%-20s %-12s %-4s %6s %6s %5s  %-9s %s"
+           % ("task", "variant", "N", "base", "gold", "grep", "lsp_right", "lsp_relpath"))
     print(hdr)
     print("-" * len(hdr))
+    core_ok = True  # base_fail / gold_pass / grep>=8 MUST hold for every variant
+    for name, sym, n in order:
+        for ty in TYPING_LEVELS:
+            r = results[name][ty]
+            row_core = r["base_fail"] and r["gold_pass"] and r["grep"] >= 8
+            core_ok = core_ok and row_core
+            print("%-20s %-12s %-4d %6s %6s %5d  %-9s %s"
+                  % (name, ty, n,
+                     "FAIL" if r["base_fail"] else "pass?",
+                     "PASS" if r["gold_pass"] else "no",
+                     r["grep"],
+                     "YES" if r["lsp_ok"] else "no",
+                     r["relpath"]))
+        print()
 
-    all_ok = True
-    details = []
-    for t in tasks:
-        env = make_env(t)
-        try:
-            # (a) fails at base
-            base_fail = not env.run_tests().get("resolved")
+    # --- LSP-resolution matrix (the crux): task x variant -> resolves to buggy override? ---
+    print("# LSP goto resolves to the RIGHT buggy override? (True/False)")
+    mh = "%-20s %-12s %-12s %-12s" % ("task", "annotated", "stripped", "indirection")
+    print(mh)
+    print("-" * len(mh))
+    counts = {ty: 0 for ty in TYPING_LEVELS}
+    for name, sym, n in order:
+        cells = []
+        for ty in TYPING_LEVELS:
+            ok = results[name][ty]["lsp_ok"]
+            counts[ty] += 1 if ok else 0
+            cells.append("True" if ok else "False")
+        print("%-20s %-12s %-12s %-12s" % (name, cells[0], cells[1], cells[2]))
 
-            # (c) textual grep for `def NAME` returns >= 8 hits (over the curated file list)
-            pat = re.compile(r"\bdef\s+" + re.escape(t["symbol"]) + r"\b")
-            grep_hits = 0
-            for rel in env.list_files():
-                try:
-                    src = env.read_file(rel)
-                except Exception:
-                    continue
-                grep_hits += sum(1 for ln in src.splitlines() if pat.search(ln))
+    K = len(order)
+    print("\n# LSP-resolves-right totals (out of %d):" % K)
+    for ty in TYPING_LEVELS:
+        print("    %-12s %d/%d" % (ty, counts[ty], K))
 
-            # (d) pyrefly receiver-aware goto -> the RIGHT (buggy) override file
-            us = t["use_site"]
-            span, relpath = env.lsp_definition(t["symbol"], file=us["file"],
-                                               line=us["line"], col=us["col"])
-            lsp_relpath = relpath or "(none)"
-            lsp_ok = (relpath == t["buggy_rel"])
+    # --- one-line pattern summary ---
+    print("\nSUMMARY: annotated %d/%d resolve; stripping the annotation -> %d/%d resolve "
+          "(%s); indirection via factory return -> %d/%d resolve (%s)."
+          % (counts["annotated"], K,
+             counts["stripped"], K,
+             "L1 mostly defeats goto" if counts["stripped"] * 2 <= K else "L1 mostly keeps goto",
+             counts["indirection"], K,
+             "L2 mostly preserves goto" if counts["indirection"] * 2 > K else "L2 mostly loses goto"))
 
-            # (b) gold fix makes it pass, then revert
-            g = t["gold"]
-            ok_edit, info = env.apply_line_edit(g["path"], g["start"], g["end"], g["new_text"])
-            gold_pass = ok_edit and env.run_tests().get("resolved")
-            env.reset()
-
-            row_ok = base_fail and gold_pass and grep_hits >= 8 and lsp_ok
-            all_ok = all_ok and row_ok
-            print("%-16s %-10s %-4d %6s %6s %6d  %-24s %s"
-                  % (t["name"], t["symbol"], t["n_overrides"],
-                     "FAIL" if base_fail else "pass?", "PASS" if gold_pass else "no",
-                     grep_hits, lsp_relpath, "YES" if lsp_ok else "NO  <-- CRUX"))
-            details.append((t, span, relpath, lsp_ok))
-        finally:
-            env.close()
-
-    print("\n# use-sites and pyrefly spans:")
-    for t, span, relpath, lsp_ok in details:
-        us = t["use_site"]
-        head = (span or "").splitlines()[0:2]
-        print("  [%s] x.%s at %s:%d:%d -> %s%s"
-              % (t["name"], t["symbol"], us["file"], us["line"], us["col"],
-                 relpath, "" if lsp_ok else "  (WRONG file!)"))
-        for h in head:
-            print("        | %s" % h)
-
-    print("\nGATE 1: %s" % ("ALL PASS" if all_ok else "FAILURES PRESENT"))
-    return 0 if all_ok else 1
+    print("\nGATE 1 core checks (base-fail / gold-pass / grep>=8, all 3 variants): %s"
+          % ("ALL PASS" if core_ok else "FAILURES PRESENT"))
+    return 0 if core_ok else 1
 
 
 if __name__ == "__main__":

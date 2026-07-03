@@ -126,6 +126,9 @@ def main():
     ap.add_argument("--max-reads", type=int, default=12)
     ap.add_argument("--max-turns", type=int, default=16)
     ap.add_argument("--tmp-root", default="/tmp/streams_dispatch")
+    ap.add_argument("--typing", default="annotated",
+                    choices=["annotated", "stripped", "indirection"],
+                    help="receiver-type ablation level (default annotated = current behavior)")
     ap.add_argument("--out", default=None)
     ap.add_argument("--names", default=None, help="comma-separated task names subset")
     args = ap.parse_args()
@@ -133,8 +136,9 @@ def main():
     conds = args.conds.split(",")
     n_seeds = 1 if args.temp == 0 else args.seeds
 
-    print("[build] materializing dispatch repos under %s" % args.tmp_root, flush=True)
-    tasks = build_tasks(args.tmp_root)
+    print("[build] materializing dispatch repos (typing=%s) under %s"
+          % (args.typing, args.tmp_root), flush=True)
+    tasks = build_tasks(args.tmp_root, typing=args.typing)
     if args.names:
         want = set(args.names.split(","))
         tasks = [t for t in tasks if t["name"] in want]
