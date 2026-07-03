@@ -321,6 +321,47 @@ are comparable in tokens. Next: 27B (Qwen3.6-27B) with the fix across all three 
 7B + DAgger. Caveat to watch: the override classes are small (~10 lines), so a precise-reading model's
 grep baseline is already cheap and defn saves little; if the effect needs amplifying, enlarge the classes.
 
+### Dispatch-efficiency results: 27B redundant, 7B edit-bound (2026-07-03)
+
+**27B (Qwen3.6-27B, with the anchor fix): efficiency REDUNDANT in the dispatch domain.**
+
+```
+grep_base   resolved=3/3  mean_in_toks=1385  n_grep=0.0  read_whole=1.0
+defn_avail  resolved=3/3  mean_in_toks=1386  n_defn=1.0
+defn_prompt resolved=3/3  mean_in_toks=1335  n_defn=1.0
+matched-success ratio grep_base/defn_prompt = 1.037
+```
+
+The competent model solves every task under every condition, and the mechanism is the point: in
+grep_base it did ZERO greps. It read `app.py`, saw the receiver's type annotation (`x: EmailField`), and
+went straight to the one relevant class. The dispatch ambiguity that makes `grep def NAME` return 10
+candidates never bit it, because the type is readable at the call site. It elects `<defn>` when offered
+(and framing shifts it further off reads), but that changes neither tokens (1.04x) nor resolution (3/3).
+This is the dispatch-domain confirmation, for EFFICIENCY, of the report's thesis: a capable model reads
+the receiver type and self-localizes, so the language server's single-target resolution is redundant. The
+1.04x sits against the synthetic 3.5-4.7x precisely because the realistic baseline (read the ONE relevant
+class after reading the type) is already cheap, unlike the whole-file-read strawman.
+
+**7B (Qwen2.5-Coder-7B, with the anchor fix): retrieval is not the bottleneck, edit competence is.**
+
+```
+grep_base   resolved=1/3 (field_validate 1371)
+defn_avail  resolved=1/3 (node_to_str 1281 clean)
+defn_prompt resolved=0/3
+```
+
+temp=0, so this is deterministic behaviour, not sampling noise. Two real effects: (1) `<defn>` RESCUED
+localization on node_to_str, where grep_base looped without ever editing (0 edits) but the anchored defn
+gave the 7B the exact class + line numbers and it solved cleanly in 1281 tokens / 33s; (2) `<defn>` HURT
+field_validate, which grep_base solved (1371) but defn_avail thrashed (4535), and strong framing
+(defn_prompt) pushed it onto defn everywhere and it thrashed to 0/3. So the 7B already ELECTS defn when
+framed (election was never its problem, unlike the report's synthetic single-file tasks where DAgger fixed
+election); its ceiling is multi-file line-edit competence, which the retrieval method does not move. Net
+resolution ~1/3 under every condition. The resolution-assist (defn rescuing localization) is real but 1
+help / 1 hurt / 1 both-fail on 3 tasks is too few. Decision (Ian): EXPAND to 15 dispatch tasks (varied
+method family, receiver type, override count, localization difficulty) and re-run 7B + 27B, to firm up or
+kill the weak-model resolution-assist claim. Task expansion in progress; all local compute, no API spend.
+
 ## Where could a language server still beat grep+sed? semantic vs textual (subagent analysis, 2026-07-02)
 
 grep/sed are textual; a language server is semantic (it resolves receiver types, imports/re-exports,
