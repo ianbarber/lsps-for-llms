@@ -362,6 +362,58 @@ help / 1 hurt / 1 both-fail on 3 tasks is too few. Decision (Ian): EXPAND to 15 
 method family, receiver type, override count, localization difficulty) and re-run 7B + 27B, to firm up or
 kill the weak-model resolution-assist claim. Task expansion in progress; all local compute, no API spend.
 
+### 15-task run: capable model efficiency-neutral, weak model below threshold (2026-07-03)
+
+Expanded to 15 dispatch tasks (override counts 8-15, small-to-large bodies, tempting-similar siblings,
+varied bug types; all pass GATE 1, pyrefly resolves the receiver-correct override for each). Ran the 7B
+and 27B across all 15 x 3 conditions (temp=0). Runner now reports a paired per-task efficiency delta.
+
+**27B: LSP efficiency-neutral in the dispatch domain, robustly, at N=15.**
+
+```
+grep_base   resolved=15/15  mean_in_toks=1436  n_grep=0.3  read_whole=1.0
+defn_avail  resolved=14/15  mean_in_toks=1552  n_defn=0.8
+defn_prompt resolved=15/15  mean_in_toks=1380  n_defn=1.0
+paired delta defn_avail  vs grep_base: n=14  ratio=0.972  mean_delta=-43 toks (defn slightly costlier)
+paired delta defn_prompt vs grep_base: n=15  ratio=1.041  mean_delta=+56 toks (defn slightly cheaper)
+```
+
+The token ratio is ~1.0 either way (0.97 to 1.04); per-task deltas are small and mixed (+/-50 to 350),
+with occasional thrash outliers in BOTH directions (defn_avail thrashed resource_cost to 3390 and lost
+that one task; defn_prompt thrashed job_priority to 2387). Mean is a wash. Mechanism confirmed at scale:
+grep_base n_grep=0.3 - the 27B barely greps even when grep is the advertised tool; it reads the receiver
+type annotation and goes straight to the one class (read_whole=1.0). So go-to-definition, whether elected
+neutrally or under framing, neither helps nor hurts token cost on average, and occasionally causes a
+thrash the plain read avoids. The synthetic 3.5-4.7x efficiency win does NOT transfer to the dispatch
+domain for a capable model, because the realistic baseline (read the type, read the one class) is already
+cheap.
+
+**7B: below the competence threshold, no reliable LSP benefit, forcing defn hurts.**
+
+```
+grep_base   resolved=3/15  mean_in_toks=2508  n_defn=0.0
+defn_avail  resolved=4/15  mean_in_toks=2848  n_defn=2.7
+defn_prompt resolved=2/15  mean_in_toks=3545  n_defn=1.0
+paired delta: NO task resolved in BOTH grep_base and any defn condition -> efficiency delta UNDEFINED
+```
+
+The solved sets are DISJOINT (grep_base: field_validate, record_to_dict, rule_matches; defn_avail:
+encoder_encode, node_to_str, order_compute_total, row_format_row; defn_prompt: animal_describe,
+row_format_row). defn_avail's 4 vs grep_base's 3 is not the LSP rescuing grep's failures - the 7B solves
+a different random subset. The node_to_str rescue from the 3-task run was one of the coin-flips and did
+NOT generalize: at N=15 success is sparse (2-4/15) and uncorrelated with the retrieval method, because the
+7B's bottleneck is multi-file edit competence, not retrieval. defn_prompt (strong framing) is WORST on
+both resolution (2/15) and cost (3545 tokens): pushing a below-threshold model onto defn just adds thrash.
+
+**Synthesis across three capability tiers (dispatch domain).** Frontier (sonnet, section 3.5): resolves
+by reading, does not elect the tool. Capable local (27B): resolves by reading (self-localizes on the
+receiver type), elects defn when offered but efficiency-neutral (ratio ~1.0) and occasionally thrashes.
+Weak local (7B): below threshold, no reliable resolution benefit, forcing defn hurts. The efficiency
+question is answered with a clean negative: in the domain built to favour the language server, its
+go-to-definition buys no token efficiency for a capable model, because reading the receiver type is the
+cheap path the model already takes. Note on DAgger: election was never the 7B's gap here (it elects defn
+when framed), so the report's election-DAgger lever does not apply; the gap is edit competence.
+
 ## Where could a language server still beat grep+sed? semantic vs textual (subagent analysis, 2026-07-02)
 
 grep/sed are textual; a language server is semantic (it resolves receiver types, imports/re-exports,
