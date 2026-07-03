@@ -248,6 +248,25 @@ test run; secondary: resolved@1 via the in-container tests / swebench score. Inc
 (effect predicted capability-gated). Honest prior: a strong agent may disambiguate by reading a few grep
 hits, so T may beat G on mis-localization/steps more than on final correctness.
 
+### First G-vs-T smoke (django-11211, sonnet, native x86): precision is redundant too
+
+Ran `mini_ablate.py --arms off,nav` on django-11211 (`get_prep_value`, edit one of 21 Field overrides)
+natively on chunklebox. Native x86 fixes the convergence problem: both arms **Submitted** and both
+**RESOLVED 1/1** (held-out tests pass) - unlike the emulated ARM runs that hit the step limit empty.
+
+- **off (grep only): RESOLVED.** Sonnet edits the correct override via 15 grep + 8 sed + 4 cat, no
+  type-aware tool.
+- **nav (pyrefly_goto available + advertised): RESOLVED, but `pyrefly_goto` called 0 times.** Sonnet
+  disambiguated by reading; it never reached for the tool. T == G behaviourally; the 0.82x token
+  difference is run variance.
+
+So precision-under-ambiguity joins information and efficiency: **redundant for a capable self-reading
+agent.** It resolves a dispatch-ambiguous task by reading and does not use (or need) the receiver-aware
+tool even when handed it. Note: since `off` already resolves 1/1, strong framing (navx) cannot raise
+resolved@1 here - the only place LSP precision can change an OUTCOME is a task the model gets WRONG via
+mis-localization, which points at a WEAKER model. Spend: off $0.76 + nav $0.89 = ~$1.65; both scored
+native (no emulation). Driver arms `nav`/`navx` + score.py dict-preds fix committed.
+
 ## Where could a language server still beat grep+sed? semantic vs textual (subagent analysis, 2026-07-02)
 
 grep/sed are textual; a language server is semantic (it resolves receiver types, imports/re-exports,

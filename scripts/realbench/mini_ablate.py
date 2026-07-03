@@ -97,7 +97,7 @@ def _read_behavior(messages):
     whether the agent does the expensive whole-file read that codenav would replace, or already
     self-retrieves cheaply (grep + ranged sed), or elects codenav."""
     import re
-    b = {"codenav_calls": 0, "codenav_defn": 0, "codenav_refs": 0,
+    b = {"codenav_calls": 0, "codenav_defn": 0, "codenav_refs": 0, "pyrefly_goto": 0, "pyrefly_impls": 0,
          "grep": 0, "sed_range": 0, "cat_whole_py": 0, "cat_ranged_py": 0, "total_actions": 0}
     for m in messages:
         for a in (m.get("extra") or {}).get("actions", []) or []:
@@ -109,6 +109,9 @@ def _read_behavior(messages):
                 b["codenav_calls"] += 1
                 b["codenav_defn"] += "codenav defn" in cmd
                 b["codenav_refs"] += "codenav refs" in cmd
+            if "pyrefly_nav" in cmd:
+                b["pyrefly_goto"] += "pyrefly_nav goto" in cmd
+                b["pyrefly_impls"] += "pyrefly_nav impls" in cmd
             if re.search(r"\bgrep\b", cmd):
                 b["grep"] += 1
             if re.search(r"\bsed -n\b", cmd):
@@ -120,6 +123,51 @@ def _read_behavior(messages):
                 else:
                     b["cat_whole_py"] += 1
     return b
+
+
+# --- pyrefly type-aware goto: the T arm (docker-cp'd in; pyrefly can't be base64-injected like codenav) ---
+PYREFLY_BIN = os.environ.get("PYREFLY_BIN_PATH", str(ROOT / ".venv-rb/bin/pyrefly"))
+NAV_TOOL = str(ROOT / "scripts/realbench/pyrefly_nav.py")
+NAV_WRAP = ("chmod +x /usr/local/bin/pyrefly && printf "
+            "'#!/usr/bin/env bash\\nexec \"${PYREFLY_NAV_PY:-python}\" /opt/pyrefly_nav.py \"$@\"\\n' "
+            "> /usr/local/bin/pyrefly_nav && chmod +x /usr/local/bin/pyrefly_nav && pyrefly_nav --selfcheck")
+
+PYREFLY_NAV_PARA = """
+
+    ## Type-aware navigation tool (available in this environment)
+
+    A `pyrefly_nav` command is installed. When several classes define a method with the SAME name (many
+    subclasses overriding `foo`), `grep def foo` returns all of them and cannot tell you WHICH one binds
+    for a given object. `pyrefly_nav` resolves it by the receiver's type:
+
+    - `pyrefly_nav goto FILE LINE SYMBOL` - at the line where SYMBOL is used (e.g. a line containing
+      `x.foo(`), returns the SINGLE definition that actually binds for that receiver, not every
+      same-named method. Give it the file and the usage line (`grep -n` gives you the line number).
+
+    Use it when a method name is defined in many places and you need the one that applies to the object
+    at hand; it is more precise than grep for that.
+"""
+
+
+NAV_STRONG_SYS = """You have a `pyrefly_nav` command that resolves a method call to the SINGLE definition
+that binds for the receiver's type. When a method name is defined on many classes, do NOT guess which
+override applies from grep output or by reading files: run `pyrefly_nav goto FILE LINE SYMBOL` at the
+usage site to get the exact one. STRONGLY PREFER `pyrefly_nav goto` over grep/reading whenever you need
+to know which definition of a same-named method is the relevant one.
+
+"""
+
+
+def _inject_pyrefly_nav(env):
+    """docker cp the pyrefly binary + pyrefly_nav.py into the running container and install a wrapper."""
+    cid = env.container_id
+    exe = env.config.executable
+    for src, dst in ((PYREFLY_BIN, "/usr/local/bin/pyrefly"), (NAV_TOOL, "/opt/pyrefly_nav.py")):
+        subprocess.run([exe, "cp", src, f"{cid}:{dst}"], check=True,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+    out = env.execute({"command": NAV_WRAP})
+    if out.get("returncode") != 0:
+        raise RuntimeError("pyrefly_nav inject failed: " + str(out.get("output", ""))[:300])
 
 
 def run_arm(arm, instance, base_cfg, model_name, model_class, out_dir, step_limit, wall_seconds):
@@ -149,9 +197,15 @@ def run_arm(arm, instance, base_cfg, model_name, model_class, out_dir, step_limi
     if arm == "onx":
         # strong system-prompt framing (the election lever), on top of the instance advertisement
         cfg["agent"]["system_template"] = STRONG_SYS_PREFIX + cfg["agent"]["system_template"]
+    if arm in ("nav", "navx"):
+        cfg["agent"]["instance_template"] = cfg["agent"]["instance_template"] + PYREFLY_NAV_PARA
+    if arm == "navx":
+        cfg["agent"]["system_template"] = NAV_STRONG_SYS + cfg["agent"]["system_template"]
 
     t0 = time.time()
     env = get_sb_environment(cfg, instance)           # starts container, runs the inject on 'on'
+    if arm in ("nav", "navx"):
+        _inject_pyrefly_nav(env)                       # docker cp pyrefly + tool into the container
     model = get_model(config=cfg["model"])
     agent = DefaultAgent(model, env, **cfg["agent"])
     exit_status, patch = "", ""
@@ -180,9 +234,9 @@ def run_arm(arm, instance, base_cfg, model_name, model_class, out_dir, step_limi
     (out_dir / f"preds_{arm}.json").write_text(json.dumps(preds, indent=2))
     (out_dir / f"summary_{arm}.json").write_text(json.dumps(rec, indent=2))
     print(f"[{arm}] exit={exit_status} calls={rec['model_calls']} in_tok={tin} peak={peak} "
-          f"codenav={rec['codenav_calls']}(defn={rec['codenav_defn']}) cat_whole={rec['cat_whole_py']} "
-          f"sed={rec['sed_range']} grep={rec['grep']} ${rec['cost_usd']} patch={rec['patch_bytes']}B "
-          f"wall={rec['wall_s']}s", flush=True)
+          f"codenav={rec['codenav_calls']}(defn={rec['codenav_defn']}) pyrefly_goto={rec['pyrefly_goto']} "
+          f"cat_whole={rec['cat_whole_py']} sed={rec['sed_range']} grep={rec['grep']} ${rec['cost_usd']} "
+          f"patch={rec['patch_bytes']}B wall={rec['wall_s']}s", flush=True)
     return rec
 
 

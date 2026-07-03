@@ -24,7 +24,9 @@ DATASET = "princeton-nlp/SWE-bench_Verified"
 
 def score(preds_path, run_id, workers=4, dataset=DATASET):
     """Run the swebench oracle on a predictions file; return {instance_id: resolved_bool}."""
-    preds = json.load(open(preds_path))
+    preds_raw = json.load(open(preds_path))
+    # accept both the swebench dict form {iid: {...}} (mini_ablate) and a list (run_matrix)
+    preds = list(preds_raw.values()) if isinstance(preds_raw, dict) else preds_raw
     ids = sorted({p["instance_id"] for p in preds})
     model = preds[0]["model_name_or_path"] if preds else "model"
     env = dict(os.environ, DOCKER_DEFAULT_PLATFORM="linux/amd64",
