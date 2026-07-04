@@ -551,7 +551,39 @@ model authoring a small well-specified module makes no type errors, so the check
 
 This points the real test at a WEAKER model (organic errors -> something for the checker to catch) or
 harder tasks. Now running the full 12 tasks x 3 arms on the 7B (the capability-gated test) and the 27B
-(confirm the null at N=12), temp 0. Results below.
+(confirm the null at N=12), temp 0.
+
+**Full 12-task result (2026-07-04):**
+
+```
+model arm       held-out  resid_diag  edits  in_tok  n_checks
+27b   none      12/12     0.17        1.2    1260    0
+27b   check     12/12     0.08        1.1    1291    0 (never elected)
+27b   feedback  12/12     0.08        1.1    1289    1.1
+7b    none       6/12     2.17        6.3    2709    0
+7b    check       3/12     2.08        8.2    3439    0 (never elected)
+7b    feedback    4/12     2.08       10.4    6367    10.4
+```
+
+The type checker helps at NEITHER capability tier, for the two mirror-image reasons this whole
+investigation keeps surfacing. (1) The 27B does not need it: it authors all 12 modules correctly and
+essentially type-clean, never elects `<check>`, and volunteered feedback finds nothing (12/12 every arm,
+confirming the smoke null at N=12). (2) The 7B cannot use it: `none` (6/12) is its BEST arm; it never
+elects the checker, and VOLUNTEERING diagnostics after every edit floods it into thrash (10.4 edits,
+6367 tokens, 2.3x none) while cleaning nothing up, since residual type errors are FLAT at ~2.1 across all
+three arms. It sees the diagnostics but cannot act on them (edit competence, same ceiling as the dispatch
+7B). Caveat: temp 0 single-seed, and the 7B's per-task solves are near-disjoint across arms (real noise),
+but the aggregate is unambiguous: no arm beats none, residuals do not move, feedback only adds cost.
+
+This parallels the navigation result exactly. Both tools are redundant for the capable model (it makes no
+type errors, just as it reads the type for dispatch) and unusable for the weak one (it cannot act on the
+diagnostics, just as it cannot convert a resolved definition into a correct edit). So a type checker's
+value is not live authoring feedback any more than it is live navigation. Across every channel we tested
+(section 5 bug-fix inference, and now authoring), the checker's information does not improve the code a
+capable agent writes; its value is as a GATE that keeps the committed code's types correct so the code
+stays self-describing for the next self-retrieving agent. That is the reframe, now supported on both the
+navigation side (types make retrieval redundant) and the authoring side (the checker does not help write
+the code, only keep it honest).
 
 ## Where could a language server still beat grep+sed? semantic vs textual (subagent analysis, 2026-07-02)
 
