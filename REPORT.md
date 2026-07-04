@@ -297,8 +297,14 @@ and the agent reads it, so navigation is redundant; if it is not statically reso
 the server's static goto cannot resolve it either. Navigation never beats a readable type. So the value is
 not in the language server's navigation, it is in the types themselves, and a type checker's contribution
 is keeping those annotations correct so the code stays self-describing, not feeding the agent a live
-lookup. How much the annotation is worth (measured by stripping it), and whether a type checker helps when
-*authoring* new code rather than navigating existing code, are the two questions we take up next (§7).
+lookup. We then measured how much the annotation is worth by stripping it: moving the receiver type from
+the call-site annotation to the test's construction to a return-annotated factory leaves the capable
+model's cost flat (grep-only input tokens of 1436, 1429, and 1465 across the three), because the type
+stays somewhere in the source the model reads, and go-to-definition stays neutral (ratio 0.98 to 1.07)
+even in the factory case where it does resolve. So it is readable type information, wherever it sits, that
+carries the localization, not the call-site annotation specifically and not the language server. The
+remaining question, whether a type checker helps when *authoring* new code rather than navigating existing
+code, is the one we take up next (§7).
 
 ## 4. Election is capability-gated (C2)
 
