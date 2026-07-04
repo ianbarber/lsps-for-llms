@@ -1,0 +1,237 @@
+{
+  "model": "Qwen/Qwen3.6-27B",
+  "adapter": null,
+  "config": {
+    "suite": "authoring",
+    "arm": "feedback",
+    "lsp_tools": false,
+    "dry_run": false,
+    "save_sft": false,
+    "force_lsp": false,
+    "relabel": false,
+    "lsp_defn": false,
+    "no_defn": false,
+    "out": "runs/agent/exp2_smoke_feedback.json",
+    "conds": "A",
+    "names": "auth_bank_dataclass,auth_graph_edges,auth_fold_callable",
+    "seeds": 1,
+    "seed_start": 0,
+    "temp": 0.0,
+    "adapter": null,
+    "model": "Qwen/Qwen3.6-27B",
+    "gpu_only": true,
+    "max_new": 3500,
+    "max_reads": 6,
+    "max_turns": 20
+  },
+  "summary": {
+    "A": {
+      "resolve_rate": 1.0,
+      "n": 3,
+      "by_group": {
+        "plain": "0/0",
+        "rich": "0/0",
+        "control": "0/0"
+      },
+      "mean_reads": 1.0,
+      "arm": "feedback",
+      "held_pass": "3/3",
+      "visible_pass": "3/3",
+      "mean_resid_diag": 0.0,
+      "n_clean_final": 3,
+      "mean_edits": 1.0,
+      "mean_checks": 1.0,
+      "mean_in_tokens": 1335.0
+    }
+  },
+  "rows": {
+    "A": [
+      {
+        "task": "auth_bank_dataclass",
+        "group": "easy",
+        "cond": "A",
+        "seed": 0,
+        "arm": "feedback",
+        "resolved": true,
+        "held_pass": true,
+        "bailed": false,
+        "in_tokens": 1475,
+        "out_tokens": 346,
+        "sec": 133.6,
+        "rework_ratio": 0.0,
+        "n_edits": 1,
+        "n_tests": 1,
+        "n_reads": 1,
+        "n_greps": 0,
+        "n_lsp": 0,
+        "n_checks": 1,
+        "n_resid_diag": 0,
+        "resid_diag": "",
+        "turns": 3,
+        "n_attractor_edits": 0,
+        "stream_tail": "       if amount > self.balance:\n            raise InsufficientFunds(self.owner)\n        self.balance -= amount\n\n</file><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\nNow I understand the `Account` class and `InsufficientFunds` exception. Let me implement the `Bank` class:\n\n<edit path=\"target.py\" lines=\"7-25\">\n    def __init__(self) -> None:\n        self._accounts: dict[str, Account] = {}\n\n    def open(self, owner: str) -> Account:\n        \"\"\"Create and store a zero-balance account for owner; return it.\"\"\"\n        account = Account(owner=owner)\n        self._accounts[owner] = account\n        return account\n\n    def deposit(self, owner: str, amount: int) -> None:\n        \"\"\"Deposit into an existing account.\"\"\"\n        self._accounts[owner].deposit(amount)\n\n    def transfer(self, src: str, dst: str, amount: int) -> bool:\n        \"\"\"Move amount from src to dst. Return False (and change nothing) if\n        src has insufficient funds; return True on success.\"\"\"\n        src_account = self._accounts[src]\n        if amount > src_account.balance:\n            return False\n        src_account.withdraw(amount)\n        self._accounts[dst].deposit(amount)\n        return True\n\n    def total_assets(self) -> int:\n        \"\"\"Sum of all account balances.\"\"\"\n        return sum(acc.balance for acc in self._accounts.values())\n</edit><|im_end|>\n<|im_start|>user\n<check_result>\n(no type errors)\n</check_result>\n\nCurrent `target.py` (edit against THIS exact text):\n  1| from lib import Account, InsufficientFunds\n  2| \n  3| \n  4| class Bank:\n  5|     \"\"\"A collection of named accounts.\"\"\"\n  6| \n  7|     def __init__(self) -> None:\n  8|         self._accounts: dict[str, Account] = {}\n  9| \n 10|     def open(self, owner: str) -> Account:\n 11|         \"\"\"Create and store a zero-balance account for owner; return it.\"\"\"\n 12|         account = Account(owner=owner)\n 13|         self._accounts[owner] = account\n 14|         return account\n 15| \n 16|     def deposit(self, owner: str, amount: int) -> None:\n 17|         \"\"\"Deposit into an existing account.\"\"\"\n 18|         self._accounts[owner].deposit(amount)\n 19| \n 20|     def transfer(self, src: str, dst: str, amount: int) -> bool:\n 21|         \"\"\"Move amount from src to dst. Return False (and change nothing) if\n 22|         src has insufficient funds; return True on success.\"\"\"\n 23|         src_account = self._accounts[src]\n 24|         if amount > src_account.balance:\n 25|             return False\n 26|         src_account.withdraw(amount)\n 27|         self._accounts[dst].deposit(amount)\n 28|         return True\n 29| \n 30|     def total_assets(self) -> int:\n 31|         \"\"\"Sum of all account balances.\"\"\"\n 32|         return sum(acc.balance for acc in self._accounts.values())<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\nNo type errors. Let me run the tests:\n\n<test/><|im_end|>\n<|im_start|>user\n<test_result>\nALL TESTS PASS.\n</test_result>\nTests pass \u2014 emit <done/> if the fix is complete.<|im_end|>\n<|im_start|>assistant\n<think>",
+        "events": [
+          {
+            "tok": 34,
+            "type": "read",
+            "n": 1,
+            "path": "lib.py",
+            "ranged": false
+          },
+          {
+            "tok": 327,
+            "type": "line_edit",
+            "path": "target.py",
+            "lines": "7-25",
+            "ok": true,
+            "info": "ok",
+            "fail_streak": 0,
+            "replace": "    def __init__(self) -> None:\n        self._accounts: dict[str, Account] = {}\n\n    def open(self, owner: str) -> Account:\n        \"\"\"Create and store a zero-balance account for owner; return it.\"\"\"\n        account = Account(owner=owner)\n        self._accounts[owner] = account\n        return accoun"
+          },
+          {
+            "tok": 327,
+            "type": "auto_check",
+            "n": 1,
+            "n_diag": 0
+          },
+          {
+            "tok": 345,
+            "type": "test",
+            "n": 1,
+            "resolved": true
+          },
+          {
+            "tok": 345,
+            "type": "turn",
+            "n": 3,
+            "via": "test"
+          }
+        ]
+      },
+      {
+        "task": "auth_fold_callable",
+        "group": "tricky",
+        "cond": "A",
+        "seed": 0,
+        "arm": "feedback",
+        "resolved": true,
+        "held_pass": true,
+        "bailed": false,
+        "in_tokens": 1162,
+        "out_tokens": 325,
+        "sec": 122.6,
+        "rework_ratio": 0.0,
+        "n_edits": 1,
+        "n_tests": 1,
+        "n_reads": 1,
+        "n_greps": 0,
+        "n_lsp": 0,
+        "n_checks": 1,
+        "n_resid_diag": 0,
+        "resid_diag": "",
+        "turns": 3,
+        "n_attractor_edits": 0,
+        "stream_tail": "First, I need to understand the `fold` function from `lib.py` to implement the three functions correctly.\n\n<read path=\"lib.py\"/><|im_end|>\n<|im_start|>user\n<file path=\"lib.py\">\nfrom typing import Callable, TypeVar\n\nT = TypeVar(\"T\")\nU = TypeVar(\"U\")\n\n\ndef fold(items: list[T], init: U, step: Callable[[U, T], U]) -> U:\n    \"\"\"Left fold: thread step(acc, item) across items starting from init.\"\"\"\n    acc = init\n    for item in items:\n        acc = step(acc, item)\n    return acc\n\n</file><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\nNow I understand `fold`. It takes a list, an initial accumulator value, and a step function that combines the accumulator with each item. Let me implement all three functions:\n\n1. `total`: sum of numbers using fold with init=0 and step=lambda acc, x: acc + x\n2. `concat`: join strings using fold with init=\"\" and step=lambda acc, w: acc + w\n3. `count_matching`: count items > threshold using fold with init=0 and step that increments when item > threshold\n\n<edit path=\"target.py\" lines=\"4-16\">\ndef total(nums: list[int]) -> int:\n    \"\"\"Sum of nums, computed with fold.\"\"\"\n    return fold(nums, 0, lambda acc, x: acc + x)\n\n\ndef concat(words: list[str]) -> str:\n    \"\"\"Join words with no separator, computed with fold from an empty string.\"\"\"\n    return fold(words, \"\", lambda acc, w: acc + w)\n\n\ndef count_matching(items: list[int], threshold: int) -> int:\n    \"\"\"How many items are strictly greater than threshold, computed with fold.\"\"\"\n    return fold(items, 0, lambda acc, x: acc + (1 if x > threshold else 0))\n</edit><|im_end|>\n<|im_start|>user\n<check_result>\n(no type errors)\n</check_result>\n\nCurrent `target.py` (edit against THIS exact text):\n  1| from lib import fold\n  2| \n  3| \n  4| def total(nums: list[int]) -> int:\n  5|     \"\"\"Sum of nums, computed with fold.\"\"\"\n  6|     return fold(nums, 0, lambda acc, x: acc + x)\n  7| \n  8| \n  9| def concat(words: list[str]) -> str:\n 10|     \"\"\"Join words with no separator, computed with fold from an empty string.\"\"\"\n 11|     return fold(words, \"\", lambda acc, w: acc + w)\n 12| \n 13| \n 14| def count_matching(items: list[int], threshold: int) -> int:\n 15|     \"\"\"How many items are strictly greater than threshold, computed with fold.\"\"\"\n 16|     return fold(items, 0, lambda acc, x: acc + (1 if x > threshold else 0))<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\nNo type errors. Let me run the tests to verify.\n\n<test/><|im_end|>\n<|im_start|>user\n<test_result>\nALL TESTS PASS.\n</test_result>\nTests pass \u2014 emit <done/> if the fix is complete.<|im_end|>\n<|im_start|>assistant\n<think>",
+        "events": [
+          {
+            "tok": 31,
+            "type": "read",
+            "n": 1,
+            "path": "lib.py",
+            "ranged": false
+          },
+          {
+            "tok": 304,
+            "type": "line_edit",
+            "path": "target.py",
+            "lines": "4-16",
+            "ok": true,
+            "info": "ok",
+            "fail_streak": 0,
+            "replace": "def total(nums: list[int]) -> int:\n    \"\"\"Sum of nums, computed with fold.\"\"\"\n    return fold(nums, 0, lambda acc, x: acc + x)\n\n\ndef concat(words: list[str]) -> str:\n    \"\"\"Join words with no separator, computed with fold from an empty string.\"\"\"\n    return fold(words, \"\", lambda acc, w: acc + w)\n\n\n"
+          },
+          {
+            "tok": 304,
+            "type": "auto_check",
+            "n": 1,
+            "n_diag": 0
+          },
+          {
+            "tok": 324,
+            "type": "test",
+            "n": 1,
+            "resolved": true
+          },
+          {
+            "tok": 324,
+            "type": "turn",
+            "n": 3,
+            "via": "test"
+          }
+        ]
+      },
+      {
+        "task": "auth_graph_edges",
+        "group": "tricky",
+        "cond": "A",
+        "seed": 0,
+        "arm": "feedback",
+        "resolved": true,
+        "held_pass": true,
+        "bailed": false,
+        "in_tokens": 1368,
+        "out_tokens": 248,
+        "sec": 98.5,
+        "rework_ratio": 0.0,
+        "n_edits": 1,
+        "n_tests": 1,
+        "n_reads": 1,
+        "n_greps": 0,
+        "n_lsp": 0,
+        "n_checks": 1,
+        "n_resid_diag": 0,
+        "resid_diag": "",
+        "turns": 3,
+        "n_attractor_edits": 0,
+        "stream_tail": "<read path=\"lib.py\"/><|im_end|>\n<|im_start|>user\n<file path=\"lib.py\">\nclass Edge:\n    \"\"\"A weighted directed edge.\"\"\"\n\n    def __init__(self, src: str, dst: str, weight: int) -> None:\n        self.src = src\n        self.dst = dst\n        self.weight = weight\n\n</file><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<edit path=\"target.py\" lines=\"7-24\">\n    def __init__(self) -> None:\n        self._edges: list[Edge] = []\n\n    def add(self, edge: Edge) -> None:\n        \"\"\"Register an edge.\"\"\"\n        self._edges.append(edge)\n\n    def neighbors(self, node: str) -> list[str]:\n        \"\"\"Destinations one edge from node, in the order edges were added.\"\"\"\n        return [e.dst for e in self._edges if e.src == node]\n\n    def cost(self, src: str, dst: str) -> int | None:\n        \"\"\"Weight of the src->dst edge, or None if there is no such edge.\"\"\"\n        for e in self._edges:\n            if e.src == src and e.dst == dst:\n                return e.weight\n        return None\n\n    def out_degree(self, node: str) -> int:\n        \"\"\"Number of edges leaving node.\"\"\"\n        return sum(1 for e in self._edges if e.src == node)\n</edit><|im_end|>\n<|im_start|>user\n<check_result>\n(no type errors)\n</check_result>\n\nCurrent `target.py` (edit against THIS exact text):\n  1| from lib import Edge\n  2| \n  3| \n  4| class Graph:\n  5|     \"\"\"A directed weighted graph accumulated from edges.\"\"\"\n  6| \n  7|     def __init__(self) -> None:\n  8|         self._edges: list[Edge] = []\n  9| \n 10|     def add(self, edge: Edge) -> None:\n 11|         \"\"\"Register an edge.\"\"\"\n 12|         self._edges.append(edge)\n 13| \n 14|     def neighbors(self, node: str) -> list[str]:\n 15|         \"\"\"Destinations one edge from node, in the order edges were added.\"\"\"\n 16|         return [e.dst for e in self._edges if e.src == node]\n 17| \n 18|     def cost(self, src: str, dst: str) -> int | None:\n 19|         \"\"\"Weight of the src->dst edge, or None if there is no such edge.\"\"\"\n 20|         for e in self._edges:\n 21|             if e.src == src and e.dst == dst:\n 22|                 return e.weight\n 23|         return None\n 24| \n 25|     def out_degree(self, node: str) -> int:\n 26|         \"\"\"Number of edges leaving node.\"\"\"\n 27|         return sum(1 for e in self._edges if e.src == node)<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<test/><|im_end|>\n<|im_start|>user\n<test_result>\nALL TESTS PASS.\n</test_result>\nTests pass \u2014 emit <done/> if the fix is complete.<|im_end|>\n<|im_start|>assistant\n<think>",
+        "events": [
+          {
+            "tok": 7,
+            "type": "read",
+            "n": 1,
+            "path": "lib.py",
+            "ranged": false
+          },
+          {
+            "tok": 240,
+            "type": "line_edit",
+            "path": "target.py",
+            "lines": "7-24",
+            "ok": true,
+            "info": "ok",
+            "fail_streak": 0,
+            "replace": "    def __init__(self) -> None:\n        self._edges: list[Edge] = []\n\n    def add(self, edge: Edge) -> None:\n        \"\"\"Register an edge.\"\"\"\n        self._edges.append(edge)\n\n    def neighbors(self, node: str) -> list[str]:\n        \"\"\"Destinations one edge from node, in the order edges were added.\"\""
+          },
+          {
+            "tok": 240,
+            "type": "auto_check",
+            "n": 1,
+            "n_diag": 0
+          },
+          {
+            "tok": 247,
+            "type": "test",
+            "n": 1,
+            "resolved": true
+          },
+          {
+            "tok": 247,
+            "type": "turn",
+            "n": 3,
+            "via": "test"
+          }
+        ]
+      }
+    ]
+  }
+}

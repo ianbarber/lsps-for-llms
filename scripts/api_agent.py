@@ -67,6 +67,9 @@ def load_suite(suite):
     if suite == "runtime":
         from scripts.synth_tasks_runtime import TASKS_RUNTIME
         return TASKS_RUNTIME
+    if suite == "authoring":
+        from scripts.synth_tasks_authoring import TASKS_AUTHORING
+        return TASKS_AUTHORING
     if suite in ("gapd", "gapd2"):
         # Loaded lazily so this harness imports even if the suite file does not exist yet.
         mod = "synth_tasks_gapd" if suite == "gapd" else "synth_tasks_gapd2"
@@ -506,7 +509,7 @@ def main():
     ap.add_argument("out")
     ap.add_argument("--model", required=True)
     ap.add_argument("--suite", required=True,
-                    choices=["effic_real2", "gapd", "gapd2", "runtime"])
+                    choices=["effic_real2", "gapd", "gapd2", "runtime", "authoring"])
     ap.add_argument("--no-hint", action="store_true",
                     help="REALISTIC deployment: omit the 'visible test is partial' note and stop when "
                          "the visible test passes (measures the natural latent-bug rate on held-out tasks)")

@@ -38,6 +38,9 @@ EDIT_RE = re.compile(
     r'(?=\n\s*(?:END\b|>>>>>>>|<test\s*/>|<done\s*/>|SEARCH\b)|\Z)', re.S)
 DONE_RE = re.compile(r'<done\s*/>')
 TEST_RE = re.compile(r'<test\s*/>')
+# <check/> — Exp 2 authoring arm: run the static type checker (env.pyrefly_diagnostics) WITHOUT
+# executing the code, so the agent can catch organic type errors before it runs the tests.
+CHECK_RE = re.compile(r'<check\s*/>')
 # <read> now optionally takes a line range (realistic `sed -n` baseline, not just whole-file).
 READ_RE = re.compile(r'<read\s+path="(?P<path>[^"]+)"'
                      r'(?:\s+lines="(?P<rs>\d+)\s*-\s*(?P<re>\d+)")?\s*/>')   # gather repo context
@@ -129,15 +132,48 @@ the results. Keep iterating: edit the affected sites -> <test/> -> fix any remai
 <test/> until tests pass, then emit <done/>. Reason briefly between actions."""
 
 
+SYS_LINE_AUTHOR = """You are a coding agent IMPLEMENTING a Python module from a specification. The
+file `{file}` contains typed function/class signatures with docstrings; every body currently
+raises NotImplementedError. Replace EVERY NotImplementedError with a correct implementation that
+satisfies the docstrings and the test. The file is shown with line numbers (`NNN| code`). Work
+iteratively.
+
+To EDIT, replace a range of lines by emitting EXACTLY:
+<edit path="{file}" lines="START-END">
+<the new code for those lines, WITHOUT line-number prefixes>
+</edit>
+START-END are inclusive 1-based line numbers from the numbered view. Include proper indentation.
+You choose the range — one line or many. Do not wrap the code in ``` fences.
+To READ another workspace file for context (e.g. the provided library you must call correctly):
+<read path="lib.py"/>. To look up just a symbol's definition (cheaper than a whole file):
+<defn sym="NAME"/> — NAME may be qualified (`module.Class.method`, `Class.method`).
+After editing, emit <test/> to RUN THE TESTS; you'll get the results, then a fresh numbered view of
+the file (line numbers may have shifted — always use the latest view). Keep iterating: edit ->
+<test/> -> fix -> <test/> until the tests pass, then emit <done/>. Reason briefly between actions."""
+
+# Exp 2 checker-arm advertisements, appended to the system prompt when the arm enables the checker.
+CHECK_ADVERT = ("\nTo TYPE-CHECK your code WITHOUT running it, emit <check/> — a static type checker "
+                "runs over the workspace and returns any type errors it finds (undefined names, wrong "
+                "call signatures or arity, bad imports, attribute typos, wrong dict keys). Prefer it to "
+                "catch mistakes before you spend a <test/> run.")
+AUTO_CHECK_ADVERT = ("\nAfter every edit a static type checker runs AUTOMATICALLY and reports any type "
+                     "errors it finds (undefined names, wrong call signatures or arity, bad imports, "
+                     "attribute typos, wrong dict keys) in a <check_result> block before you run <test/>. "
+                     "Read those diagnostics and fix them.")
+
+
 class StreamAgent:
     def __init__(self, model, tok, env,
                  max_new_tokens=3000, max_tests=8, max_turns=12, max_bad=5,
                  max_reads=6, edit_mode="search", temperature=0.0, seed=0,
                  force_lsp=False, relabel=False, device=None,
                  use_lsp_defn=False, advertised_symbols=None, lsp_disabled=False,
-                 sys_override=None):
+                 sys_override=None, authoring=False, allow_check=False, auto_check=False):
         assert edit_mode in ("search", "line")
         self.sys_override = sys_override   # dispatch experiment: runner supplies the per-condition tool advertisement
+        self.authoring = authoring   # Exp 2: reframe the system prompt as IMPLEMENT-a-module (not fix-a-bug)
+        self.allow_check = allow_check   # Exp 2 `check` arm: advertise + honour a model-elected <check/> action
+        self.auto_check = auto_check     # Exp 2 `feedback` arm: VOLUNTEER pyrefly diagnostics after every applied edit
         self.temperature, self.seed = temperature, seed
         self.model, self.tok, self.env = model, tok, env
         self.max_new, self.max_tests, self.max_turns = max_new_tokens, max_tests, max_turns
@@ -246,6 +282,19 @@ class StreamAgent:
         except TypeError:
             return self.env.run_tests()
 
+    def _check_obs(self):
+        """Exp 2: run the static type checker over the workspace and format its diagnostics as a
+        <check_result> observation (same splice-as-tool-result path as <test/>)."""
+        diag = ""
+        if hasattr(self.env, "pyrefly_diagnostics"):
+            try:
+                diag = self.env.pyrefly_diagnostics() or ""
+            except Exception as e:
+                diag = f"(type checker error: {type(e).__name__})"
+        n_diag = len([l for l in diag.splitlines() if l.strip()])
+        body = diag.strip() if diag.strip() else "(no type errors)"
+        return "<check_result>\n" + body + "\n</check_result>", n_diag
+
     @staticmethod
     def _turn_obs(last_test, n_edits):
         if last_test is None:
@@ -307,11 +356,19 @@ class StreamAgent:
             # dispatch experiment: the runner dictates exactly which retrieval actions are advertised
             sys_text = self.sys_override.format(file=target_file,
                                                 files=", ".join(f"`{f}`" for f in editable))
+        elif self.authoring and self.edit_mode == "line" and len(editable) <= 1:
+            # Exp 2: authoring reframing (implement the module) — single editable target, line-edit protocol
+            sys_text = SYS_LINE_AUTHOR.format(file=target_file)
         elif self.edit_mode == "line" and len(editable) > 1:
             sys_text = SYS_LINE_MULTI.format(files=", ".join(f"`{f}`" for f in editable))
         else:
             sys_tmpl = {"line": SYS_LINE}.get(self.edit_mode, SYS)
             sys_text = sys_tmpl.format(file=target_file)
+        # Exp 2 checker arms: advertise the checker the arm enables (feedback wins if both were set).
+        if self.auto_check:
+            sys_text += AUTO_CHECK_ADVERT
+        elif self.allow_check:
+            sys_text += CHECK_ADVERT
         if self.lsp_disabled:
             # tool-value ablation: also strip the <defn> advertisement so the model isn't pointed at a disabled tool
             sys_text = re.sub(r"To look up just a symbol's definition.*?to disambiguate\.\s*\n?", "", sys_text, flags=re.S)
@@ -335,7 +392,8 @@ class StreamAgent:
         read_from = 0         # char index from which to look for <read/>
         grep_from = 0         # char index from which to look for <grep/>
         lsp_from = 0          # char index from which to look for <findrefs/>/<defn/>
-        n_tests = n_edits = n_reads = n_lsp = turns = 0
+        check_from = 0        # char index from which to look for <check/> (Exp 2 checker arm)
+        n_tests = n_edits = n_reads = n_lsp = n_checks = turns = 0
         fail_streak = 0       # consecutive non-applying / no-op edits (anti-degeneracy)
         changed_files = set()  # files edited since the last turn -> re-show their numbered view
         done_seen = resolved = bailed = False
@@ -424,6 +482,16 @@ class StreamAgent:
                                    "replace": body[:300]})
                     if fail_streak >= self.max_bad:
                         bailed = True; events.append({"tok": t, "type": "bail", "reason": "edit_fail_streak"}); break
+                    if ok and self.auto_check:
+                        # Exp 2 `feedback` arm: VOLUNTEER the checker's diagnostics after the applied edit.
+                        n_checks += 1
+                        obs, n_diag = self._check_obs()
+                        turns += 1
+                        deliver_turn(obs)
+                        events.append({"tok": t, "type": "auto_check", "n": n_checks, "n_diag": n_diag})
+                        # advance every action cursor past the spliced obs (mirrors the read-block handler)
+                        read_from = lsp_from = test_from = done_from = grep_from = check_from = applied_upto = len(emitted)
+                        continue
 
             # detect a newly-completed edit (search/replace mode)
             m = EDIT_RE.search(emitted, applied_upto) if self.edit_mode == "search" else None
@@ -447,6 +515,25 @@ class StreamAgent:
                     bailed = True
                     events.append({"tok": t, "type": "bail", "reason": "edit_fail_streak"})
                     break
+                if ok and self.auto_check:
+                    # Exp 2 `feedback` arm: VOLUNTEER the checker's diagnostics after the applied edit.
+                    n_checks += 1
+                    obs, n_diag = self._check_obs()
+                    turns += 1
+                    deliver_turn(obs)
+                    events.append({"tok": t, "type": "auto_check", "n": n_checks, "n_diag": n_diag})
+                    read_from = lsp_from = test_from = done_from = grep_from = check_from = applied_upto = len(emitted)
+                    continue
+
+            # detect <check/> -> run the static type checker (Exp 2 `check` arm), splice diagnostics
+            cm = CHECK_RE.search(emitted, check_from)
+            if cm and self.allow_check:
+                check_from = cm.end(); n_checks += 1
+                obs, n_diag = self._check_obs()
+                turns += 1
+                deliver_turn(obs)
+                events.append({"tok": t, "type": "check", "n": n_checks, "n_diag": n_diag})
+                continue
 
             # detect <test/> -> run tests, splice results back
             tm = TEST_RE.search(emitted, test_from)
@@ -575,6 +662,7 @@ class StreamAgent:
                 "bailed": bailed, "tests": result, "metrics": self.env.metrics(),
                 "events": events, "stream": emitted,
                 "out_tokens": t, "in_tokens": in_toks, "n_tokens": t,
-                "n_edits": n_edits, "n_tests": n_tests, "n_reads": n_reads, "n_greps": 0, "n_lsp": n_lsp, "turns": turns,
+                "n_edits": n_edits, "n_tests": n_tests, "n_reads": n_reads, "n_greps": 0, "n_lsp": n_lsp,
+                "n_checks": n_checks, "turns": turns,
                 "sft_input_ids": sft_input_ids, "sft_labels": sft_labels,
                 "n_train_tokens": sum(1 for x in kept_labels if x != -100)}

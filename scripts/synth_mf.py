@@ -23,12 +23,17 @@ from scripts.synth_tasks_effic_real import TASKS_EFFIC_REAL  # REAL-CODE effic: 
 from scripts.synth_tasks_effic_real2 import TASKS_EFFIC_REAL2  # REAL-CODE effic, UN-MEMORIZED obscure-tail symbols
 from scripts.synth_tasks_gapd import TASKS_GAPD  # GAP D: inference-hard tasks — is type-checker INFERENCE non-redundant?
 from scripts.synth_tasks_efficread import TASKS_EFFICREAD  # READ-REQUIRED boundary: <defn> insufficient, must <read>
+from scripts.synth_tasks_authoring import TASKS_AUTHORING  # EXP 2: AUTHOR a module — does the type checker help?
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--suite", default="effic",
-                choices=["effic", "effic_real", "effic_real2", "gapd", "efficread", "effmix"],
+                choices=["effic", "effic_real", "effic_real2", "gapd", "efficread", "effmix", "authoring"],
                 help="task suite: effic (prefer cheap <defn>), efficread (read-required boundary), "
-                     "effmix (effic + efficread), gapd (type-inference info channel)")
+                     "effmix (effic + efficread), gapd (type-inference info channel), "
+                     "authoring (Exp 2: implement a module; checker arms via --arm)")
+ap.add_argument("--arm", default="none", choices=["none", "check", "feedback"],
+                help="EXP 2 checker arm (authoring suite): none (no checker), check (model may elect "
+                     "<check/>), feedback (pyrefly diagnostics volunteered automatically after every edit)")
 ap.add_argument("--lsp-tools", action="store_true",
                 help="advertise PULL LSP actions <defn sym=.../> and <findrefs sym=.../> alongside <read>")
 ap.add_argument("--dry-run", action="store_true",
@@ -63,7 +68,7 @@ A = ap.parse_args()
 
 TASKS_MF = {"effic": TASKS_EFFIC, "effic_real": TASKS_EFFIC_REAL, "effic_real2": TASKS_EFFIC_REAL2,
             "gapd": TASKS_GAPD, "efficread": TASKS_EFFICREAD,
-            "effmix": (TASKS_EFFIC + TASKS_EFFICREAD)}[A.suite]
+            "effmix": (TASKS_EFFIC + TASKS_EFFICREAD), "authoring": TASKS_AUTHORING}[A.suite]
 tasks = TASKS_MF if not A.names else [t for t in TASKS_MF if t["name"] in set(A.names.split(","))]
 conds = A.conds.split(",")
 n_seeds = 1 if A.temp == 0 else A.seeds
@@ -118,6 +123,25 @@ def build_prompt(task):
                 if A.lsp_tools else "")
     target, editable, _, shown = task_meta(task)
     others = [f for f in sorted(task["files"]) if f not in shown]
+    if A.suite == "authoring":
+        # EXP 2: authoring framing — implement the stubbed module (do not "fix a bug").
+        body = _numbered(task["files"][target])
+        head = (f"Implement every unimplemented function/class in `{target}` so the test below passes. "
+                f"Each body currently raises NotImplementedError; replace them ALL with correct code "
+                f"that satisfies the docstrings.\n\n`{target}`:\n{body}\n\n")
+        if others:
+            whereabouts = (f"The workspace also provides these files (typed APIs you must call correctly): "
+                           f"{', '.join(others)} — you have NOT seen their contents; inspect any with "
+                           f"<read path=\"...\"/>.\n\n")
+        else:
+            whereabouts = ""
+        note = ("\nNote: the shown test is a PARTIAL spec — it does not exercise every input. Make your "
+                "implementation correct for ALL cases the docstrings describe, not only the shown ones."
+                if task.get("held_out") else "")
+        return (head + whereabouts +
+                "The test that must pass (do NOT edit it; it is the spec):\n"
+                f"```python\n{task['test']}\n```\n"
+                f"Make line-range edits to `{target}`, then run <test/>." + note + lsp_line)
     multi = len(editable) > 1
     partial = multi and set(shown) != set(editable)   # some editable files are HIDDEN -> discovery
     body = "\n\n".join(f"`{f}`:\n{_numbered(task['files'][f])}" for f in shown)
@@ -172,24 +196,37 @@ for task in tasks:
         for seed in range(A.seed_start, A.seed_start + n_seeds):
             # cond A never reads pyrefly_diagnostics; skip `pyrefly init` (esp. under --lsp-defn, where the
             # persistent `pyrefly lsp` daemon backs <defn> and a second init-daemon would contend on the socket).
-            env = MultiFileEnv(task["files"], target, task["test"], skip_pyrefly=True)
+            # EXP 2 authoring: keep pyrefly available (checker arms + residual-diagnostic measurement) and
+            # score the HELD-OUT oracle. Both are gated on the authoring suite; other suites are unchanged.
+            is_auth = (A.suite == "authoring")
+            env = MultiFileEnv(task["files"], target, task["test"], skip_pyrefly=not is_auth,
+                               held_out_src=(task.get("held_out") if is_auth else None))
             agent = StreamAgent(model, tok, env,
                                 max_new_tokens=A.max_new, max_reads=A.max_reads,
                                 max_turns=A.max_turns, edit_mode="line",
                                 temperature=A.temp, seed=seed,
                                 force_lsp=A.force_lsp, relabel=A.relabel,
                                 advertised_symbols=(advertised_symbols(task) if A.lsp_tools else []),
-                                use_lsp_defn=A.lsp_defn, lsp_disabled=A.no_defn)
+                                use_lsp_defn=A.lsp_defn, lsp_disabled=A.no_defn,
+                                authoring=is_auth,
+                                allow_check=(is_auth and A.arm == "check"),
+                                auto_check=(is_auth and A.arm == "feedback"))
             t0 = time.time()
             r = agent.run(build_prompt(task), target, editable=editable)
             dt = time.time() - t0
             m = r["metrics"]
+            # EXP 2: held-out correctness + residual type errors on the FINAL submission (both arms + none).
+            held_pass = bool(env.score()["resolved"]) if (is_auth and task.get("held_out")) else bool(r["resolved"])
+            resid = env.pyrefly_diagnostics() if is_auth else ""
+            n_resid_diag = len([l for l in resid.splitlines() if l.strip()]) if resid else 0
             row = {"task": task["name"], "group": task["group"], "cond": c, "seed": seed,
-                   "resolved": bool(r["resolved"]), "bailed": r.get("bailed"),
+                   "arm": A.arm,
+                   "resolved": bool(r["resolved"]), "held_pass": held_pass, "bailed": r.get("bailed"),
                    "in_tokens": r["in_tokens"], "out_tokens": r["out_tokens"],
                    "sec": round(dt, 1), "rework_ratio": m.get("rework_ratio"),
                    "n_edits": m.get("n_edits"), "n_tests": r["n_tests"],
                    "n_reads": r["n_reads"], "n_greps": r.get("n_greps", 0), "n_lsp": r.get("n_lsp", 0),
+                   "n_checks": r.get("n_checks", 0), "n_resid_diag": n_resid_diag, "resid_diag": resid[:800],
                    "turns": r["turns"],
                    "n_attractor_edits": count_attractor_edits(r["events"], task.get("attractors", [])),
                    "stream_tail": r["stream"][-3000:], "events": r["events"]}
@@ -198,9 +235,15 @@ for task in tasks:
                 row["n_train_tokens"] = r.get("n_train_tokens")
             agg[c]["rows"].append(row)
             env.close()
-            print(f"  [{task['name']:22}] {c} s{seed}: resolved={row['resolved']} "
-                  f"reads={row['n_reads']} tests={row['n_tests']} edits={row['n_edits']} "
-                  f"out={row['out_tokens']} ({row['sec']}s)", flush=True)
+            if A.suite == "authoring":
+                print(f"  [{task['name']:26}] {A.arm:8} s{seed}: held={row['held_pass']} "
+                      f"visible={row['resolved']} edits={row['n_edits']} checks={row['n_checks']} "
+                      f"resid_diag={row['n_resid_diag']} in={row['in_tokens']} out={row['out_tokens']} "
+                      f"({row['sec']}s)", flush=True)
+            else:
+                print(f"  [{task['name']:22}] {c} s{seed}: resolved={row['resolved']} "
+                      f"reads={row['n_reads']} tests={row['n_tests']} edits={row['n_edits']} "
+                      f"out={row['out_tokens']} ({row['sec']}s)", flush=True)
     checkpoint()
 
 print("\n=== aggregate ===", flush=True)
@@ -214,8 +257,25 @@ for c in conds:
     summary[c] = {"resolve_rate": round(len(res)/len(rs), 3) if rs else 0, "n": len(rs),
                   "by_group": bygrp,
                   "mean_reads": round(sum(r['n_reads'] for r in rs)/max(len(rs),1), 2)}
-    print(f"  {c}: resolve={summary[c]['resolve_rate']} ({len(res)}/{len(rs)})  "
-          f"by_group={bygrp}  mean_reads={summary[c]['mean_reads']}", flush=True)
+    if A.suite == "authoring" and rs:
+        n = len(rs)
+        held = sum(r["held_pass"] for r in rs)
+        summary[c].update({
+            "arm": A.arm,
+            "held_pass": f"{held}/{n}", "visible_pass": f"{len(res)}/{n}",
+            "mean_resid_diag": round(sum(r["n_resid_diag"] for r in rs)/n, 2),
+            "n_clean_final": sum(1 for r in rs if r["n_resid_diag"] == 0),
+            "mean_edits": round(sum((r["n_edits"] or 0) for r in rs)/n, 2),
+            "mean_checks": round(sum(r["n_checks"] for r in rs)/n, 2),
+            "mean_in_tokens": round(sum(r["in_tokens"] for r in rs)/n, 1)})
+        s = summary[c]
+        print(f"  arm={A.arm}: held_out={s['held_pass']} visible={s['visible_pass']}  "
+              f"mean_resid_diag={s['mean_resid_diag']} clean_final={s['n_clean_final']}/{n}  "
+              f"mean_edits={s['mean_edits']} mean_checks={s['mean_checks']} "
+              f"mean_in_tokens={s['mean_in_tokens']}", flush=True)
+    else:
+        print(f"  {c}: resolve={summary[c]['resolve_rate']} ({len(res)}/{len(rs)})  "
+              f"by_group={bygrp}  mean_reads={summary[c]['mean_reads']}", flush=True)
 
 json.dump({"model": A.model, "adapter": A.adapter, "config": vars(A), "summary": summary,
            "rows": {c: agg[c]["rows"] for c in conds}}, open(A.out, "w"), indent=2)
