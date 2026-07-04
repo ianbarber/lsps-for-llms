@@ -506,6 +506,28 @@ capable model any statically resolvable type is readable in one or two reads, so
 that. This bounded ceiling is the deep reason the reframe holds and why the more interesting next question
 is the type CHECKER at authoring time (Exp 2), not squeezing the navigation result further.
 
+### Exp 2: does a type checker help when AUTHORING new code? (design, 2026-07-04, in progress)
+
+The reframe said a type checker's value is keeping the code's types correct. Section 5 tested the checker
+as in-loop info on BUG FIXES (gapd2: fill one small stub, a designed plausible-wrong alternative the
+checker would catch) and found it redundant: frontier models write the correct fix anyway. Authoring is a
+different regime with a bigger, ORGANIC type-error surface (undefined names, wrong signatures, bad
+imports, arity, attribute access across several interacting components), which is where fast checker
+feedback might finally pay. Exp 2 tests it.
+
+Design: an `authoring` suite (~12 tasks). Each task is a typed STUB (function/class signatures + docstring
+spec, bodies raise NotImplementedError) plus an optional provided typed `lib.py` the target must use
+correctly, a VISIBLE example test the agent may run, and a HELD-OUT scoring test (as in gapd2, so
+behavioural correctness is not trivially confirmed by the visible test). The tasks are larger than gapd2
+(several functions/classes, imports, interacting types) so type errors occur organically. Arms toggle only
+the type checker: `none` (implement + run visible test), `check` (a check_types() tool the agent may
+elect), `feedback` (pyrefly diagnostics volunteered automatically after each edit). Metrics: held-out
+pass@1 (primary), visible pass, edits/iterations to green, residual type-error count (pyrefly on the final
+submission), input tokens. Models: local 27B and 7B (free, capability contrast; the hypothesis is the
+checker helps a weaker model that errs more), with a frontier run as an optional section-5 comparison.
+Harness reuses section 5 (api_agent check_types / synth_mf + stream_agent gapd path). Build delegated;
+smoke on the 27B first. Results below.
+
 ## Where could a language server still beat grep+sed? semantic vs textual (subagent analysis, 2026-07-02)
 
 grep/sed are textual; a language server is semantic (it resolves receiver types, imports/re-exports,
