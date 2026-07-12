@@ -24,14 +24,14 @@
   "protocol_source_sha256": {
     "scripts/experiments/navigation_tasks.py": "f860fd07fdeb2d4f78d89a047c6804d79cc3babd60fab7e0a06e839679692d97",
     "scripts/experiments/run_navigation.py": "319743150b0b49a86e8c52d5264f5736d887a396e89bb5bfa7280fdce4ea72b8",
-    "scripts/analysis/analyze_navigation.py": "3afeb993cd0950ea2b0b1fd4264807de3872b508623b58d90660c348b7dccedf",
+    "scripts/analysis/analyze_navigation.py": "c48d2c7b696244107665c0b07f2cd6c4fc2febb7b6f6d67b931ea02cc9be5a77",
     "scripts/run_navigation_pilot.sh": "727d6780ae7d3fbac35b88e02ddbe554b3a6687293e329a1f11d05a62f2adb77",
     "scripts/run_navigation_confirmation.sh": "af48c93caf45c9047828d5a7b76eed7977419290ad6863917a1df88fa50a1d56",
-    "scaffold/stream_agent.py": "cc052cb2882cf3b35dab51a9d0d55b49b811341d52c6dde105e03f535c9f2db8",
+    "scaffold/stream_agent.py": "a614735b30ab0df1b1248d5583272d2c4707d5fc0cf8626f624bd8a83d59b5ca",
     "scaffold/real_env.py": "a1b38f3d228d659a37329eb9088a80de20422f07712de9bdd9b3c7ad694ae70b",
     "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
     "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
-    "evidence/protocols.md": "2dc963320f650011f1a9323fbec9e542ae1efc6627c9681110abe08ce44e76be"
+    "evidence/protocols.md": "8de5e59edcc4e33f786ba12c9f8ad1a95cd11e2be0a9a8a725df254fc8d6f346"
   },
   "pyrefly": {
     "path": "/home/ianbarber/Projects/Streams/.venv-streams/bin/pyrefly",
@@ -74,7 +74,7 @@
         "typed": {
           "path": "pkg/units/utxfqf.py",
           "span_hash": "fcd461b3b90cdbd96d8707e7ca89f49bc49cb00b1e25b828fd8413c8e0b27ae4",
-          "latency_ms": 6022.1,
+          "latency_ms": 6021.8,
           "health_path": "pkg/units/utxfqf.py",
           "resolved_class": "Cuskgwrm",
           "resolved_method_span_hash": "59a315b38496db179410e9df63a11cf22eed049f0d309c7091bc1895ef62f9c7"
@@ -87,7 +87,7 @@
         "erased": {
           "path": "pkg/base.py",
           "span_hash": "6329c4ac0feed95b189b132d45f76b4c034530f25ec901c1b4b1ac8660143f50",
-          "latency_ms": 6020.3,
+          "latency_ms": 6019.1,
           "health_path": "pkg/base.py",
           "resolved_class": "Bggitvfs",
           "resolved_method_span_hash": "74ba9c9a1a1697b4e1434bb23f98dcfeba151cd2056b7df9cc0fd97d382e9a05"
@@ -195,7 +195,7 @@
         "typed": {
           "path": "pkg/units/ummeus.py",
           "span_hash": "8c072373bf0b9eed0e4fcdd9a7be95fec7ad86b213155a7bc98ac3cc89538653",
-          "latency_ms": 6019.8,
+          "latency_ms": 6019.2,
           "health_path": "pkg/units/ummeus.py",
           "resolved_class": "Crhqglzp",
           "resolved_method_span_hash": "729e253155760be3e7889941c567ed415cdc07edafa09d55023534a203efbe55"
@@ -208,7 +208,7 @@
         "erased": {
           "path": "pkg/base.py",
           "span_hash": "d1b4e12388033e9657fe76ba29f416e1c0464639141d9381432a91520c712e32",
-          "latency_ms": 6019.5,
+          "latency_ms": 6019.8,
           "health_path": "pkg/base.py",
           "resolved_class": "Bnbzkyqm",
           "resolved_method_span_hash": "4a40675c796baa5e7171618c262fd98a6ef9a8e9bdae0112aab532a0dac713c4"
@@ -300,7 +300,7 @@
         "typed": {
           "path": "pkg/units/utpatd.py",
           "span_hash": "42fb99a975f8498b0004605436aae2ffc70023b35ba9a4a013011670a22c8e14",
-          "latency_ms": 6020.1,
+          "latency_ms": 6020.7,
           "health_path": "pkg/units/utpatd.py",
           "resolved_class": "Ctimfmtd",
           "resolved_method_span_hash": "4265732849473fe9302a908d0976a939dc0848ab3f1f6307a538379d7d0fceb3"
@@ -313,7 +313,7 @@
         "erased": {
           "path": "pkg/base.py",
           "span_hash": "7702d7b02d20c3c0ee623becba98b68b3d28e0c441f8601f0cac7601c85e42be",
-          "latency_ms": 6019.0,
+          "latency_ms": 6019.8,
           "health_path": "pkg/base.py",
           "resolved_class": "Bsmbneum",
           "resolved_method_span_hash": "bae76877e439574937097a88008fdc80a29fe97dfb7e3084e515f7b26b401daf"
@@ -405,7 +405,7 @@
         "typed": {
           "path": "pkg/units/uvbpiu.py",
           "span_hash": "0268f4d9c1e1b99cd77a784a7c27da81ca10330bf461dc8b3ac4806d048d64a6",
-          "latency_ms": 6020.3,
+          "latency_ms": 6019.9,
           "health_path": "pkg/units/uvbpiu.py",
           "resolved_class": "Chrxajbh",
           "resolved_method_span_hash": "2591b995b84c90b5221ded2878326727a02ed15a577c2008db45b776a13ed429"
@@ -418,7 +418,7 @@
         "erased": {
           "path": "pkg/base.py",
           "span_hash": "fa237b21651847f9265b5e0ec49e2d54da299ee7c31988a460aeafd7ac8639c4",
-          "latency_ms": 6019.3,
+          "latency_ms": 6018.7,
           "health_path": "pkg/base.py",
           "resolved_class": "Bdzqcgpr",
           "resolved_method_span_hash": "52ae7f74d5c8070eb1cd79786e3f60c645535b7d3e373dc1299e5c4acdf851b1"
@@ -514,7 +514,7 @@
         "typed": {
           "path": "pkg/units/uoxbbo.py",
           "span_hash": "bcb8522c67a1ecddfc9dde036a91187871f6e1985f631fcdcdc7307b54993f67",
-          "latency_ms": 6019.5,
+          "latency_ms": 6020.0,
           "health_path": "pkg/units/uoxbbo.py",
           "resolved_class": "Cipwtdgf",
           "resolved_method_span_hash": "6509bc55e0f91a15713a3f4f79bb17528604d99a3fd26ecdea0614aaaa62162b"
@@ -527,7 +527,7 @@
         "erased": {
           "path": "pkg/base.py",
           "span_hash": "7851e74e641d3780d705568501f95ad5c6170db57dae62a276d8238c9c5b95a2",
-          "latency_ms": 6018.8,
+          "latency_ms": 6020.4,
           "health_path": "pkg/base.py",
           "resolved_class": "Byfqmeie",
           "resolved_method_span_hash": "cadabdc5e5a214258679c04fdecaf5dcf9397a93c1c3d164fd7c53d996b9bfb9"
@@ -643,7 +643,7 @@
         "typed": {
           "path": "pkg/units/udkcza.py",
           "span_hash": "7b36228db022ea6c6fcc3d5c55b77a4045984f16232a44c7603c188b853e3e2d",
-          "latency_ms": 6018.8,
+          "latency_ms": 6019.5,
           "health_path": "pkg/units/udkcza.py",
           "resolved_class": "Colygjjk",
           "resolved_method_span_hash": "8e3e19def90469258a4f592bbd05f6603cb84aa8d34d375da603a0ddaab311e1"
@@ -656,7 +656,7 @@
         "erased": {
           "path": "pkg/base.py",
           "span_hash": "cfacc48dfd7f4d6044dee4b503e1d77f985c0aebc6276d778399c5cf2c5bdd8f",
-          "latency_ms": 6018.2,
+          "latency_ms": 6019.8,
           "health_path": "pkg/base.py",
           "resolved_class": "Bwbxobay",
           "resolved_method_span_hash": "de828de7f44c45e0233ecad7f812337d5c33556f8174f616df61313f55d4a044"
@@ -760,7 +760,7 @@
         "typed": {
           "path": "pkg/units/ueaurc.py",
           "span_hash": "747ec726695e61e8ddc4e86eff2d51e46bd64c76aef88fee2c19860ba261dcf0",
-          "latency_ms": 6021.3,
+          "latency_ms": 6020.1,
           "health_path": "pkg/units/ueaurc.py",
           "resolved_class": "Ctlafbfu",
           "resolved_method_span_hash": "a9f2dbfbbef736cccab86d84def32eba9f2cc81186bb6af25a7b8ec8a2e6af95"
@@ -773,7 +773,7 @@
         "erased": {
           "path": "pkg/base.py",
           "span_hash": "7bb70112c11b1d5ffd31bf8b9631e3b963069c879b72334e0d9163f05990a300",
-          "latency_ms": 6020.7,
+          "latency_ms": 6020.3,
           "health_path": "pkg/base.py",
           "resolved_class": "Bujztjvu",
           "resolved_method_span_hash": "f68e28012cc835c786c8c519bec308966d44d75f209bdf2d3838886d67d8f7c0"
@@ -885,7 +885,7 @@
         "typed": {
           "path": "pkg/units/uzqgiz.py",
           "span_hash": "c7e386ecc9f857ee7d68854d6286bb9d45dd5c354abdde78474f370f78c29df2",
-          "latency_ms": 6020.3,
+          "latency_ms": 6021.3,
           "health_path": "pkg/units/uzqgiz.py",
           "resolved_class": "Cnassecu",
           "resolved_method_span_hash": "2fe66b9f0264b09e466b068d75398d0ddafbf6fc0f94c06a386524cea999eee3"
@@ -898,7 +898,7 @@
         "erased": {
           "path": "pkg/base.py",
           "span_hash": "f0736d032fbecaeed3e79ea29ddf7abed326daf531dd5fc4c782cb025853bb57",
-          "latency_ms": 6019.9,
+          "latency_ms": 6021.2,
           "health_path": "pkg/base.py",
           "resolved_class": "Bycgdhcn",
           "resolved_method_span_hash": "58735ffbcfda855b9849cfff096c26d067cb2038388bd5986a32f98fdfc05e7e"
@@ -1006,7 +1006,7 @@
         "typed": {
           "path": "pkg/units/ubmpms.py",
           "span_hash": "d599cbc00917c1d58e2e235a16eca993958f275ac736cd58c82e56be0113b954",
-          "latency_ms": 6019.7,
+          "latency_ms": 6019.8,
           "health_path": "pkg/units/ubmpms.py",
           "resolved_class": "Ceooltkg",
           "resolved_method_span_hash": "a8274da51e1cd370aaa60b4cdd1873fcba3bc89702d49d777db349c80c857354"
@@ -1019,7 +1019,7 @@
         "erased": {
           "path": "pkg/base.py",
           "span_hash": "7037d7aa061dffe5233df2cf780390b95c994ff4586a464b638d82afb0e6e49e",
-          "latency_ms": 6018.5,
+          "latency_ms": 6019.5,
           "health_path": "pkg/base.py",
           "resolved_class": "Bvrqbxch",
           "resolved_method_span_hash": "3dbb9f0150cc104fd46d68b4750b55644add9027651d6fe6715d585c45c76105"
@@ -1123,7 +1123,7 @@
         "typed": {
           "path": "pkg/units/uhpbfk.py",
           "span_hash": "db11b62370ed7b27d7d4e1e3d7ff9bdb2c4b0a72598dc415417f556711cf8942",
-          "latency_ms": 6020.5,
+          "latency_ms": 6020.1,
           "health_path": "pkg/units/uhpbfk.py",
           "resolved_class": "Cvmafchb",
           "resolved_method_span_hash": "27da86bed15704961b4574152cd2180422f1aeeff66e09107eb3784431bd3ed1"
@@ -1136,7 +1136,7 @@
         "erased": {
           "path": "pkg/base.py",
           "span_hash": "1320c95e90ccbe81ddc405d6fd43f34b92d092d6d291ceb621a2028b00c74194",
-          "latency_ms": 6020.6,
+          "latency_ms": 6019.8,
           "health_path": "pkg/base.py",
           "resolved_class": "Bmeldsej",
           "resolved_method_span_hash": "fc54008814532039d9bde726dcb8af9a6011118cc4d2d6dced605114734e795b"
@@ -1228,7 +1228,7 @@
         "typed": {
           "path": "pkg/units/usbmit.py",
           "span_hash": "afd5a69483b12fd0cfc66420066b36fa0b8eb23910f7d8eadbed7985bea22228",
-          "latency_ms": 6021.6,
+          "latency_ms": 6019.8,
           "health_path": "pkg/units/usbmit.py",
           "resolved_class": "Clnhvqne",
           "resolved_method_span_hash": "9f321bc7675eb4ec380abfa6d169da527d21dd1ea676ae62d8a43eec330835d0"
@@ -1241,7 +1241,7 @@
         "erased": {
           "path": "pkg/base.py",
           "span_hash": "6f6005da056341a410e1834538e3dfa25348ab692b58cd4080d2594959606fdd",
-          "latency_ms": 6019.3,
+          "latency_ms": 6020.6,
           "health_path": "pkg/base.py",
           "resolved_class": "Bgharcjo",
           "resolved_method_span_hash": "90459e6cba9e85f08da1a3904b724f8a29ee0b6927039511852c70334660df7d"
@@ -1361,7 +1361,7 @@
         "typed": {
           "path": "pkg/units/unnbhj.py",
           "span_hash": "e8c8bd6cfa45b96ac4e15b3d5a7aefd22519e7024175e2d6947c48c44c9de92a",
-          "latency_ms": 6021.1,
+          "latency_ms": 6020.0,
           "health_path": "pkg/units/unnbhj.py",
           "resolved_class": "Ceisxtsx",
           "resolved_method_span_hash": "96789b24da4a06ae5c429d83aac96b53cc501e710a0b5af0adc93de1e017c40e"
@@ -1374,7 +1374,7 @@
         "erased": {
           "path": "pkg/base.py",
           "span_hash": "875286a70f675bc2eb881075056e68024d983d3fbcf3f6ef07ae0b8075fa6dd3",
-          "latency_ms": 6019.5,
+          "latency_ms": 6019.8,
           "health_path": "pkg/base.py",
           "resolved_class": "Bgzyxgwz",
           "resolved_method_span_hash": "c1c426bcac81449d69d1e6f4b3a24ed684156b092c7f98b70bc1fa04b78932eb"

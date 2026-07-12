@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "git_revision_at_generation": "848f97ef889104fde72461b80bf86742a6095491",
+  "git_revision_at_generation": "91820c38a93547541524bad711bdbe49d94a97a4",
   "git_worktree_dirty_at_generation": true,
   "platform_at_generation": "Linux-6.11.0-1016-nvidia-aarch64-with-glibc2.39",
   "results": [
@@ -2871,7 +2871,7 @@
       ],
       "n_rows": 1,
       "integration_mode": "mixed_checker_revision_integrations",
-      "artifact_role": "checker_opportunity_conditioned_paired_case_series_aborted_incomplete",
+      "artifact_role": "checker_opportunity_case_series_aborted_incomplete",
       "source_run_files": [
         "runs/pilot/checker_case_series_qwen36_27b_6a9e13bd.json"
       ],
@@ -2887,7 +2887,12 @@
         "scaffold/mock_env.py": "2b21b215076bb2d1877b1cad6bb844af4e5044e3d70deff1a95d7b1458b989e1",
         "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
         "scripts/run_checker_paired.sh": "368c2e12e7930465e93a507628c0e066612533483f6717474a6374e4479fe705"
-      }
+      },
+      "current_protocol_source_mismatches": [
+        "scripts/experiments/checker_paired.py",
+        "scripts/analysis/analyze_checker_paired.py",
+        "scaffold/stream_agent.py"
+      ]
     },
     {
       "path": "runs/pilot/checker_case_series_qwen36_27b_6a9e13bd_s1.json",
@@ -2928,7 +2933,7 @@
       ],
       "n_rows": 6,
       "integration_mode": "mixed_checker_revision_integrations",
-      "artifact_role": "checker_opportunity_conditioned_paired_case_series_complete",
+      "artifact_role": "rejected_checker_case_series_ambiguous_inline_serialization",
       "source_run_files": [
         "runs/pilot/checker_case_series_qwen36_27b_6a9e13bd_s1.json"
       ],
@@ -2943,6 +2948,70 @@
         "scripts/analysis/analyze_checker_paired.py": "552a43a8ecf47aa0d237930e071fcd373c42d22525b33ccbe6b4d60f317c6139",
         "scripts/synth_tasks_authoring.py": "51af9d800d0f6812286343b74c9d578b5ad1a599f9a4bbf184246c7efb94a58e",
         "scaffold/stream_agent.py": "cc052cb2882cf3b35dab51a9d0d55b49b811341d52c6dde105e03f535c9f2db8",
+        "scaffold/mock_env.py": "2b21b215076bb2d1877b1cad6bb844af4e5044e3d70deff1a95d7b1458b989e1",
+        "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
+        "scripts/run_checker_paired.sh": "368c2e12e7930465e93a507628c0e066612533483f6717474a6374e4479fe705"
+      },
+      "current_protocol_source_mismatches": [
+        "scripts/experiments/checker_paired.py",
+        "scripts/analysis/analyze_checker_paired.py",
+        "scaffold/stream_agent.py"
+      ]
+    },
+    {
+      "path": "runs/pilot/checker_case_series_qwen36_27b_6a9e13bd_v2_s1.json",
+      "sha256": "5d7a35f45e22f51ab8994f3bf0c4f18516cf913d6960d7f0fd2aae97b8979964",
+      "bytes": 46856,
+      "model": "Qwen/Qwen3.6-27B",
+      "temperature": 0.7,
+      "model_meta": {
+        "revision": null,
+        "transformers": "5.9.0",
+        "torch": "2.11.0+cu128",
+        "dtype": "torch.bfloat16"
+      },
+      "pyrefly": {
+        "path": "/home/ianbarber/Projects/Streams/.venv-streams/bin/pyrefly",
+        "version": "pyrefly 1.0.0"
+      },
+      "config": {
+        "command": "revise",
+        "drafts": "runs/protocol/checker_opportunity_case_series_v4.json",
+        "out": "runs/pilot/checker_case_series_qwen36_27b_6a9e13bd_v2_s1.json",
+        "model": "Qwen/Qwen3.6-27B",
+        "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+        "names": "auth_fold_callable,auth_histogram_counter",
+        "arms": "control,diagnostics,gate",
+        "checker_positive_only": true,
+        "seed": 0,
+        "seeds": 1,
+        "temperature": 0.7,
+        "max_new": 800,
+        "max_turns": 6,
+        "max_reads": 4,
+        "gpu_only": true
+      },
+      "declared_seeds": 1,
+      "actual_seeds": [
+        0
+      ],
+      "n_rows": 6,
+      "integration_mode": "mixed_checker_revision_integrations",
+      "artifact_role": "checker_opportunity_conditioned_paired_case_series_complete",
+      "source_run_files": [
+        "runs/pilot/checker_case_series_qwen36_27b_6a9e13bd_v2_s1.json"
+      ],
+      "row_checker_integration_modes": {
+        "control": "normal_revision_without_checker_context",
+        "diagnostics": "one_shot_target_delta_after_coherent_patch",
+        "gate": "acceptance_gate_with_target_diagnostic_delta"
+      },
+      "recorded_protocol_source_sha256": {
+        "scripts/experiments/checker_paired.py": "fded4ebb93b43f17fc569fc2662b98bc928a31df361e10859dcf40122f41b91e",
+        "scripts/experiments/diagnostics.py": "98f3e55a2077055aa170ae6cbe09d839ae784a1605f58838478cc2e59d35b746",
+        "scripts/analysis/analyze_checker_paired.py": "3a073a36853a38ec2da47e52346158a95305aaec5401643b32332312c7b5091b",
+        "scripts/synth_tasks_authoring.py": "51af9d800d0f6812286343b74c9d578b5ad1a599f9a4bbf184246c7efb94a58e",
+        "scaffold/stream_agent.py": "a614735b30ab0df1b1248d5583272d2c4707d5fc0cf8626f624bd8a83d59b5ca",
         "scaffold/mock_env.py": "2b21b215076bb2d1877b1cad6bb844af4e5044e3d70deff1a95d7b1458b989e1",
         "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
         "scripts/run_checker_paired.sh": "368c2e12e7930465e93a507628c0e066612533483f6717474a6374e4479fe705"
@@ -3537,6 +3606,7 @@
         "evidence/protocols.md": "a5c6b2f158808b8ba576f4fa773146bbc49339f1b98574e66a0160524f15aecf"
       },
       "current_protocol_source_mismatches": [
+        "scripts/analysis/analyze_navigation.py",
         "scaffold/stream_agent.py",
         "evidence/protocols.md"
       ]
@@ -3599,6 +3669,7 @@
         "evidence/protocols.md": "a5c6b2f158808b8ba576f4fa773146bbc49339f1b98574e66a0160524f15aecf"
       },
       "current_protocol_source_mismatches": [
+        "scripts/analysis/analyze_navigation.py",
         "scaffold/stream_agent.py",
         "evidence/protocols.md"
       ]
@@ -3661,6 +3732,7 @@
         "evidence/protocols.md": "a5c6b2f158808b8ba576f4fa773146bbc49339f1b98574e66a0160524f15aecf"
       },
       "current_protocol_source_mismatches": [
+        "scripts/analysis/analyze_navigation.py",
         "scaffold/stream_agent.py",
         "evidence/protocols.md"
       ]
@@ -3728,6 +3800,8 @@
         "evidence/protocols.md": "a5c6b2f158808b8ba576f4fa773146bbc49339f1b98574e66a0160524f15aecf"
       },
       "current_protocol_source_mismatches": [
+        "scripts/analysis/analyze_navigation.py",
+        "scaffold/stream_agent.py",
         "evidence/protocols.md"
       ]
     },
@@ -3789,6 +3863,8 @@
         "evidence/protocols.md": "a5c6b2f158808b8ba576f4fa773146bbc49339f1b98574e66a0160524f15aecf"
       },
       "current_protocol_source_mismatches": [
+        "scripts/analysis/analyze_navigation.py",
+        "scaffold/stream_agent.py",
         "evidence/protocols.md"
       ]
     },
@@ -3850,6 +3926,8 @@
         "evidence/protocols.md": "a5c6b2f158808b8ba576f4fa773146bbc49339f1b98574e66a0160524f15aecf"
       },
       "current_protocol_source_mismatches": [
+        "scripts/analysis/analyze_navigation.py",
+        "scaffold/stream_agent.py",
         "evidence/protocols.md"
       ]
     },
@@ -3991,6 +4069,8 @@
         "scripts/run_checker_paired.sh": "368c2e12e7930465e93a507628c0e066612533483f6717474a6374e4479fe705"
       },
       "current_protocol_source_mismatches": [
+        "scripts/experiments/checker_paired.py",
+        "scripts/analysis/analyze_checker_paired.py",
         "scaffold/stream_agent.py"
       ]
     },
@@ -4022,6 +4102,44 @@
         "scripts/analysis/analyze_checker_paired.py": "552a43a8ecf47aa0d237930e071fcd373c42d22525b33ccbe6b4d60f317c6139",
         "scripts/synth_tasks_authoring.py": "51af9d800d0f6812286343b74c9d578b5ad1a599f9a4bbf184246c7efb94a58e",
         "scaffold/stream_agent.py": "cc052cb2882cf3b35dab51a9d0d55b49b811341d52c6dde105e03f535c9f2db8",
+        "scaffold/mock_env.py": "2b21b215076bb2d1877b1cad6bb844af4e5044e3d70deff1a95d7b1458b989e1",
+        "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
+        "scripts/run_checker_paired.sh": "368c2e12e7930465e93a507628c0e066612533483f6717474a6374e4479fe705"
+      },
+      "current_protocol_source_mismatches": [
+        "scripts/experiments/checker_paired.py",
+        "scripts/analysis/analyze_checker_paired.py",
+        "scaffold/stream_agent.py"
+      ]
+    },
+    {
+      "path": "runs/protocol/checker_opportunity_case_series_v4.json",
+      "sha256": "849075e5bcb0ff64c1c86f42dd1e35967290cd31339f5a1f97851a6bce643bf9",
+      "bytes": 18220,
+      "model": null,
+      "temperature": null,
+      "model_meta": null,
+      "pyrefly": {
+        "path": "/home/ianbarber/Projects/Streams/.venv-streams/bin/pyrefly",
+        "version": "pyrefly 1.0.0"
+      },
+      "config": {},
+      "declared_seeds": null,
+      "actual_seeds": [
+        0
+      ],
+      "n_rows": 2,
+      "integration_mode": "pre_treatment_checker_positive_cohort_selection",
+      "artifact_role": "checker_positive_cohort_selected_before_treatment",
+      "source_run_files": [
+        "runs/protocol/checker_opportunity_case_series_v4.json"
+      ],
+      "recorded_protocol_source_sha256": {
+        "scripts/experiments/checker_paired.py": "fded4ebb93b43f17fc569fc2662b98bc928a31df361e10859dcf40122f41b91e",
+        "scripts/experiments/diagnostics.py": "98f3e55a2077055aa170ae6cbe09d839ae784a1605f58838478cc2e59d35b746",
+        "scripts/analysis/analyze_checker_paired.py": "3a073a36853a38ec2da47e52346158a95305aaec5401643b32332312c7b5091b",
+        "scripts/synth_tasks_authoring.py": "51af9d800d0f6812286343b74c9d578b5ad1a599f9a4bbf184246c7efb94a58e",
+        "scaffold/stream_agent.py": "a614735b30ab0df1b1248d5583272d2c4707d5fc0cf8626f624bd8a83d59b5ca",
         "scaffold/mock_env.py": "2b21b215076bb2d1877b1cad6bb844af4e5044e3d70deff1a95d7b1458b989e1",
         "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
         "scripts/run_checker_paired.sh": "368c2e12e7930465e93a507628c0e066612533483f6717474a6374e4479fe705"
@@ -4293,7 +4411,7 @@
     },
     {
       "path": "runs/protocol/navigation_v2_apparatus_validation.json",
-      "sha256": "bcafb27956e857e05279f2318c72ec948587e6fb040902ddfd683f14dc3181c6",
+      "sha256": "00ca682db708fa41b78c24f35deaa1afe1bfc68caac953c1972741802ba125ff",
       "bytes": 48545,
       "model": null,
       "temperature": null,
@@ -4349,19 +4467,19 @@
       "recorded_protocol_source_sha256": {
         "scripts/experiments/navigation_tasks.py": "f860fd07fdeb2d4f78d89a047c6804d79cc3babd60fab7e0a06e839679692d97",
         "scripts/experiments/run_navigation.py": "319743150b0b49a86e8c52d5264f5736d887a396e89bb5bfa7280fdce4ea72b8",
-        "scripts/analysis/analyze_navigation.py": "3afeb993cd0950ea2b0b1fd4264807de3872b508623b58d90660c348b7dccedf",
+        "scripts/analysis/analyze_navigation.py": "c48d2c7b696244107665c0b07f2cd6c4fc2febb7b6f6d67b931ea02cc9be5a77",
         "scripts/run_navigation_pilot.sh": "727d6780ae7d3fbac35b88e02ddbe554b3a6687293e329a1f11d05a62f2adb77",
         "scripts/run_navigation_confirmation.sh": "af48c93caf45c9047828d5a7b76eed7977419290ad6863917a1df88fa50a1d56",
-        "scaffold/stream_agent.py": "cc052cb2882cf3b35dab51a9d0d55b49b811341d52c6dde105e03f535c9f2db8",
+        "scaffold/stream_agent.py": "a614735b30ab0df1b1248d5583272d2c4707d5fc0cf8626f624bd8a83d59b5ca",
         "scaffold/real_env.py": "a1b38f3d228d659a37329eb9088a80de20422f07712de9bdd9b3c7ad694ae70b",
         "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
         "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
-        "evidence/protocols.md": "2dc963320f650011f1a9323fbec9e542ae1efc6627c9681110abe08ce44e76be"
+        "evidence/protocols.md": "8de5e59edcc4e33f786ba12c9f8ad1a95cd11e2be0a9a8a725df254fc8d6f346"
       }
     },
     {
       "path": "runs/protocol/navigation_v2_confirmation_validation.json",
-      "sha256": "f805d2b24fc601982bff0e6749ec9d8c9ae28e010ae840df19d7d5854701fda7",
+      "sha256": "8b7a542434811e2b16d5248a0f0766481e6f50d78e0d9ff43214374f15c92e6d",
       "bytes": 48820,
       "model": null,
       "temperature": null,
@@ -4417,19 +4535,19 @@
       "recorded_protocol_source_sha256": {
         "scripts/experiments/navigation_tasks.py": "f860fd07fdeb2d4f78d89a047c6804d79cc3babd60fab7e0a06e839679692d97",
         "scripts/experiments/run_navigation.py": "319743150b0b49a86e8c52d5264f5736d887a396e89bb5bfa7280fdce4ea72b8",
-        "scripts/analysis/analyze_navigation.py": "3afeb993cd0950ea2b0b1fd4264807de3872b508623b58d90660c348b7dccedf",
+        "scripts/analysis/analyze_navigation.py": "c48d2c7b696244107665c0b07f2cd6c4fc2febb7b6f6d67b931ea02cc9be5a77",
         "scripts/run_navigation_pilot.sh": "727d6780ae7d3fbac35b88e02ddbe554b3a6687293e329a1f11d05a62f2adb77",
         "scripts/run_navigation_confirmation.sh": "af48c93caf45c9047828d5a7b76eed7977419290ad6863917a1df88fa50a1d56",
-        "scaffold/stream_agent.py": "cc052cb2882cf3b35dab51a9d0d55b49b811341d52c6dde105e03f535c9f2db8",
+        "scaffold/stream_agent.py": "a614735b30ab0df1b1248d5583272d2c4707d5fc0cf8626f624bd8a83d59b5ca",
         "scaffold/real_env.py": "a1b38f3d228d659a37329eb9088a80de20422f07712de9bdd9b3c7ad694ae70b",
         "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
         "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
-        "evidence/protocols.md": "2dc963320f650011f1a9323fbec9e542ae1efc6627c9681110abe08ce44e76be"
+        "evidence/protocols.md": "8de5e59edcc4e33f786ba12c9f8ad1a95cd11e2be0a9a8a725df254fc8d6f346"
       }
     },
     {
       "path": "runs/protocol/navigation_v2_pilot_validation.json",
-      "sha256": "15a4ad4adc9d5ff42cb489c3b7566447fb162521baf22783881200ec1ec16af7",
+      "sha256": "8fb23ad5c6158fd68bd71581abe6d6b9edeac4019774c9127b1e5c1ee64cc1e0",
       "bytes": 16764,
       "model": null,
       "temperature": null,
@@ -4468,14 +4586,14 @@
       "recorded_protocol_source_sha256": {
         "scripts/experiments/navigation_tasks.py": "f860fd07fdeb2d4f78d89a047c6804d79cc3babd60fab7e0a06e839679692d97",
         "scripts/experiments/run_navigation.py": "319743150b0b49a86e8c52d5264f5736d887a396e89bb5bfa7280fdce4ea72b8",
-        "scripts/analysis/analyze_navigation.py": "3afeb993cd0950ea2b0b1fd4264807de3872b508623b58d90660c348b7dccedf",
+        "scripts/analysis/analyze_navigation.py": "c48d2c7b696244107665c0b07f2cd6c4fc2febb7b6f6d67b931ea02cc9be5a77",
         "scripts/run_navigation_pilot.sh": "727d6780ae7d3fbac35b88e02ddbe554b3a6687293e329a1f11d05a62f2adb77",
         "scripts/run_navigation_confirmation.sh": "af48c93caf45c9047828d5a7b76eed7977419290ad6863917a1df88fa50a1d56",
-        "scaffold/stream_agent.py": "cc052cb2882cf3b35dab51a9d0d55b49b811341d52c6dde105e03f535c9f2db8",
+        "scaffold/stream_agent.py": "a614735b30ab0df1b1248d5583272d2c4707d5fc0cf8626f624bd8a83d59b5ca",
         "scaffold/real_env.py": "a1b38f3d228d659a37329eb9088a80de20422f07712de9bdd9b3c7ad694ae70b",
         "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
         "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
-        "evidence/protocols.md": "2dc963320f650011f1a9323fbec9e542ae1efc6627c9681110abe08ce44e76be"
+        "evidence/protocols.md": "8de5e59edcc4e33f786ba12c9f8ad1a95cd11e2be0a9a8a725df254fc8d6f346"
       }
     },
     {
@@ -4846,7 +4964,7 @@
     },
     {
       "path": "scripts/analysis/analyze_checker_paired.py",
-      "sha256": "552a43a8ecf47aa0d237930e071fcd373c42d22525b33ccbe6b4d60f317c6139"
+      "sha256": "3a073a36853a38ec2da47e52346158a95305aaec5401643b32332312c7b5091b"
     },
     {
       "path": "scripts/analysis/analyze_dispatch.py",
@@ -4858,7 +4976,7 @@
     },
     {
       "path": "scripts/analysis/analyze_navigation.py",
-      "sha256": "3afeb993cd0950ea2b0b1fd4264807de3872b508623b58d90660c348b7dccedf"
+      "sha256": "c48d2c7b696244107665c0b07f2cd6c4fc2febb7b6f6d67b931ea02cc9be5a77"
     },
     {
       "path": "scripts/analysis/effic_real_stats.py",
@@ -4866,7 +4984,7 @@
     },
     {
       "path": "scripts/analysis/reproduce_all.py",
-      "sha256": "2d8401551f72bceff4f7191b59a9cd2ecee92ab03823b886e46e9fec9f9df115"
+      "sha256": "d13fece08d3ad836a90d1d4adc41d99ebcccfb96b7cfcb23d0e3afdf6ea940fe"
     },
     {
       "path": "scripts/analysis/stats.py",
@@ -4892,7 +5010,7 @@
     },
     {
       "path": "scripts/experiments/checker_paired.py",
-      "sha256": "b4f73d3651f41677b598fedec6865fc4732c8197d98e219976831e58bad8b32f"
+      "sha256": "fded4ebb93b43f17fc569fc2662b98bc928a31df361e10859dcf40122f41b91e"
     },
     {
       "path": "scripts/experiments/diagnostics.py",
@@ -4900,7 +5018,7 @@
     },
     {
       "path": "scaffold/stream_agent.py",
-      "sha256": "cc052cb2882cf3b35dab51a9d0d55b49b811341d52c6dde105e03f535c9f2db8"
+      "sha256": "a614735b30ab0df1b1248d5583272d2c4707d5fc0cf8626f624bd8a83d59b5ca"
     },
     {
       "path": "scaffold/mock_env.py",

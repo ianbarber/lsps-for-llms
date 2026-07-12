@@ -4,8 +4,8 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/common.sh"
 
 MODEL="Qwen/Qwen3.6-27B"
 REVISION="6a9e13bd6fc8f0983b9b99948120bc37f49c13e9"
-DRAFTS="runs/protocol/checker_opportunity_case_series_v3.json"
-OUT="runs/pilot/checker_case_series_qwen36_27b_6a9e13bd_s1.json"
+DRAFTS="runs/protocol/checker_opportunity_case_series_v4.json"
+OUT="runs/pilot/checker_case_series_qwen36_27b_6a9e13bd_v2_s1.json"
 
 if [ -e "$OUT" ]; then
   echo "refusing to overwrite checker case-series output: $OUT" >&2

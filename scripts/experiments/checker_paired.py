@@ -31,7 +31,7 @@ from scripts.experiments.diagnostics import (  # noqa: E402
 from scripts.synth_tasks_authoring import TASKS_AUTHORING  # noqa: E402
 
 
-PROTOCOL_VERSION = "checker-paired-v1"
+PROTOCOL_VERSION = "checker-paired-v2"
 ARMS = ("control", "diagnostics", "gate", "noisy")
 REVISION_SYS = """You are revising an existing coherent Python draft.
 Tools:
@@ -417,6 +417,56 @@ def _edited_diagnosed_location(events: list[dict], diagnostics: list[dict]) -> b
     return False
 
 
+def _post_rejection_metrics(events: list[dict]) -> tuple[int, bool]:
+    rejected_at = next(
+        (index for index, event in enumerate(events) if event.get("type") == "gate_reject"), None
+    )
+    if rejected_at is None:
+        return 0, False
+    rejected_locations = {
+        (item.get("path"), item.get("line"))
+        for event in events if event.get("type") == "gate_reject"
+        for item in event.get("diagnostics", [])
+    }
+    edits = [event for event in events[rejected_at + 1:]
+             if event.get("type") == "line_edit" and event.get("ok")]
+    overlaps = False
+    for event in edits:
+        try:
+            start, end = map(int, event["lines"].split("-"))
+        except (KeyError, ValueError):
+            continue
+        overlaps |= any(
+            path == event.get("path") and line is not None and start <= line <= end
+            for path, line in rejected_locations
+        )
+    return len(edits), overlaps
+
+
+def _validate_case_series_rows(drafts: list[dict], rows: list[dict], arms: list[str], seeds: int) -> None:
+    expected = len(drafts) * len(arms) * seeds
+    if len(rows) != expected:
+        raise ValueError(f"incomplete case-series grid: expected {expected}, found {len(rows)}")
+    if any(row.get("serialization_failures") for row in rows):
+        raise ValueError("ambiguous inline edit serialization occurred")
+    for row in rows:
+        if row["arm"] == "gate":
+            if row["gate_invocations"] != row["gate_acceptances"] + row["gate_rejections"]:
+                raise ValueError("gate event counts are inconsistent")
+            if row["n_checks"] != row["gate_invocations"]:
+                raise ValueError("gate checker count differs from gate invocations")
+            if row["accepted_dirty"]:
+                raise ValueError("gate accepted a dirty workspace")
+    by_cell = {(row["draft_id"], row["seed"], row["arm"]): row for row in rows}
+    for draft in drafts:
+        for seed in range(min(row["seed"] for row in rows),
+                          min(row["seed"] for row in rows) + seeds):
+            control = by_cell[(draft["draft_id"], seed, "control")]
+            gate = by_cell[(draft["draft_id"], seed, "gate")]
+            if control["first_done_prefix_sha256"] != gate["first_done_prefix_sha256"]:
+                raise ValueError("control/gate trajectories diverge before the first completion attempt")
+
+
 def revise(args) -> int:
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -475,8 +525,20 @@ def revise(args) -> int:
             held = bool(env.score()["resolved"])
             final_diags = env.raw_diagnostic_delta()
             one_shot_latency = draft["checker_latency_ms"] if arm == "diagnostics" else 0.0
-            gate_accept = any(event.get("type") == "gate_accept" for event in result["events"])
-            accepted = gate_accept if arm == "gate" else bool(result.get("done_seen"))
+            events = result["events"]
+            done_attempts = sum(event.get("type") == "done_attempt" for event in events)
+            gate_invocations = sum(event.get("type") == "gate_check" for event in events)
+            gate_acceptances = sum(event.get("type") == "gate_accept" for event in events)
+            gate_rejections = sum(event.get("type") == "gate_reject" for event in events)
+            accepted = bool(gate_acceptances) if arm == "gate" else bool(result.get("done_seen"))
+            post_rejection_edits, edited_rejected_location = _post_rejection_metrics(events)
+            final_files = {path: env.read_file(path) for path in env.list_files()}
+            final_file_hashes, final_workspace_hash = _workspace_hashes(final_files)
+            serialization_failures = [
+                event for event in events
+                if event.get("type") == "line_edit"
+                and event.get("serialization_mode") == "ambiguous_inline_indentation"
+            ]
             row = {
                 "draft_id": draft["draft_id"], "draft_hash": draft["draft_target_sha256"],
                 "task": draft["task"], "group": draft["group"], "arm": arm, "seed": seed,
@@ -497,18 +559,35 @@ def revise(args) -> int:
                 "accepted_type_clean_correct": bool(
                     accepted and not final_diags and held
                 ),
-                "gate_rejections": sum(event.get("type") == "gate_reject"
-                                       for event in result["events"]),
-                "abstained_or_rejected": bool(arm == "gate" and not accepted),
-                "draft_in_tokens": draft.get("in_tokens", 0),
-                "draft_out_tokens": draft.get("out_tokens", 0),
+                "unsubmitted": not bool(done_attempts),
+                "done_attempts": done_attempts,
+                "gate_invocations": gate_invocations,
+                "gate_acceptances": gate_acceptances,
+                "gate_rejections": gate_rejections,
+                "gate_never_invoked": bool(arm == "gate" and not gate_invocations),
+                "gate_rejected_then_accepted": bool(gate_rejections and gate_acceptances),
+                "gate_rejected_unresolved": bool(gate_rejections and not gate_acceptances),
+                "post_rejection_edits": post_rejection_edits,
+                "edited_rejected_location": edited_rejected_location,
+                "accepted_dirty": bool(accepted and final_diags),
+                "first_done_prefix_sha256": next(
+                    (event.get("prefix_sha256") for event in events
+                     if event.get("type") == "done_attempt"), None
+                ),
+                "serialization_failures": serialization_failures,
+                "final_target_sha256": _sha(final_files[draft["target"]]),
+                "final_file_sha256": final_file_hashes,
+                "final_workspace_sha256": final_workspace_hash,
+                "draft_in_tokens": draft.get("in_tokens"),
+                "draft_out_tokens": draft.get("out_tokens"),
                 "in_tokens": result["in_tokens"], "out_tokens": result["out_tokens"],
                 "turns": result["turns"], "n_edits": result["n_edits"],
                 "n_tests": result["n_tests"], "n_checks": result["n_checks"],
                 "checker_latency_ms": round(
                     one_shot_latency + env.last_checker_latency * 1000, 1
                 ),
-                "wall_sec": round(wall, 3), "events": result["events"],
+                "wall_sec": round(wall, 3), "termination_reason": result["termination_reason"],
+                "events": events,
                 "stream_tail": result["stream"][-2500:],
             }
             rows.append(row)
@@ -528,6 +607,8 @@ def revise(args) -> int:
         }, indent=2) + "\n")
         print(f"{draft['task']} {arm}: held={row['held_pass']} clean={row['type_clean']} "
               f"accepted={row['accepted']} edits={row['n_edits']}", flush=True)
+    if payload.get("selection_is_not_a_natural_opportunity_sample"):
+        _validate_case_series_rows(drafts, rows, arms, args.seeds)
     return 0
 
 

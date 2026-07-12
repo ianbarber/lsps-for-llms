@@ -1,0 +1,429 @@
+{
+  "protocol": "checker-paired-v2",
+  "kind": "opportunity_conditioned_legacy_revision_case_series",
+  "source_artifact": "runs/protocol/checker_natural_drafts_legacy_7b.json",
+  "source_artifact_sha256": "61f2e03ec1a02b1299f9dfff0edf7f1cded6de9fcd6d40e2954cd7fd37532638",
+  "selection_is_not_a_natural_opportunity_sample": true,
+  "draft_generation_token_cost_available": false,
+  "pyrefly": {
+    "path": "/home/ianbarber/Projects/Streams/.venv-streams/bin/pyrefly",
+    "version": "pyrefly 1.0.0"
+  },
+  "protocol_source_sha256": {
+    "scripts/experiments/checker_paired.py": "fded4ebb93b43f17fc569fc2662b98bc928a31df361e10859dcf40122f41b91e",
+    "scripts/experiments/diagnostics.py": "98f3e55a2077055aa170ae6cbe09d839ae784a1605f58838478cc2e59d35b746",
+    "scripts/analysis/analyze_checker_paired.py": "3a073a36853a38ec2da47e52346158a95305aaec5401643b32332312c7b5091b",
+    "scripts/synth_tasks_authoring.py": "51af9d800d0f6812286343b74c9d578b5ad1a599f9a4bbf184246c7efb94a58e",
+    "scaffold/stream_agent.py": "a614735b30ab0df1b1248d5583272d2c4707d5fc0cf8626f624bd8a83d59b5ca",
+    "scaffold/mock_env.py": "2b21b215076bb2d1877b1cad6bb844af4e5044e3d70deff1a95d7b1458b989e1",
+    "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
+    "scripts/run_checker_paired.sh": "368c2e12e7930465e93a507628c0e066612533483f6717474a6374e4479fe705"
+  },
+  "drafts": [
+    {
+      "draft_id": "legacy-exp2_7b_none-auth_fold_callable-s0",
+      "task": "auth_fold_callable",
+      "group": "tricky",
+      "seed": 0,
+      "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "source_run": "runs/agent/exp2_7b_none.json",
+      "source_run_sha256": "496dff8367c0b3603f4f54dec135ed74777aa51028894e8d34ea6919078ff25f",
+      "source_row_arm": "none",
+      "files": {
+        "target.py": "from lib import fold\n\n\ndef total(nums: list[int]) -> int:\n    \"\"\"Sum of nums, computed with fold.\"\"\"\ndef total(nums: list[int]) -> int:\n    \"\"\"Sum of nums, computed with fold.\"\"\"\n    return fold(nums, lambda x, y: x + y, 0)\n",
+        "lib.py": "from typing import Callable, TypeVar\n\nT = TypeVar(\"T\")\nU = TypeVar(\"U\")\n\n\ndef fold(items: list[T], init: U, step: Callable[[U, T], U]) -> U:\n    \"\"\"Left fold: thread step(acc, item) across items starting from init.\"\"\"\n    acc = init\n    for item in items:\n        acc = step(acc, item)\n    return acc\n"
+      },
+      "target": "target.py",
+      "test": "from target import total, concat, count_matching\nassert total([1, 2, 3]) == 6\nassert concat([\"a\", \"b\", \"c\"]) == \"abc\"\nassert count_matching([1, 5, 3, 8], 3) == 2\n",
+      "held_out": "from target import total, concat, count_matching\nassert total([]) == 0\nassert concat([]) == \"\"\nassert count_matching([], 0) == 0\nassert count_matching([3, 3, 4], 3) == 1\n",
+      "initial_target_sha256": "0838a9fadd2592a83e6a4b73c71fd3a5a76a8416337ae30cc202c388ed0b6ffa",
+      "draft_target_sha256": "8b202e0fc2949e0fa2c217c10499345a69b3b178f76a07d09ba463834af5815e",
+      "coherent": true,
+      "file_sha256": {
+        "lib.py": "8ff0818ca5db841f00fac8deeda388648c146f377a9685ce4d2bbffdb2cc84d3",
+        "target.py": "8b202e0fc2949e0fa2c217c10499345a69b3b178f76a07d09ba463834af5815e"
+      },
+      "workspace_sha256": "30237d285b41dbd2ad1cd750a96a3a478d8a92e54f697abbf9702c5a056442a2",
+      "visible_pass": false,
+      "held_pass": false,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [
+        {
+          "path": "target.py",
+          "line": 4,
+          "column": 31,
+          "stop_line": 4,
+          "stop_column": 34,
+          "code": "bad-return",
+          "message": "Function declared to return `int` but is missing an explicit `return`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "   3| \n   4| def total(nums: list[int]) -> int:\n   5|     \"\"\"Sum of nums, computed with fold.\"\"\""
+        },
+        {
+          "path": "target.py",
+          "line": 8,
+          "column": 12,
+          "stop_line": 8,
+          "stop_column": 45,
+          "code": "bad-return",
+          "message": "Returned type `(x: Unknown, y: Unknown) -> Unknown` is not assignable to declared return type `int`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "   7|     \"\"\"Sum of nums, computed with fold.\"\"\"\n   8|     return fold(nums, lambda x, y: x + y, 0)"
+        },
+        {
+          "path": "target.py",
+          "line": 8,
+          "column": 43,
+          "stop_line": 8,
+          "stop_column": 44,
+          "code": "bad-argument-type",
+          "message": "Argument `Literal[0]` is not assignable to parameter `step` with type `((x: Unknown, y: Unknown) -> Unknown, int) -> (x: Unknown, y: Unknown) -> Unknown` in function `lib.fold`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "   7|     \"\"\"Sum of nums, computed with fold.\"\"\"\n   8|     return fold(nums, lambda x, y: x + y, 0)"
+        }
+      ],
+      "checker_latency_ms": 97.8,
+      "historical_residual_count": 5,
+      "historical_events": [
+        {
+          "tok": 89,
+          "type": "line_edit",
+          "path": "target.py",
+          "lines": "6-10",
+          "ok": true,
+          "info": "ok",
+          "fail_streak": 0,
+          "replace": "def total(nums: list[int]) -> int:\n    \"\"\"Sum of nums, computed with fold.\"\"\"\n    return fold(nums, lambda x, y: x + y, 0)"
+        },
+        {
+          "tok": 195,
+          "type": "line_edit",
+          "path": "target.py",
+          "lines": "10-14",
+          "ok": true,
+          "info": "ok",
+          "fail_streak": 0,
+          "replace": "def concat(words: list[str]) -> str:\n    \"\"\"Join words with no separator, computed with fold from an empty string.\"\"\"\n    return fold(words, lambda x, y: x + y, \"\")"
+        },
+        {
+          "tok": 313,
+          "type": "line_edit",
+          "path": "target.py",
+          "lines": "14-18",
+          "ok": false,
+          "info": "line range 14-18 out of bounds (target.py has 12 lines)",
+          "fail_streak": 1,
+          "replace": "def count_matching(items: list[int], threshold: int) -> int:\n    \"\"\"How many items are strictly greater than threshold, computed with fold.\"\"\"\n    return fold(items, lambda x, y: x + (1 if y > threshold else 0), 0)"
+        },
+        {
+          "tok": 336,
+          "type": "test",
+          "n": 1,
+          "resolved": false
+        },
+        {
+          "tok": 336,
+          "type": "turn",
+          "n": 1,
+          "via": "test"
+        },
+        {
+          "tok": 420,
+          "type": "line_edit",
+          "path": "target.py",
+          "lines": "6-10",
+          "ok": true,
+          "info": "ok",
+          "fail_streak": 0,
+          "replace": "def total(nums: list[int]) -> int:\n    \"\"\"Sum of nums, computed with fold.\"\"\"\n    return fold(nums, lambda x, y: x + y, 0)"
+        },
+        {
+          "tok": 484,
+          "type": "line_edit",
+          "path": "target.py",
+          "lines": "10-14",
+          "ok": false,
+          "info": "line range 10-14 out of bounds (target.py has 10 lines)",
+          "fail_streak": 1,
+          "replace": "def concat(words: list[str]) -> str:\n    \"\"\"Join words with no separator, computed with fold from an empty string.\"\"\"\n    return fold(words, lambda x, y: x + y, \"\")"
+        },
+        {
+          "tok": 562,
+          "type": "line_edit",
+          "path": "target.py",
+          "lines": "14-18",
+          "ok": false,
+          "info": "line range 14-18 out of bounds (target.py has 10 lines)",
+          "fail_streak": 2,
+          "replace": "def count_matching(items: list[int], threshold: int) -> int:\n    \"\"\"How many items are strictly greater than threshold, computed with fold.\"\"\"\n    return fold(items, lambda x, y: x + (1 if y > threshold else 0), 0)"
+        },
+        {
+          "tok": 574,
+          "type": "test",
+          "n": 2,
+          "resolved": false
+        },
+        {
+          "tok": 574,
+          "type": "turn",
+          "n": 2,
+          "via": "test"
+        },
+        {
+          "tok": 660,
+          "type": "line_edit",
+          "path": "target.py",
+          "lines": "6-10",
+          "ok": true,
+          "info": "ok",
+          "fail_streak": 0,
+          "replace": "def total(nums: list[int]) -> int:\n    \"\"\"Sum of nums, computed with fold.\"\"\"\n    return fold(nums, lambda x, y: x + y, 0)"
+        },
+        {
+          "tok": 724,
+          "type": "line_edit",
+          "path": "target.py",
+          "lines": "10-14",
+          "ok": false,
+          "info": "line range 10-14 out of bounds (target.py has 8 lines)",
+          "fail_streak": 1,
+          "replace": "def concat(words: list[str]) -> str:\n    \"\"\"Join words with no separator, computed with fold from an empty string.\"\"\"\n    return fold(words, lambda x, y: x + y, \"\")"
+        },
+        {
+          "tok": 802,
+          "type": "line_edit",
+          "path": "target.py",
+          "lines": "14-18",
+          "ok": false,
+          "info": "line range 14-18 out of bounds (target.py has 8 lines)",
+          "fail_streak": 2,
+          "replace": "def count_matching(items: list[int], threshold: int) -> int:\n    \"\"\"How many items are strictly greater than threshold, computed with fold.\"\"\"\n    return fold(items, lambda x, y: x + (1 if y > threshold else 0), 0)"
+        },
+        {
+          "tok": 814,
+          "type": "test",
+          "n": 3,
+          "resolved": false
+        },
+        {
+          "tok": 814,
+          "type": "turn",
+          "n": 3,
+          "via": "test"
+        },
+        {
+          "tok": 901,
+          "type": "line_edit",
+          "path": "target.py",
+          "lines": "6-10",
+          "ok": false,
+          "info": "line range 6-10 out of bounds (target.py has 8 lines)",
+          "fail_streak": 3,
+          "replace": "def total(nums: list[int]) -> int:\n    \"\"\"Sum of nums, computed with fold.\"\"\"\n    return fold(nums, lambda x, y: x + y, 0)"
+        },
+        {
+          "tok": 965,
+          "type": "line_edit",
+          "path": "target.py",
+          "lines": "10-14",
+          "ok": false,
+          "info": "line range 10-14 out of bounds (target.py has 8 lines)",
+          "fail_streak": 4,
+          "replace": "def concat(words: list[str]) -> str:\n    \"\"\"Join words with no separator, computed with fold from an empty string.\"\"\"\n    return fold(words, lambda x, y: x + y, \"\")"
+        },
+        {
+          "tok": 1043,
+          "type": "line_edit",
+          "path": "target.py",
+          "lines": "14-18",
+          "ok": false,
+          "info": "line range 14-18 out of bounds (target.py has 8 lines)",
+          "fail_streak": 5,
+          "replace": "def count_matching(items: list[int], threshold: int) -> int:\n    \"\"\"How many items are strictly greater than threshold, computed with fold.\"\"\"\n    return fold(items, lambda x, y: x + (1 if y > threshold else 0), 0)"
+        },
+        {
+          "tok": 1043,
+          "type": "bail",
+          "reason": "edit_fail_streak"
+        }
+      ],
+      "revision_case_series_eligible": true,
+      "selection_basis": "exact recovered coherent workspace with at least one target-delta semantic diagnostic",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "e6bcf9c7d3c56ce911f2be45fed998bb04f25d8dc824ec3e25ca24f5fa46bed0"
+      }
+    },
+    {
+      "draft_id": "legacy-exp2_7b_none-auth_histogram_counter-s0",
+      "task": "auth_histogram_counter",
+      "group": "easy",
+      "seed": 0,
+      "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "source_run": "runs/agent/exp2_7b_none.json",
+      "source_run_sha256": "496dff8367c0b3603f4f54dec135ed74777aa51028894e8d34ea6919078ff25f",
+      "source_row_arm": "none",
+      "files": {
+        "target.py": "from collections import Counter\nfrom lib import top_n\n\n\ndef word_counts(words: list[str]) -> \"Counter[str]\":\n    \"\"\"Count occurrences of each word.\"\"\"\ndef word_counts(words: list[str]) -> \"Counter[str]\":\n    \"\"\"Count occurrences of each word.\"\"\"\n    return Counter(words)\n\ndef most_common_word(words: list[str]) -> str:\n    \"\"\"The single most common word. `words` is non-empty.\"\"\"\n    return word_counts(words).most_common(1)[0][0]\n\n\ndef rank(words: list[str], k: int) -> list[str]:\n    \"\"\"The k most common words, via lib.top_n.\"\"\"\n    return top_n(word_counts(words), k)\n",
+        "lib.py": "from collections import Counter\n\n\ndef top_n(counts: \"Counter[str]\", n: int) -> list[str]:\n    \"\"\"The n most common keys, most-common first (ties by insertion order).\"\"\"\n    return [k for k, _ in counts.most_common(n)]\n"
+      },
+      "target": "target.py",
+      "test": "from target import word_counts, most_common_word, rank\nws = [\"a\", \"b\", \"a\", \"c\", \"a\", \"b\"]\nassert word_counts(ws)[\"a\"] == 3\nassert most_common_word(ws) == \"a\"\nassert rank(ws, 2) == [\"a\", \"b\"]\n",
+      "held_out": "from target import word_counts, most_common_word, rank\nassert dict(word_counts([])) == {}\nassert rank([\"x\"], 5) == [\"x\"]\nassert most_common_word([\"solo\"]) == \"solo\"\n",
+      "initial_target_sha256": "7bd1d091348eca4a5d4ea551ba7b980bcf6da7990e65bc2389476d35d7a2e3b9",
+      "draft_target_sha256": "01539df9e1e3acc64d0852a6a1eedecee81d272990c60f807abe77b77d833430",
+      "coherent": true,
+      "file_sha256": {
+        "lib.py": "bafc6b28078c48a3f2c4776bd43d023ce3c05186794997706fbe8429d22ab2a8",
+        "target.py": "01539df9e1e3acc64d0852a6a1eedecee81d272990c60f807abe77b77d833430"
+      },
+      "workspace_sha256": "b8bcb23501b978fdd51d8ca1879fca691466d1f621ecde07636568e41ade74f3",
+      "visible_pass": true,
+      "held_pass": true,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [
+        {
+          "path": "target.py",
+          "line": 5,
+          "column": 39,
+          "stop_line": 5,
+          "stop_column": 51,
+          "code": "bad-return",
+          "message": "Function declared to return `Counter[str]` but is missing an explicit `return`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "   4| \n   5| def word_counts(words: list[str]) -> \"Counter[str]\":\n   6|     \"\"\"Count occurrences of each word.\"\"\""
+        }
+      ],
+      "checker_latency_ms": 101.2,
+      "historical_residual_count": 1,
+      "historical_events": [
+        {
+          "tok": 76,
+          "type": "line_edit",
+          "path": "target.py",
+          "lines": "7-8",
+          "ok": true,
+          "info": "ok",
+          "fail_streak": 0,
+          "replace": "def word_counts(words: list[str]) -> \"Counter[str]\":\n    \"\"\"Count occurrences of each word.\"\"\"\n    return Counter(words)"
+        },
+        {
+          "tok": 86,
+          "type": "test",
+          "n": 1,
+          "resolved": false
+        },
+        {
+          "tok": 86,
+          "type": "turn",
+          "n": 1,
+          "via": "test"
+        },
+        {
+          "tok": 185,
+          "type": "line_edit",
+          "path": "target.py",
+          "lines": "12-13",
+          "ok": true,
+          "info": "ok",
+          "fail_streak": 0,
+          "replace": "def most_common_word(words: list[str]) -> str:\n    \"\"\"The single most common word. `words` is non-empty.\"\"\"\n    return word_counts(words).most_common(1)[0][0]"
+        },
+        {
+          "tok": 196,
+          "type": "test",
+          "n": 2,
+          "resolved": false
+        },
+        {
+          "tok": 196,
+          "type": "turn",
+          "n": 2,
+          "via": "test"
+        },
+        {
+          "tok": 272,
+          "type": "line_edit",
+          "path": "target.py",
+          "lines": "12-14",
+          "ok": true,
+          "info": "ok",
+          "fail_streak": 0,
+          "replace": "def most_common_word(words: list[str]) -> str:\n    \"\"\"The single most common word. `words` is non-empty.\"\"\"\n    return word_counts(words).most_common(1)[0][0]"
+        },
+        {
+          "tok": 283,
+          "type": "test",
+          "n": 3,
+          "resolved": false
+        },
+        {
+          "tok": 283,
+          "type": "turn",
+          "n": 3,
+          "via": "test"
+        },
+        {
+          "tok": 361,
+          "type": "line_edit",
+          "path": "target.py",
+          "lines": "11-14",
+          "ok": true,
+          "info": "ok",
+          "fail_streak": 0,
+          "replace": "def most_common_word(words: list[str]) -> str:\n    \"\"\"The single most common word. `words` is non-empty.\"\"\"\n    return word_counts(words).most_common(1)[0][0]"
+        },
+        {
+          "tok": 372,
+          "type": "test",
+          "n": 4,
+          "resolved": false
+        },
+        {
+          "tok": 372,
+          "type": "turn",
+          "n": 4,
+          "via": "test"
+        },
+        {
+          "tok": 459,
+          "type": "line_edit",
+          "path": "target.py",
+          "lines": "16-18",
+          "ok": true,
+          "info": "ok",
+          "fail_streak": 0,
+          "replace": "def rank(words: list[str], k: int) -> list[str]:\n    \"\"\"The k most common words, via lib.top_n.\"\"\"\n    return top_n(word_counts(words), k)"
+        },
+        {
+          "tok": 470,
+          "type": "test",
+          "n": 5,
+          "resolved": true
+        },
+        {
+          "tok": 470,
+          "type": "turn",
+          "n": 5,
+          "via": "test"
+        }
+      ],
+      "revision_case_series_eligible": true,
+      "selection_basis": "exact recovered coherent workspace with at least one target-delta semantic diagnostic",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "56286d7f96cc5332da6358d5adf8ed0b816f495cbc44e400b7c5984b7246e55a"
+      }
+    }
+  ]
+}

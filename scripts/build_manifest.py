@@ -120,6 +120,12 @@ def artifact_role(path: str, payload: dict) -> str:
             * len((config.get("arms") or "").split(","))
             * int(config.get("seeds", 1))
         )
+        if payload.get("protocol") == "checker-paired-v1":
+            return (
+                "rejected_checker_case_series_ambiguous_inline_serialization"
+                if expected and len(rows(payload)) == expected
+                else "checker_opportunity_case_series_aborted_incomplete"
+            )
         return (
             "checker_opportunity_conditioned_paired_case_series_complete"
             if expected and len(rows(payload)) == expected

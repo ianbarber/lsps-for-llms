@@ -43,7 +43,7 @@ an interval crossing those bounds is inconclusive rather than equivalent.
 
 Protocol version `checker-paired-v1` first generates a natural draft with no checker access, stores every
 workspace file and its hash, then forks control, one-shot coherent-patch diagnostics, acceptance gate, and
-deliberately noisy after-every-edit trajectories from those exact bytes. Coherence means the target parses
+a low-level-edit-triggered pushed-feedback baseline from those exact bytes. Coherence means the target parses
 and contains no remaining explicit `raise NotImplementedError`. Revision efficacy is conditional on a
 coherent submitted draft. A separate end-to-end estimand retains failed, unsubmitted, and incoherent drafts
 as pipeline failures; they are never silently removed from the denominator.
@@ -70,13 +70,18 @@ coherent frozen draft already has a checker-detectable semantic error? Selection
 using only the committed frozen workspace, coherence, and target-delta diagnostic state. The source
 artifact is not edited. A derived selection record preserves its hash, workspace hashes, selection rule,
 and a mechanical gold-repair check. Two exact recovered historical 7B workspaces qualify. A stronger
-pinned local model receives byte-identical workspaces under control, one-shot patch-boundary diagnostics,
+pinned local model receives byte-identical workspaces under control, one-shot pre-revision diagnostics,
 and acceptance-gate arms with common seeds. The primary product outcome is
 `accepted && type_clean && held_pass`; accepted semantic/behavioral defects, gate rejection, diagnostic
 changes, diagnosed-location edits, revision tokens, and latency are secondary outcomes. This selected
 case series estimates conditional revision efficacy only. It cannot estimate natural opportunity
 prevalence, same-model end-to-end value, or a population effect, and historical draft-generation token
 cost is unavailable.
+
+Protocol `checker-paired-v2` keeps missing draft cost as null and records completion attempts, gate checks,
+rejections, and acceptances as separate events. Inline edit bodies are normalized only when their
+indentation equals the replaced line or differs by one unambiguous separator space; other inline indentation
+is rejected without mutation. Each row stores raw/applied edit-body hashes and final file/workspace hashes.
 
 ## Run and spend budget
 
@@ -93,10 +98,15 @@ model/cell/cost proposal.
 The historical `navigation-v1` 7B run is invalid because its factory contract is unsound. In repaired v2,
 7B fails buggy-span actionability 0/2 and 14B reaches 1/2, so both stop. After a tested compact-edit parser
 repair, pinned Qwen3.6-27B clears gold-copy and buggy-span controls 2/2 and runs the matrix. All 12 cells pass;
-typed automatic context is token-equivalent to typed baseline, erased automatic context adds cost, and
-automatic payloads always precede target reads. Confirmation remains blocked by the uniform-ceiling gate.
+the typed token ratio falls within the margin on these two pilot tasks only, erased automatic context adds
+cost, automatic payloads always precede target reads, and composed resolution adds about six seconds per
+task. Confirmation remains blocked by the uniform-ceiling gate.
 Fresh checker calibration still misses the opportunity band. The separately selected two-task checker-
-positive case series completes paired control/diagnostics/gate revisions: diagnostics make 2/2 final
-workspaces type-clean versus 1/2 control, but all arms remain 1/2 on joint accepted-clean-correct outcome.
-The gate rejects one unresolved task without preventing a defect control would have accepted. These are
-exploratory conditional results, not confirmation or prevalence evidence. No paid API calls were made.
+positive case-series replay is invalid for cleanup claims because ambiguous inline edit serialization creates
+the observed syntax-state difference. All arms remain 1/2 jointly. The unresolved gate trajectory never
+invokes the gate, so no rejection or prevention evidence exists. Protocol `checker-paired-v2` makes inline
+serialization explicit relative to current indentation, records actual done/gate events separately, and
+preserves missing draft cost as null. Its immutable rerun has no serialization failures. Diagnostics end
+type-clean on 2/2 selected workspaces versus 1/2 control but add 217 mean revision tokens; every arm remains
+1/2 on held pass and joint accepted-clean-correct. The gate accepts the already-clean task, is never invoked
+on the unresolved task, and records zero rejections. No paid API calls were made.

@@ -49,12 +49,11 @@ def summarize_rows(rows: list[dict]) -> dict:
             for task_rows in grouped.values()
         )
 
-    def draft_plus_revision_tokens(row: dict) -> float:
-        if "draft_in_tokens" not in row or "draft_out_tokens" not in row:
-            return math.nan
-        return row["draft_in_tokens"] + row["draft_out_tokens"] + row["in_tokens"] + row["out_tokens"]
-
-    return {
+    draft_cost_available = all(
+        row.get("draft_in_tokens") is not None and row.get("draft_out_tokens") is not None
+        for row in rows
+    )
+    result = {
         "n_tasks": len(grouped), "n_revision_trajectories": len(rows),
         "final_held_pass": task_mean(lambda row: row["held_pass"]),
         "accepted_rate": task_mean(lambda row: row["accepted"]),
@@ -73,19 +72,32 @@ def summarize_rows(rows: list[dict]) -> dict:
         "accepted_any_checker_defect_rate": task_mean(
             lambda row: row["accepted"] and not row["type_clean"]
         ),
-        "abstained_or_rejected_rate": task_mean(lambda row: row["abstained_or_rejected"]),
+        "unsubmitted_rate": task_mean(lambda row: row["unsubmitted"]),
+        "gate_checked_rate": task_mean(lambda row: bool(row["gate_invocations"])),
+        "gate_rejected_rate": task_mean(lambda row: bool(row["gate_rejections"])),
+        "gate_accepted_rate": task_mean(lambda row: bool(row["gate_acceptances"])),
         "edited_diagnosed_location_rate": task_mean(lambda row: row["edited_diagnosed_location"]),
         "diagnostics_eliminated_mean": task_mean(lambda row: row["diagnostics_eliminated"]),
         "diagnostics_retained_mean": task_mean(lambda row: row["diagnostics_retained"]),
         "diagnostics_introduced_mean": task_mean(lambda row: row["diagnostics_introduced"]),
-        "draft_plus_revision_tokens_mean": task_mean(draft_plus_revision_tokens),
-        "draft_plus_revision_tokens_median": task_median(draft_plus_revision_tokens),
         "revision_tokens_mean": task_mean(lambda row: row["in_tokens"] + row["out_tokens"]),
         "revision_tokens_median": task_median(lambda row: row["in_tokens"] + row["out_tokens"]),
         "turns_mean": task_mean(lambda row: row["turns"]),
         "checker_latency_ms_mean": task_mean(lambda row: row["checker_latency_ms"]),
         "wall_sec_mean": task_mean(lambda row: row["wall_sec"]),
     }
+    result["draft_plus_revision_tokens_estimable"] = draft_cost_available
+    result["draft_plus_revision_tokens_mean"] = (
+        task_mean(lambda row: row["draft_in_tokens"] + row["draft_out_tokens"]
+                  + row["in_tokens"] + row["out_tokens"])
+        if draft_cost_available else None
+    )
+    result["draft_plus_revision_tokens_median"] = (
+        task_median(lambda row: row["draft_in_tokens"] + row["draft_out_tokens"]
+                    + row["in_tokens"] + row["out_tokens"])
+        if draft_cost_available else None
+    )
+    return result
 
 
 def end_to_end_summary(drafts: list[dict], rows: list[dict], arm: str) -> dict:
@@ -100,7 +112,7 @@ def end_to_end_summary(drafts: list[dict], rows: list[dict], arm: str) -> dict:
             "estimable": False, "reason": "missing revision trajectories for eligible drafts",
             "missing_draft_ids": missing,
         }
-    if any("in_tokens" not in draft or "out_tokens" not in draft for draft in drafts):
+    if any(draft.get("in_tokens") is None or draft.get("out_tokens") is None for draft in drafts):
         return {"estimable": False, "reason": "natural draft token cost is missing"}
 
     attempts: dict[str, list[dict]] = {}
@@ -112,7 +124,8 @@ def end_to_end_summary(drafts: list[dict], rows: list[dict], arm: str) -> dict:
                 "held": 0.0, "accepted": 0.0, "accepted_correct": 0.0,
                 "accepted_clean_correct": 0.0, "accepted_behavioral_defect": 0.0,
                 "accepted_semantic_defect": 0.0, "pre_revision_failure": 1.0,
-                "gate_rejection": 0.0, "draft_tokens": draft_tokens,
+                "gate_checked": 0.0, "gate_rejection": 0.0, "gate_acceptance": 0.0,
+                "unsubmitted": 1.0, "draft_tokens": draft_tokens,
                 "revision_tokens": 0.0, "total_tokens": draft_tokens,
             })
             continue
@@ -127,7 +140,10 @@ def end_to_end_summary(drafts: list[dict], rows: list[dict], arm: str) -> dict:
                 "accepted_behavioral_defect": float(row["accepted"] and not row["held_pass"]),
                 "accepted_semantic_defect": float(row["accepted"] and not row["semantic_clean"]),
                 "pre_revision_failure": 0.0,
-                "gate_rejection": float(row["arm"] == "gate" and not row["accepted"]),
+                "gate_checked": float(bool(row["gate_invocations"])),
+                "gate_rejection": float(bool(row["gate_rejections"])),
+                "gate_acceptance": float(bool(row["gate_acceptances"])),
+                "unsubmitted": float(row["unsubmitted"]),
                 "draft_tokens": draft_tokens, "revision_tokens": revision_tokens,
                 "total_tokens": draft_tokens + revision_tokens,
             })
@@ -152,7 +168,10 @@ def end_to_end_summary(drafts: list[dict], rows: list[dict], arm: str) -> dict:
         "accepted_behavioral_defect_rate": task_mean("accepted_behavioral_defect"),
         "accepted_semantic_defect_rate": task_mean("accepted_semantic_defect"),
         "pre_revision_failure_rate": task_mean("pre_revision_failure"),
+        "unsubmitted_rate": task_mean("unsubmitted"),
+        "gate_checked_rate": task_mean("gate_checked"),
         "gate_rejection_rate": task_mean("gate_rejection"),
+        "gate_acceptance_rate": task_mean("gate_acceptance"),
         "draft_tokens_mean": task_mean("draft_tokens"),
         "revision_tokens_mean_including_pre_revision_zeros": task_mean("revision_tokens"),
         "total_tokens_mean": total_cost,
@@ -176,7 +195,7 @@ def expected_cost_per_accepted_correct(
     )]
     if not selected:
         return {"n_tasks": 0, "estimable": False, "reason": "no selected natural drafts"}
-    if any("in_tokens" not in draft or "out_tokens" not in draft for draft in selected):
+    if any(draft.get("in_tokens") is None or draft.get("out_tokens") is None for draft in selected):
         return {"n_tasks": 0, "estimable": False, "reason": "natural draft token cost is missing"}
     by_draft: dict[str, list[dict]] = {}
     for row in rows:
@@ -316,7 +335,10 @@ def end_to_end_contrast(
         "accepted_type_clean_correct": lambda row: row["accepted_type_clean_correct"],
         "accepted_behavioral_defect": lambda row: row["accepted"] and not row["held_pass"],
         "accepted_semantic_defect": lambda row: row["accepted"] and not row["semantic_clean"],
-        "gate_rejection": lambda row: row["arm"] == "gate" and not row["accepted"],
+        "gate_checked": lambda row: bool(row["gate_invocations"]),
+        "gate_rejection": lambda row: bool(row["gate_rejections"]),
+        "gate_acceptance": lambda row: bool(row["gate_acceptances"]),
+        "unsubmitted": lambda row: row["unsubmitted"],
     }
     if field not in outcome:
         raise ValueError(f"unsupported end-to-end field: {field}")
@@ -424,7 +446,10 @@ def main() -> None:
     unexpected = sorted({row["draft_id"] for row in rows} - eligible_ids)
     if unexpected:
         raise ValueError(f"revision rows exist for ineligible drafts: {unexpected}")
-    print("\nREVISION EFFICACY AMONG COHERENT SUBMITTED DRAFTS")
+    heading = ("SELECTED RECOVERED-WORKSPACE REVISION EFFICACY"
+               if payload.get("selection_is_not_a_natural_opportunity_sample")
+               else "REVISION EFFICACY AMONG COHERENT SUBMITTED DRAFTS")
+    print(f"\n{heading}")
     for opportunity_only, subset in (
         (False, "coherent_submitted_revision"),
         (True, "checker_positive_revision"),
@@ -458,7 +483,8 @@ def main() -> None:
     for arm in sorted({row["arm"] for row in rows} - {"control"}):
         for field in (
             "held", "accepted_correct", "accepted_type_clean_correct",
-            "accepted_behavioral_defect", "accepted_semantic_defect", "gate_rejection",
+            "accepted_behavioral_defect", "accepted_semantic_defect", "gate_checked",
+            "gate_rejection", "gate_acceptance", "unsubmitted",
         ):
             end_to_end_contrasts[f"{arm}_minus_control_{field}"] = end_to_end_contrast(
                 drafts, rows, arm, field, args.bootstrap, args.seed

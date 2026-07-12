@@ -5,13 +5,14 @@ import subprocess
 import sys
 
 from scaffold.mock_env import MultiFileEnv
-from scaffold.stream_agent import LINE_EDIT_RE, _strip_fences
+from scaffold.stream_agent import LINE_EDIT_RE, _normalize_inline_edit, _strip_fences
 from scripts.analysis.effic_real_stats import binom_two_sided
 from scripts.analysis.analyze_checker_paired import (
     end_to_end_summary,
     end_to_end_contrast,
     expected_cost_per_accepted_correct,
     paired_contrast,
+    summarize_rows,
 )
 from scripts.analysis.analyze_navigation import interaction, paired_ratio
 from scripts.experiments.diagnostics import collect_diagnostics, delta, format_diagnostics, is_coherent
@@ -109,6 +110,36 @@ def test_line_edit_parser_accepts_same_line_body_without_losing_indentation():
     assert _strip_fences(match["body"]) == "    def f(self):\n        return 1"
 
 
+def test_inline_edit_serialization_is_anchored_to_current_indentation():
+    cases = (
+        (" from lib import fold", "from lib import fold\n", 1,
+         "from lib import fold", "inline_separator_removed"),
+        ("from lib import fold", "from lib import fold\n", 1,
+         "from lib import fold", "inline_exact_indentation"),
+        ("    def f(self):", "    def old(self):\n", 1,
+         "    def f(self):", "inline_exact_indentation"),
+        ("     def f(self):", "    def old(self):\n", 1,
+         "    def f(self):", "inline_separator_removed"),
+    )
+    for body, source, start, expected, mode in cases:
+        assert _normalize_inline_edit(body, source, start) == (expected, mode)
+
+
+def test_inline_edit_serialization_rejects_ambiguous_indentation():
+    assert _normalize_inline_edit("  from lib import fold", "from lib import fold\n", 1) == (
+        None, "ambiguous_inline_indentation"
+    )
+    assert _normalize_inline_edit("\treturn 1", "\treturn 0\n", 1) == (
+        None, "ambiguous_inline_indentation"
+    )
+
+
+def test_newline_edit_body_preserves_leading_space():
+    match = LINE_EDIT_RE.search('<edit path="x.py" lines="1">\n value = 1</edit>')
+    assert match and match["newline"] == "\n"
+    assert _strip_fences(match["body"]) == " value = 1"
+
+
 def test_report_claim_links_have_row_level_ledger_anchors():
     root = Path(__file__).resolve().parents[1]
     report = (root / "REPORT.md").read_text()
@@ -133,7 +164,7 @@ def test_navigation_token_equivalence_uses_ratio_of_task_weighted_means():
     )
     assert result["ratio_of_task_weighted_means"] == 120 / 110
     assert result["mean_task_ratio_descriptive"] == 1.5
-    assert not result["equivalent"]
+    assert not result["exploratory_margin_compatible"]
 
 
 def test_checker_expected_cost_includes_draft_and_failed_attempts():
@@ -169,12 +200,45 @@ def test_checker_end_to_end_counts_incoherent_draft_as_failure():
         "draft_id": "d1", "task": "t1", "arm": "control", "accepted": True,
         "held_pass": True, "type_clean": True, "semantic_clean": True,
         "accepted_type_clean_correct": True,
+        "gate_invocations": 0, "gate_rejections": 0, "gate_acceptances": 0,
+        "unsubmitted": False,
         "in_tokens": 50, "out_tokens": 10,
     }]
     result = end_to_end_summary(drafts, rows, "control")
     assert result["final_held_pass_yield"] == 0.5
     assert result["accepted_correct_yield"] == 0.5
     assert result["pre_revision_failure_rate"] == 0.5
+
+
+def test_checker_summary_keeps_missing_draft_cost_non_estimable():
+    row = {
+        "task": "t", "held_pass": True, "accepted": True, "type_clean": True,
+        "semantic_clean": True, "accepted_type_clean_correct": True,
+        "unsubmitted": False, "gate_invocations": 0, "gate_rejections": 0,
+        "gate_acceptances": 0, "edited_diagnosed_location": True,
+        "diagnostics_eliminated": 1, "diagnostics_retained": 0,
+        "diagnostics_introduced": 0, "draft_in_tokens": None,
+        "draft_out_tokens": None, "in_tokens": 10, "out_tokens": 5,
+        "turns": 1, "checker_latency_ms": 2, "wall_sec": 3,
+    }
+    result = summarize_rows([row])
+    assert not result["draft_plus_revision_tokens_estimable"]
+    assert result["draft_plus_revision_tokens_mean"] is None
+    assert result["revision_tokens_mean"] == 15
+
+
+def test_unsubmitted_gate_is_not_a_rejection():
+    drafts = [{"draft_id": "d", "task": "t", "draft_submitted": True,
+               "coherent": True}]
+    common = {"draft_id": "d", "task": "t", "seed": 0, "accepted": False,
+              "held_pass": False, "semantic_clean": False,
+              "accepted_type_clean_correct": False, "unsubmitted": True,
+              "gate_invocations": 0, "gate_rejections": 0, "gate_acceptances": 0}
+    rows = [{**common, "arm": "control"}, {**common, "arm": "gate"}]
+    rejected = end_to_end_contrast(drafts, rows, "gate", "gate_rejection", 100, 1)
+    unsubmitted = end_to_end_contrast(drafts, rows, "gate", "unsubmitted", 100, 1)
+    assert rejected["mean_delta"] == 0
+    assert unsubmitted["mean_delta"] == 0
 
 
 def test_checker_end_to_end_contrast_uses_joint_correct_clean_acceptance():

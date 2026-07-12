@@ -42,16 +42,23 @@ source hashes without model exposure. The earlier 7B `navigation-v1` pilot used 
 factory return and is retained only as invalid apparatus history. In v2, 7B fails the buggy-span control
 0/2 and a pinned 14B rung reaches 1/2, so neither runs a matrix. After a tested compact-edit parser fix,
 pinned Qwen3.6-27B clears both controls 2/2 and runs the sound matrix. All 12 cells pass, making correctness
-non-identifying; typed automatic context is token-equivalent to typed baseline on these two tasks, erased
-automatic context adds cost, and every automatic result is followed by a target read. This is a
+non-identifying; typed automatic context falls within the token-ratio margin on these two pilot tasks only,
+erased automatic context adds cost, and every automatic result is followed by a target read. Automatic
+resolution also adds about six seconds of composed harness lookup time per task. This is a
 precision/overhead boundary, not the missing useful-compression result, so confirmation remains blocked.
 Fresh checker calibration stops correctly: 7B produces 0/3 coherent drafts, while 14B produces 2/8 and
 both are type-clean. Neither reaches the 20–70% opportunity band.
 A pre-treatment selection artifact therefore freezes the two exact recovered coherent checker-positive
 workspaces for a conditional case series. Pinned Qwen3.6-27B completes paired control, patch-boundary, and
-gate revisions: diagnostics finish type-clean on 2/2 versus 1/2 control, but every arm remains 1/2 on the
-joint accepted-clean-correct outcome. The gate rejects the unresolved task, which control also leaves
-unaccepted; this supports conditional diagnostic cleanup, not pass@1 or accepted-defect improvement.
+gate revisions. The first replay is rejected as outcome evidence: ambiguous same-line edit serialization
+introduces syntax errors on the harder task, creating the apparent terminal-cleanliness difference. Every
+arm remains 1/2 on joint accepted-clean-correct. The unresolved gate trajectory never invokes the gate, so
+the run supplies no gate-prevention evidence.
+A protocol-v2 rerun removes that artifact and records completion/gate events separately. One-shot
+diagnostics finish type-clean on 2/2 selected workspaces versus 1/2 control, but every arm remains 1/2 on
+held pass and accepted-clean-correct; diagnostics add 217 mean revision tokens. The gate accepts the clean
+task, while the unresolved task never invokes it. This is intermediate checker-state evidence, not a
+correctness, prevalence, or prevention result.
 
 See [REPORT.md](REPORT.md) for the evidence, limitations, related work, and practitioner decision table;
 [evidence/claim_ledger.md](evidence/claim_ledger.md) for claim-by-claim status; and
@@ -103,7 +110,8 @@ PYTHON=python3 scripts/run_checker_case_series.sh
 
 The confirmation command is intentionally separate and runs only after the v2 gold-copy and buggy-span
 controls and pilot clear the preregistered gates. Against the completed 27B pilot below, it exits before
-model loading because the causal matrix is uniformly at ceiling:
+model loading because the shared parser changed after the run; the at-run pilot is also uniformly at ceiling
+and therefore scientifically ineligible for confirmation:
 
 ```bash
 PILOT_RUN_ID=qwen36-27b-6a9e13bd-pilot002 RUN_ID=qwen36-27b-confirm001 \
@@ -117,17 +125,14 @@ Historical OpenRouter drivers still require `OPENROUTER_API_KEY` or `.orkey` and
 
 ## Decision recipe
 
-1. Use grep and ranged reads for local, lexically obvious facts.
-2. Test automatically pushed semantic context for ambiguous or remote bindings before expecting LSP-tool election.
-3. Treat sound readable or inferred types as a server precision multiplier, not an LSP alternative.
-4. Improve framing or retrieval-policy training only after an automatic-context upper bound proves value.
-5. Deliver target-scoped checker deltas after coherent patches, not during partial edits.
-6. Consider gates when reliable diagnostics prevent accepted defects that the model cannot reliably repair.
-7. Keep semantic tools only when they replace reads or other work.
+1. Use text search and ranged reads for unique, local bindings.
+2. Use typed semantic resolution for genuinely non-lexical ambiguity.
+3. Keep semantic retrieval only when it replaces substantial reading or prevents wrong-file work.
+4. Run target-scoped diagnostic deltas on coherent agent patches; checker cleanliness is not correctness.
+5. Gate only when telemetry shows prevention of defects the ungated agent would actually submit.
 
-The first, fourth, and seventh rules have narrow or model-specific repository support. The semantic
-navigation mechanism is validated but useful agent value remains open. The selected checker case series
-supports patch-boundary cleanup, not joint outcome improvement; gate prevention remains design guidance.
+Compact retrieval has narrow repository support; useful semantic-navigation value remains open. The repaired
+checker replay shows a selected terminal-state effect without correctness gain; gate prevention remains open.
 The confidence-labeled decision table and claim links are in
 [REPORT.md](REPORT.md#6-practitioner-decision-table).
 

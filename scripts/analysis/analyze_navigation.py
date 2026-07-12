@@ -102,7 +102,7 @@ def paired_ratio(
     rng = random.Random(seed)
     samples = [effect([rng.choice(tasks) for _ in tasks]) for _ in range(bootstrap)]
     interval = [quantile(samples, 0.025), quantile(samples, 0.975)]
-    equivalent = interval[0] >= margin[0] and interval[1] <= margin[1]
+    within_margin = interval[0] >= margin[0] and interval[1] <= margin[1]
     return {
         "n_tasks": len(tasks),
         "ratio_of_task_weighted_means": effect(tasks),
@@ -110,8 +110,11 @@ def paired_ratio(
         "median_task_ratio": statistics.median(ratios),
         "ci95": interval,
         "equivalence_margin": list(margin),
-        "equivalent": equivalent,
-        "interpretation": "equivalent" if equivalent else "inconclusive_or_different",
+        "exploratory_margin_compatible": within_margin,
+        "interpretation": (
+            "exploratory_within_margin_not_population_equivalence"
+            if within_margin else "inconclusive_or_different"
+        ),
     }
 
 
@@ -164,6 +167,15 @@ def summarize_cell(rows: list[dict], variant: str, arm: str) -> dict:
     passes = means("held_out_pass", bool)
     total_tokens = [statistics.mean(row["in_tokens"] + row["out_tokens"] for row in group)
                     for group in grouped.values()]
+    adjusted_wall = [
+        statistics.mean(
+            row["wall_sec"] + (
+                row["server_latency_ms"] / 1000 if row["arm"] == "semantic_auto" else 0
+            )
+            for row in group
+        )
+        for group in grouped.values()
+    ]
     success_mass = sum(passes)
     return {
         "tasks": len(grouped),
@@ -179,7 +191,11 @@ def summarize_cell(rows: list[dict], variant: str, arm: str) -> dict:
         "reads": statistics.mean(means("n_reads")),
         "turns": statistics.mean(means("turns")),
         "wall_sec_mean": statistics.mean(means("wall_sec")),
+        "wall_sec_median": statistics.median(means("wall_sec")),
+        "adjusted_end_to_end_sec_mean": statistics.mean(adjusted_wall),
+        "adjusted_end_to_end_sec_median": statistics.median(adjusted_wall),
         "server_latency_ms_mean": statistics.mean(means("server_latency_ms")),
+        "server_latency_ms_median": statistics.median(means("server_latency_ms")),
         "semantic_election": statistics.mean(
             [statistics.mean(bool(row["n_lsp"]) for row in group) for group in grouped.values()]
         ),

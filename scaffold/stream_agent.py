@@ -28,7 +28,7 @@ The agent is environment-agnostic and expects the env to provide:
   metrics() -> dict
 """
 from __future__ import annotations
-import re, torch
+import hashlib, re, torch
 
 # Robust SEARCH/REPLACE parser: the 7B inconsistently drops the <<<<<<</=======/>>>>>>>
 # markers, so make them optional and terminate the replace at END / blank line / next
@@ -59,7 +59,8 @@ DEFN_RE     = re.compile(                                          # go-to-defin
 NUMPREFIX_RE = re.compile(r'(?m)^\s*\d+\|\s?')   # strip accidental "  3| " file-view prefixes
 # line-range edit: robust for weak models on big files (no string matching).
 LINE_EDIT_RE = re.compile(
-    r'<edit\s+path="(?P<path>[^"]+)"\s+lines="(?P<start>\d+)(?:\s*-\s*(?P<end>\d+))?"\s*>\r?\n?'
+    r'<edit\s+path="(?P<path>[^"]+)"\s+lines="(?P<start>\d+)(?:\s*-\s*(?P<end>\d+))?"\s*>'
+    r'(?P<newline>\r?\n)?'
     r'(?P<body>.*?)\n?\s*</edit>', re.S)   # END optional: accept lines="N" and lines="N-M"
 
 def _strip_fences(s: str) -> str:
@@ -72,6 +73,24 @@ def _strip_fences(s: str) -> str:
     if lines and lines[-1].strip().startswith("```"):
         lines = lines[:-1]
     return NUMPREFIX_RE.sub("", "\n".join(lines))
+
+
+def _normalize_inline_edit(body: str, current_source: str, start: int) -> tuple[str | None, str]:
+    """Remove only an unambiguous one-space inline separator relative to the replaced line."""
+    lines = current_source.splitlines()
+    if not (1 <= start <= len(lines)):
+        return None, "invalid_start_line"
+    current_prefix = re.match(r"[ \t]*", lines[start - 1]).group()
+    body_prefix = re.match(r"[ \t]*", body.split("\n", 1)[0]).group()
+    if "\t" in current_prefix or "\t" in body_prefix:
+        return None, "ambiguous_inline_indentation"
+    expected = len(current_prefix)
+    actual = len(body_prefix)
+    if actual == expected:
+        return body, "inline_exact_indentation"
+    if actual == expected + 1:
+        return body[1:], "inline_separator_removed"
+    return None, "ambiguous_inline_indentation"
 
 TEST_OPEN, TEST_CLOSE = "\n<test_result>\n", "\n</test_result>\n"
 
@@ -476,10 +495,18 @@ class StreamAgent:
                 lm = LINE_EDIT_RE.search(emitted, applied_upto)
                 if lm:
                     applied_upto = lm.end()
-                    body = _strip_fences(lm["body"])
+                    raw_body = lm["body"]
+                    body = _strip_fences(raw_body)
                     epath, s = lm["path"], int(lm["start"])
                     e = int(lm["end"]) if lm["end"] else s
-                    if hasattr(self.env, "apply_line_edit"):
+                    serialization_mode = "newline"
+                    if lm["newline"] is None:
+                        body, serialization_mode = _normalize_inline_edit(
+                            body, self.env.read_file(epath), s
+                        )
+                    if body is None:
+                        ok, info = False, serialization_mode
+                    elif hasattr(self.env, "apply_line_edit"):
                         res = self.env.apply_line_edit(epath, s, e, body)
                         ok = res.ok if hasattr(res, "ok") else res[0]
                         info = res.reason if hasattr(res, "reason") else (res[1] if isinstance(res, tuple) else "")
@@ -491,7 +518,12 @@ class StreamAgent:
                         fail_streak += 1
                     events.append({"tok": t, "type": "line_edit", "path": epath, "lines": f"{s}-{e}",
                                    "ok": ok, "info": str(info)[:80], "fail_streak": fail_streak,
-                                   "replace": body[:300]})
+                                   "replace": (body or "")[:300],
+                                   "serialization_mode": serialization_mode,
+                                   "raw_body_sha256": hashlib.sha256(raw_body.encode()).hexdigest(),
+                                   "applied_body_sha256": (
+                                       hashlib.sha256(body.encode()).hexdigest() if body is not None else None
+                                   )})
                     if fail_streak >= self.max_bad:
                         bailed = True; events.append({"tok": t, "type": "bail", "reason": "edit_fail_streak"}); break
                     if ok and self.auto_check:
@@ -671,9 +703,16 @@ class StreamAgent:
             dm = DONE_RE.search(emitted, done_from)
             if dm:
                 done_from = dm.end()
+                events.append({
+                    "tok": t, "type": "done_attempt",
+                    "prefix_sha256": hashlib.sha256(emitted[:dm.end()].encode()).hexdigest(),
+                })
                 if self.acceptance_gate:
                     obs, n_diag = self._check_obs()
                     n_checks += 1
+                    diagnostics = list(getattr(self.env, "last_raw_diagnostics", []))
+                    events.append({"tok": t, "type": "gate_check", "n": n_checks,
+                                   "n_diag": n_diag, "diagnostics": diagnostics})
                     if n_diag:
                         turns += 1
                         deliver_turn(
@@ -682,7 +721,7 @@ class StreamAgent:
                             + obs + "\n</acceptance_gate>"
                         )
                         events.append({"tok": t, "type": "gate_reject", "n": n_checks,
-                                       "n_diag": n_diag})
+                                       "n_diag": n_diag, "diagnostics": diagnostics})
                         continue
                     events.append({"tok": t, "type": "gate_accept", "n": n_checks,
                                    "n_diag": 0})
@@ -702,5 +741,11 @@ class StreamAgent:
                 "out_tokens": t, "in_tokens": in_toks, "n_tokens": t,
                 "n_edits": n_edits, "n_tests": n_tests, "n_reads": n_reads, "n_greps": 0, "n_lsp": n_lsp,
                 "n_checks": n_checks, "turns": turns,
+                "termination_reason": (
+                    "done" if done_seen else "bailed" if bailed else
+                    "token_budget" if t >= self.max_new else
+                    "turn_budget" if turns >= self.max_turns else
+                    "tests_passed_without_done" if resolved else "model_eos"
+                ),
                 "sft_input_ids": sft_input_ids, "sft_labels": sft_labels,
                 "n_train_tokens": sum(1 for x in kept_labels if x != -100)}

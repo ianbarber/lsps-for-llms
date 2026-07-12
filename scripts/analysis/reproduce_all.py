@@ -58,8 +58,8 @@ def main() -> None:
     run(py, "scripts/analysis/analyze_checker_calibration.py",
         "runs/pilot/checker_drafts_14b.json", "runs/pilot/checker_drafts_14b_ext.json")
     run(py, "scripts/analysis/analyze_checker_paired.py", "--drafts",
-        "runs/protocol/checker_opportunity_case_series_v3.json", "--revisions",
-        "runs/pilot/checker_case_series_qwen36_27b_6a9e13bd_s1.json")
+        "runs/protocol/checker_opportunity_case_series_v4.json", "--revisions",
+        "runs/pilot/checker_case_series_qwen36_27b_6a9e13bd_v2_s1.json")
     with tempfile.TemporaryDirectory(prefix="streams_fast_") as tmp:
         run(py, "scripts/experiments/navigation_tasks.py", "--split", "pilot",
             "--out", str(Path(tmp) / "navigation.json"))
