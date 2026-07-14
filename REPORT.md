@@ -2,78 +2,64 @@
 
 ## Abstract
 
-This report asks when semantic retrieval, name resolution, and diagnostics improve coding-agent correctness
-or reduce total cost compared with text search and file reads. In an 11-task unfamiliar-API benchmark,
-compact definition results reduced mean input tokens by 3.50x for Qwen3.6-27B, 3.65x for Claude Sonnet 4.5,
-and 4.70x for DeepSeek v3.1, with 44/44 successful attempts in both arms for every model. Definition
-retrieval was cheaper on 11/11, 11/11, and 10/11 tasks. This three-model comparison used a static AST
-resolver. A separate live-first Pyrefly/AST hybrid reduced mean input from 2,894 to 689 tokens and raised
-success from 14/24 to 24/24.
+Language servers can help coding agents by resolving bindings that text cannot distinguish, returning
+compact code context, and checking patches. Across the experiments, the recurring boundary is whether
+repository semantics are the bottleneck and whether the integration changes the agent's work. A correct
+definition that neither changes localization nor replaces reading, or a diagnostic the agent cannot act on,
+adds cost without improving the result.
 
-Semantic navigation did not reduce work when the target was already cheap to identify from source. Across
-a 15-task dispatch suite, live goto and text retrieval had matched-success token ratios of 0.945-1.065. In
-a sound typed/erased experiment, typed factory overloads let Pyrefly resolve the correct override while the
-erased variant resolved only the base definition. On two Qwen3.6-27B tasks, however, all conditions passed
-and every automatic semantic result was followed by a target-file read. Typed automatic context used 1.037x
-the baseline tokens; erased automatic context used 1.190x, and lookup took about six seconds per task.
+The experiments test these opportunities separately. Compact definition retrieval cut input tokens by
+3.5-4.7x at unchanged success when it replaced whole-file reads; a live-first Pyrefly/AST hybrid showed the
+same direction. Semantic navigation was near token-neutral when text already exposed the target. In sound
+typed/erased tasks, type information let Pyrefly distinguish the correct implementation from many same-named
+alternatives, but the two-task agent pilot reread every target file and gained neither correctness nor lower
+cost. On two selected workspaces with checker-detectable errors, one-shot diagnostics produced one additional
+type-clean result without improving held-out correctness and added 217 revision tokens. The gate comparison
+did not measure defect prevention.
 
-On two selected checker-positive workspaces, one-shot diagnostics increased type-clean outcomes from 1/2
-to 2/2 while held-out success remained 1/2 and mean revision cost increased by 217 tokens. The gate arms
-contained no valid prevention contrast or rejection event. Use text retrieval for visible, unique bindings;
-use typed semantic resolution for genuine ambiguity; retain semantic retrieval when it replaces larger
-reads; deliver diagnostics on coherent patches; and require accepted-defect telemetry before deploying a
-gate.
+For practitioners, start with the cheapest workflow that resolves the task. Add typed semantic resolution
+when it prevents wrong-target work, compact semantic spans when they replace broad retrieval, and diagnostics
+when coherent patches contain actionable static errors. Measure changed actions and outcomes rather than
+tool calls. Improve election only after demonstrating service value, and deploy gates only when
+measurements show that bad submissions are actually rejected.
 
-## Practitioner recipe
+## Practitioner guide
 
-1. **Use text search and ranged reads for unique, local bindings.** They are cheap, transparent, and hard to
-   beat when the relevant fact is nearby ([C6](evidence/claim_ledger.md#c6),
-   [C9](evidence/claim_ledger.md#c9)).
-2. **Use typed semantic resolution for non-lexical ambiguity.** It is most promising for overloads,
-   inheritance, re-exports, factories, and same-named implementations
-   ([C15](evidence/claim_ledger.md#c15), [C24](evidence/claim_ledger.md#c24)).
-3. **Keep semantic retrieval only when it replaces work.** A definition result followed by the same target
-   read is overhead, not compression ([C1](evidence/claim_ledger.md#c1),
-   [C4](evidence/claim_ledger.md#c4)).
-4. **Run target-scoped diagnostic deltas on coherent patches.** Type cleanliness is useful intermediate
-   evidence, not proof of behavioral correctness ([C11](evidence/claim_ledger.md#c11),
-   [C26](evidence/claim_ledger.md#c26)).
-5. **Gate only when telemetry demonstrates prevention.** A gate should stop a defect the ungated agent would
-   submit, or help produce an accepted clean and correct patch ([C14](evidence/claim_ledger.md#c14),
-   [C26](evidence/claim_ledger.md#c26)).
+| Situation | Default | Evidence in this report | Keep it when |
+|---|---|---|---|
+| The binding is local, visible, and unique | Text search plus ranged reads | Text is competitive when prompts expose the receiver and target ([C6](evidence/claim_ledger.md#c6), [C9](evidence/claim_ledger.md#c9)) | Localization is reliable at low cost |
+| Overloads, inheritance, factories, or re-exports make the target ambiguous | Typed semantic resolution | Sound types improve resolver precision; agent-level benefit remains open ([C15](evidence/claim_ledger.md#c15), [C24](evidence/claim_ledger.md#c24)) | It prevents wrong-target work or reduces retrieval |
+| A compact result can replace broad reading | Definition or enclosing-method span | 3.5-4.7x fewer input tokens against whole-file reads; the live-first result uses a composed Pyrefly/AST integration ([C1](evidence/claim_ledger.md#c1), [C4](evidence/claim_ledger.md#c4)) | The result substitutes for retrieval rather than preceding the same read |
+| A coherent patch contains checker-detectable errors | Show new relevant checker errors after the patch | One additional type-clean result in two selected cases; no correctness gain ([C26](evidence/claim_ledger.md#c26)) | The model repairs the defect and held-out outcomes improve |
+| A useful service is available but rarely chosen | Improve tool description or policy | Prompting and training change election in model-specific runs ([C2](evidence/claim_ledger.md#c2), [C3](evidence/claim_ledger.md#c3)) | Higher election retains correctness and lowers total cost |
 
-Measure substitution, not invocation: did the tool prevent a wrong-file edit, replace a larger read, repair
-an actionable defect, or reject a bad submission?
+**Open integrations:** gate prevention is unmeasured because the local comparison is invalid and contains no
+rejection event ([C14](evidence/claim_ledger.md#c14), [C26](evidence/claim_ledger.md#c26)). Candidate
+reranking, constrained generation, and structured edits are discussed in related work but have no direct
+repository experiment.
 
-## 1. Research question
+## 1. How language-server assistance creates value
 
-> When do semantic retrieval, name resolution, and diagnostics improve coding-agent correctness or reduce
-> total cost compared with text search and file reads?
+Language-server assistance addresses three distinct bottlenecks:
 
-Language servers expose binding resolution, compact definitions and references, diagnostics, and structured
-code operations. Type information makes many of these operations precise; it may be written in source or
-inferred from the program. Type checkers turn that information into consistency diagnostics.
+- **Resolve:** identify the correct program entity when names or local text are ambiguous. Type information,
+  whether written or inferred, can distinguish overloads, implementations, and factory results.
+- **Compress:** return the needed definition, signature, or method span instead of making the agent search
+  and read broader source context.
+- **Validate:** expose a checker-detectable defect in a coherent patch while the agent can still repair it,
+  or prevent a bad patch from being accepted.
 
 Agents can request these services, receive results automatically, or use them through patch feedback,
-acceptance gates, candidate reranking, constrained generation, and training rewards. The integration
-determines whether a correct semantic result changes the work or merely adds context and latency.
+acceptance gates, candidate reranking, structured operations, and training rewards. Delivery changes
+availability and election; it cannot make redundant information useful.
 
-For task `t`:
+The common value chain is:
 
-`value(t) ~= opportunity x correctness x uniqueness x compression x election x actionability - cost`
+`real opportunity -> useful semantic signal -> changed agent action -> lower cost or higher correctness`
 
-A correct goto has no deployment value if the agent ignores it. A compact definition has no compression
-value if the agent then reads the same file. A checker has no revision value on a clean draft, and a correct
-diagnostic has no outcome value if the agent cannot repair it.
-
-| Mechanism | Useful when | Redundant or harmful when |
-|---|---|---|
-| Semantic resolution | Text does not uniquely identify the binding | The binding is visible or cheaply traced |
-| Compact retrieval | A definition or method span replaces a large read | The baseline already uses a small range, or the agent rereads the file |
-| Diagnostics | A coherent patch contains a checker-detectable, repairable defect | The draft is clean, the signal is noisy, or the model cannot revise |
-| Gate or reranking | Cleanliness predicts acceptance and bad candidates occur | False positives dominate or no bad completion reaches the gate |
-| Structured operations | Text edits are ambiguous or unsafe | A simple local edit is already unique and reliable |
-| Training or reward | A valuable tool is available but rarely elected | The policy already chooses and uses it effectively |
+Each step must be measured. Correct resolution is not an agent benefit if the same target was already clear.
+Compact context saves nothing if the agent rereads the file. A diagnostic has no outcome value on a clean
+draft or when the model cannot repair the reported error.
 
 ## 2. Results
 
@@ -92,10 +78,10 @@ in both arms succeeds.
 | Claude Sonnet 4.5 | 3.65x | 11/11 | 3.65 (2.72-5.20) | 44/44 both arms |
 | DeepSeek v3.1 | 4.70x | 10/11 | 6.03 (2.32-10.82) | 44/44 both arms |
 
-The task-level medians are 3.83, 3.01, and 2.70. The gap between DeepSeek's mean and median is a reminder to
-report task distributions rather than only pooled totals. Seeds are repeated runs within tasks; intervals
-resample task means. The three-model comparison uses the repository's static AST resolver and measures
-compact retrieval against whole-file reading ([C1](evidence/claim_ledger.md#c1)).
+The task-level medians are 3.83, 3.01, and 2.70; DeepSeek's distribution is strongly skewed. Seeds are
+repeated runs within tasks, and intervals resample task means. The three-model comparison uses the
+repository's static AST resolver and measures compact retrieval against whole-file reading
+([C1](evidence/claim_ledger.md#c1)).
 
 Tool election is a policy question. In matched local 7B runs, definition-trained and read-trained policies
 both solve 40 cells while mean input falls from 3,191 to 684 tokens. Relabeling raises definition use from
@@ -105,22 +91,22 @@ can change election, but these runs do not establish a model-size law
 
 A live-first Pyrefly suite reduces mean input from 2,894 to 689 tokens and raises success from 14/24 to
 24/24. The tool combines live lookup with AST-selected use sites, span expansion, and fallback, and the rows
-do not record which backend answered. This supports the composed integration, not a pure live-server
-ablation ([C4](evidence/claim_ledger.md#c4)).
+do not record which backend answered. The estimate therefore applies to the composed integration
+([C4](evidence/claim_ledger.md#c4)).
 
-**Takeaway:** compact definitions are valuable when they replace coarse retrieval. Their advantage over an
-efficient grep-and-ranged-read baseline remains untested.
+**Interpretation:** compact definitions reduce cost when they replace coarse retrieval. Their advantage over
+efficient grep plus ranged reads remains unmeasured here.
 
-### 2.2 Semantic navigation needs real ambiguity and real substitution
+### 2.2 Semantic navigation helps when resolution changes the work
 
 A 15-task dispatch suite compares grep/ranged reads with live Pyrefly goto. On the annotated 27B variant,
 grep, neutral goto, and framed goto solve 15/15, 14/15, and 15/15; matched-success token ratios are 0.972 and
 1.041. Stripped and factory-indirection variants remain near one (0.945-1.065).
 
-This is a useful negative regime, not evidence that navigation is generally redundant. Prompts expose the
-concrete receiver and make the correct file cheap to identify. There is no erased or `Any` condition, and
-some variants still describe an annotation that has been removed. The suite shows that goto adds little
-when text already reveals the answer ([C6](evidence/claim_ledger.md#c6),
+The prompts expose the concrete receiver and make the correct file cheap to identify, so this suite measures
+a redundant-navigation regime. It has no erased or `Any` condition, and some variants still describe an
+annotation that has been removed. Goto adds little when text already reveals the answer
+([C6](evidence/claim_ledger.md#c6),
 [C9](evidence/claim_ledger.md#c9)).
 
 The typed/erased navigation pilot isolates this mechanism. Typed and erased repositories have byte-identical
@@ -131,52 +117,39 @@ use site without AST fallback. Mechanical checks confirm that typed lookup reach
 erased lookup returns a non-discriminating base result, widening the key removes the discrimination, and
 both variants are type-clean ([C15](evidence/claim_ledger.md#c15)).
 
-Only Qwen3.6-27B meets the preregistered actionability criterion; the 7B and 14B models do not. The factorial
-estimate therefore covers Qwen3.6-27B on two tasks:
+The 7B and 14B models fail a supplied-span edit control. Qwen3.6-27B passes it, so the two-task comparison
+uses that model:
 
 | Outcome | Result |
 |---|---:|
-| Correctness | All 12 causal/deployment cells pass |
+| Correctness | All 12 task-condition runs pass |
 | Typed automatic / typed textual tokens | 1.037 (task bootstrap 0.988-1.093) |
 | Erased automatic / erased textual tokens | 1.190 (1.119-1.251) |
 | Typed-by-automatic interaction | -214 tokens (-402 to -26) |
 | Automatic-result substitution | Every result is followed by a target-file read |
 | Neutral / framed elective use | 0/2 and 1/2 |
 
-The typed ratio lies inside the prespecified 0.90-1.10 margin for these two pilot tasks only; this is not a
-population equivalence claim. Lookup itself takes about six seconds per task, dominated by a fixed indexing
-wait. Including that lookup, descriptive end-to-end times are about 109 seconds for automatic context and
-64 seconds for textual baselines. Correctness is ceilinged, and the tool does not replace retrieval
-([C24](evidence/claim_ledger.md#c24)).
+The typed ratio lies inside the prespecified 0.90-1.10 margin for these two pilot tasks; two tasks are
+insufficient for population equivalence. Lookup itself takes about six seconds per task, dominated by a
+fixed indexing wait. Including that lookup, descriptive end-to-end times are about 109 seconds for automatic
+context and 64 seconds for textual baselines. Correctness is ceilinged, and the tool does not replace
+retrieval ([C24](evidence/claim_ledger.md#c24)).
 
-**Takeaway:** sound types can make semantic resolution precise. That precision becomes useful only when it
-changes localization or replaces retrieval; automatic delivery alone can turn a correct answer into extra
-context and latency.
+**Interpretation:** sound types improve resolver precision. Agent value requires that precision to change
+localization, prevent wrong-target work, or reduce retrieval; automatic delivery alone can turn a correct
+answer into extra context and latency.
 
-### 2.3 Checker feedback needs opportunity, actionability, and an outcome
+### 2.3 Checker feedback requires a coherent, repairable error
 
-The checker studies mostly test regimes with no measurable headroom:
-
-| Study | Result | What it establishes |
-|---|---|---|
-| Inference suite | 18/18 in every checker and no-checker cell for both frontier models | Ceiling; natural checker opportunity was not measured |
-| Authoring, 27B | 12/12 in no-checker, elective, and after-every-edit arms | No outcome headroom |
-| Authoring, 7B | 6/12 no checker, 3/12 elective, 4/12 noisy; noisy input costs 2.35x | These independently generated live integrations do not help |
-| Exact workspace replay | 2 coherent recovered workspaces are checker-positive; 3 are incoherent and 7 unrecoverable | Checker opportunity exists in a selected subset, not at an estimated prevalence |
-
-Residual-error counts from the authoring study are invalid because they include diagnostics from the
-generated test runner. Independently generated treatment arms also do not isolate the value of diagnostics
-on the same draft. The appropriate unit is a coherent patch frozen before paired revisions
-([C11](evidence/claim_ledger.md#c11)).
-
-Natural-draft calibration yields 0/3 coherent drafts from the 7B model and 2/8 from the 14B model; both
-coherent 14B drafts are type-clean. The sample therefore lacks the required coherence-and-opportunity band.
-This is a calibration result, not a checker null ([C16](evidence/claim_ledger.md#c16),
+The broad checker suites do not isolate feedback value. Frontier inference arms and 27B authoring arms are
+at ceiling (18/18 and 12/12), while the 7B authoring arms use different first drafts. Exact recovery finds
+two coherent workspaces with relevant semantic diagnostics, but natural-draft calibration produces no usable
+opportunity: 0/3 7B drafts are coherent, and the 2/8 coherent 14B drafts are already type-clean
+([C11](evidence/claim_ledger.md#c11), [C16](evidence/claim_ledger.md#c16),
 [C22](evidence/claim_ledger.md#c22)).
 
-A selected case series uses two exact checker-positive recovered workspaces and forks each draft into
-control and one-shot diagnostic revisions using unambiguous indentation-anchored edit serialization. Results
-are:
+A paired case series forks each of the two recovered workspaces into control and one-shot diagnostic
+revisions:
 
 | Outcome | Control | One-shot diagnostics |
 |---|---:|---:|
@@ -186,25 +159,22 @@ are:
 | Mean revision tokens | 1,368 | 1,585 |
 
 Diagnostics improve an intermediate checker state on one selected task, at 217 extra revision tokens, but
-do not improve behavioral or joint success. The sample is two selected workspaces, one seed, and a different
-model from the model that generated the drafts; draft-generation cost is unavailable
+do not improve behavioral or joint success. The sample contains two selected workspaces and one seed;
+draft-generation cost is unavailable
 ([C26](evidence/claim_ledger.md#c26)).
 
-The paired gate arm diverges from control before either attempts completion, so no valid prevention contrast
-exists. It records no rejection event.
+The paired gate arm diverges from control before either attempts completion and records no rejection event,
+so prevention is unmeasured.
 
-**Takeaway:** report checker opportunity, diagnostic deltas, repair behavior, held-out correctness, and total
-cost separately. A cleaner patch is evidence that the checker changed the work, not that the work is right.
+**Interpretation:** diagnostics can improve checker state without improving behavior. Their value depends on
+coherent patches with actionable diagnostics, successful repair, and a better accepted outcome at acceptable
+cost.
 
-### 2.4 Other feedback and external validity
+### 2.4 Execution feedback and external validity
 
 Execution feedback is ceilinged in the committed small-task suite: two frontier models, 14 tasks, three
 seeds, and three delivery modes all pass, for 252/252 attempts. This does not establish equivalence outside
 small simulable functions.
-
-Claims about correction, prevention, repository scaling, and a 35B model that appear only in the research
-log lack the raw artifacts needed for verification. They are excluded from the empirical conclusions and
-classified in the claim ledger.
 
 The bounded real-repository scan found no fully admissible task. One Django case has a working environment
 and substantial override ambiguity, but leakage and fix-site resolution were not fully audited. Both
@@ -212,41 +182,24 @@ recorded arms pass and the semantic tool is not elected. Constructed tasks there
 causal apparatus here, while population validity remains open. The audit and rejection reasons are in
 [docs/external_validity_recon.md](docs/external_validity_recon.md).
 
-## 3. Practitioner decision table
+## 3. Related work
 
-| Situation | Recommended integration | Evidence status | Measure before keeping it |
-|---|---|---|---|
-| Fact is local, visible, and unique | Grep plus ranged reads | Tentative guidance from negative retrieval regimes ([C6](evidence/claim_ledger.md#c6), [C9](evidence/claim_ledger.md#c9)) | Localization success, bytes read, total cost |
-| Binding is ambiguous across overloads, inheritance, factories, or re-exports | Typed semantic result; use automatic delivery first to test the upper bound | Resolver mechanism supported; useful agent benefit open ([C15](evidence/claim_ledger.md#c15), [C24](evidence/claim_ledger.md#c24)) | Exact resolution, wrong-file edits, substitution, latency |
-| A compact result can replace a large read | Definition or enclosing-method span | Supported against whole-file reads; live transfer tentative ([C1](evidence/claim_ledger.md#c1), [C4](evidence/claim_ledger.md#c4)) | Semantic-then-read rate, expected cost per success |
-| Automatic context helps but elective use is low | Cheap, explicit framing; then policy training if the upper bound justifies it | Model- and policy-specific ([C2](evidence/claim_ledger.md#c2), [C3](evidence/claim_ledger.md#c3)) | Election, retained correctness, added context |
-| A coherent patch has checker-detectable errors and the model can revise | Target-scoped diagnostics at the patch boundary | Intermediate-state effect on two selected cases; correctness benefit open ([C26](evidence/claim_ledger.md#c26)) | Opportunity, new/eliminated errors, held-out success, revision cost |
-| Bad submissions occur and cleanliness predicts failure | Acceptance gate | External/design guidance; local causal arm invalid ([C14](evidence/claim_ledger.md#c14), [C26](evidence/claim_ledger.md#c26)) | Identical pre-gate trajectory, rejections, prevented accepted defects, false-positive cost |
-| Several candidates already exist | Checker reranking | External evidence only | Clean-correct ranking precision and candidate cost |
-| Text edits are structurally risky or non-unique | Server/AST rename, references, or structured edit | External evidence only | Semantic preservation, rollback rate, latency |
-
-Static tooling will not solve dynamic behavior, incorrect annotations, `Any`-heavy boundaries, environment
-failures, or logic outside the checker. These are scope boundaries, not all tested null results.
-
-## 4. Related work
-
-Positive prior results generally target missing context, automatic delivery, coherent drafts, or generation
-constraints. Those regimes are compatible with this report's negative results for redundant retrieval and
-noisy feedback.
+Prior work studies missing context, automatic delivery, coherent drafts, and generation constraints. These
+conditions map to different points in the resolve-compress-validate chain.
 
 | Work | Relevant lesson |
 |---|---|
 | [Typed Holes](https://arxiv.org/abs/2409.00921) and [LSPRAG](https://arxiv.org/abs/2510.22210) | Push types, definitions, or references when context is missing; automatic delivery removes election failure. |
 | [STALL+](https://arxiv.org/abs/2406.10018) | Static analysis effects vary by language and integration phase; retrieval and semantic analysis can complement each other. |
 | [CoCoGen](https://arxiv.org/abs/2403.16792) | Check a coherent draft, then retrieve context to repair project/API mismatches. This is the opportunity-conditioned regime absent from after-every-edit feedback. |
-| [CodeStruct](https://arxiv.org/abs/2604.05407) | Structured reads, edits, and syntax validation can improve actionability without making a claim specific to LSP transport or types. |
+| [CodeStruct](https://arxiv.org/abs/2604.05407) | Structured reads, edits, and syntax validation improve actionability through program structure rather than type information. |
 | [CompCoder](https://arxiv.org/abs/2203.05132), [type-constrained generation](https://arxiv.org/abs/2504.09246), and [RLCSF v2](https://arxiv.org/abs/2510.22907) | Compiler and server signals can rank, constrain, or train candidates even when repair-time feedback is not useful. |
 
-The reconciliation is simple: static tooling helps when it supplies missing, correct, compact, actionable
-information at the phase where the model can use it. It does not help when the same fact is already cheap,
-the draft offers no checker opportunity, delivery is ignored or noisy, or the cost exceeds the work saved.
+Across this report and prior work, static tooling helps when it supplies missing, correct, compact,
+actionable information at the phase where the model can use it. The common failure modes are duplicate
+information, no checker opportunity, ignored or noisy delivery, and cost that exceeds the work saved.
 
-## 5. Reproducibility and limits
+## 4. Reproducibility and limits
 
 From a clean clone:
 
@@ -261,6 +214,8 @@ the navigation manipulation checks without making model or API calls. Model runs
 
 The main limits are:
 
+- Static tooling does not address dynamic behavior, incorrect annotations, `Any`-heavy boundaries,
+  environment failures, or logic outside the checker.
 - Compact-retrieval tasks are synthetic and compare against whole-file reads; efficient ranged retrieval is
   the harder baseline.
 - The typed navigation outcome comes from two pilot tasks with ceilinged correctness; there is no outcome
@@ -277,13 +232,12 @@ claim that sound types sharpen semantic resolution.
 
 ## Conclusion
 
-The evidence supports a conditional recipe, not a verdict on LSPs. Compact semantic retrieval clearly helps
-when it replaces whole-file reading. Sound types make ambiguous resolution more precise. Neither fact means
-that a semantic result will save work: in the realistic retrieval and typed navigation pilots, agents often
-obtain the right answer through text or reread the target after receiving it.
+Language-server services can create value by resolving ambiguity, compressing retrieval, or validating a patch.
+The experiments demonstrate compact retrieval against broad reads and type-driven gains in resolver
+precision. They do not yet demonstrate a general navigation benefit, a checker-driven correctness gain, or
+gate prevention.
 
-Checker feedback should be judged the same way. It is useful only where checker-positive coherent drafts
-occur, the model can repair them, and cleaner state predicts a better accepted outcome. This repository
-shows a small intermediate-state improvement, not a correctness or prevention gain. The practical standard
-for every integration is therefore the same: demonstrate a real opportunity, a unique signal, a changed
-action, and lower expected cost per correct result.
+The deployment standard is the same for each service: identify a real opportunity, verify that the semantic
+signal changes the agent's action, and measure whether that change lowers cost or improves correctness.
+Availability and invocation are not outcomes. The useful integration is the smallest targeted operation
+that removes work or prevents an error the agent would otherwise carry forward.
