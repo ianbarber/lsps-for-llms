@@ -1,0 +1,1197 @@
+{
+  "protocol": "navigation-v2",
+  "experiment": "reread-after-span-api",
+  "model": "anthropic/claude-sonnet-4.5",
+  "matched_pricing_id": "anthropic/claude-sonnet-4.5",
+  "config": {
+    "out": "runs/pilot/navigation_v2_reread_api_sonnet45_apparatus.json",
+    "model": "anthropic/claude-sonnet-4.5",
+    "split": "apparatus",
+    "arms": "auto_neutral,auto_sufficient",
+    "names": null,
+    "seed": 0,
+    "temperature": 0.0,
+    "max_turns": 12,
+    "max_reads": 12,
+    "budget_usd": 5.0,
+    "tmp_root": "/tmp/streams_nav_api_reread"
+  },
+  "arms": [
+    "auto_neutral",
+    "auto_sufficient"
+  ],
+  "total_cost_usd": 0.936258,
+  "budget_hit": false,
+  "rows": [
+    {
+      "task": "nav_apparatus_29009",
+      "family": 29009,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_neutral",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 5,
+      "prompt_tokens": 9575,
+      "completion_tokens": 516,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 2,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6019.9,
+      "semantic_supplied_path": "pkg/units/uwmxju.py",
+      "semantic_payload_sha256": "8667ea57493fc99819e2bc81dfa98fdb57066303179dd9b811fd9a8c33f6c648",
+      "est_cost_usd": 0.036465,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uwmxju.py"
+        },
+        {
+          "t": "test",
+          "resolved": false
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uwmxju.py",
+          "lines": "6-6",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 18.4
+    },
+    {
+      "task": "nav_apparatus_29009",
+      "family": 29009,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_sufficient",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 4,
+      "prompt_tokens": 7987,
+      "completion_tokens": 575,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6019.3,
+      "semantic_supplied_path": "pkg/units/uwmxju.py",
+      "semantic_payload_sha256": "8667ea57493fc99819e2bc81dfa98fdb57066303179dd9b811fd9a8c33f6c648",
+      "est_cost_usd": 0.032586,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uwmxju.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uwmxju.py",
+          "lines": "6-6",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 18.7
+    },
+    {
+      "task": "nav_apparatus_29017",
+      "family": 29017,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_neutral",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 4,
+      "prompt_tokens": 8906,
+      "completion_tokens": 661,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6019.9,
+      "semantic_supplied_path": "pkg/units/uffvgm.py",
+      "semantic_payload_sha256": "2a390ff7ce86a793da2740fe8195df767c8f1142be7e75c4909faa57c97cd283",
+      "est_cost_usd": 0.036633,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uffvgm.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uffvgm.py",
+          "lines": "21-21",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 20.8
+    },
+    {
+      "task": "nav_apparatus_29017",
+      "family": 29017,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_sufficient",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 4,
+      "prompt_tokens": 9149,
+      "completion_tokens": 707,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6019.5,
+      "semantic_supplied_path": "pkg/units/uffvgm.py",
+      "semantic_payload_sha256": "2a390ff7ce86a793da2740fe8195df767c8f1142be7e75c4909faa57c97cd283",
+      "est_cost_usd": 0.038052,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uffvgm.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uffvgm.py",
+          "lines": "21-21",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 22.1
+    },
+    {
+      "task": "nav_apparatus_29021",
+      "family": 29021,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_neutral",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 7,
+      "prompt_tokens": 17663,
+      "completion_tokens": 1107,
+      "n_read": 2,
+      "n_edit": 2,
+      "n_test": 3,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6020.0,
+      "semantic_supplied_path": "pkg/units/uakhuo.py",
+      "semantic_payload_sha256": "dbc80c0ccb304a0524c426a5f553951bda759b53d467155f3ca00731f2ca542d",
+      "est_cost_usd": 0.069594,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uakhuo.py"
+        },
+        {
+          "t": "test",
+          "resolved": false
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uakhuo.py",
+          "lines": "21-21",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": false
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uakhuo.py",
+          "lines": "21-21",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 30.4
+    },
+    {
+      "task": "nav_apparatus_29021",
+      "family": 29021,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_sufficient",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 5,
+      "prompt_tokens": 10638,
+      "completion_tokens": 824,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 2,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6020.6,
+      "semantic_supplied_path": "pkg/units/uakhuo.py",
+      "semantic_payload_sha256": "dbc80c0ccb304a0524c426a5f553951bda759b53d467155f3ca00731f2ca542d",
+      "est_cost_usd": 0.044274,
+      "trace": [
+        {
+          "t": "test",
+          "resolved": false
+        },
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uakhuo.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uakhuo.py",
+          "lines": "21-21",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 25.8
+    },
+    {
+      "task": "nav_apparatus_29023",
+      "family": 29023,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_neutral",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 5,
+      "prompt_tokens": 10445,
+      "completion_tokens": 584,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 2,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6020.0,
+      "semantic_supplied_path": "pkg/units/urzwiz.py",
+      "semantic_payload_sha256": "2a82c01a2d068fff29406e7ba6bc646b6445e3bbe7efed9bf464b12df857e93f",
+      "est_cost_usd": 0.040095,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/urzwiz.py"
+        },
+        {
+          "t": "test",
+          "resolved": false
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/urzwiz.py",
+          "lines": "11-11",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 19.7
+    },
+    {
+      "task": "nav_apparatus_29023",
+      "family": 29023,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_sufficient",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 4,
+      "prompt_tokens": 8507,
+      "completion_tokens": 619,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6020.0,
+      "semantic_supplied_path": "pkg/units/urzwiz.py",
+      "semantic_payload_sha256": "2a82c01a2d068fff29406e7ba6bc646b6445e3bbe7efed9bf464b12df857e93f",
+      "est_cost_usd": 0.034806,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/urzwiz.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/urzwiz.py",
+          "lines": "11-11",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 19.4
+    },
+    {
+      "task": "nav_apparatus_29027",
+      "family": 29027,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_neutral",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 5,
+      "prompt_tokens": 9802,
+      "completion_tokens": 599,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 2,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6020.8,
+      "semantic_supplied_path": "pkg/units/uwhbgk.py",
+      "semantic_payload_sha256": "005bd73cdabc74584a10b31af1a23549d709893b90e1deb95bbaa233e22d4ab8",
+      "est_cost_usd": 0.038391,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uwhbgk.py"
+        },
+        {
+          "t": "test",
+          "resolved": false
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uwhbgk.py",
+          "lines": "6-6",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 21.6
+    },
+    {
+      "task": "nav_apparatus_29027",
+      "family": 29027,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_sufficient",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 5,
+      "prompt_tokens": 9503,
+      "completion_tokens": 689,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 2,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6020.9,
+      "semantic_supplied_path": "pkg/units/uwhbgk.py",
+      "semantic_payload_sha256": "005bd73cdabc74584a10b31af1a23549d709893b90e1deb95bbaa233e22d4ab8",
+      "est_cost_usd": 0.038844,
+      "trace": [
+        {
+          "t": "test",
+          "resolved": false
+        },
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uwhbgk.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uwhbgk.py",
+          "lines": "6-6",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 23.8
+    },
+    {
+      "task": "nav_apparatus_29033",
+      "family": 29033,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_neutral",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 4,
+      "prompt_tokens": 8293,
+      "completion_tokens": 597,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 2,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6020.0,
+      "semantic_supplied_path": "pkg/units/ummdkp.py",
+      "semantic_payload_sha256": "b1c81e6724a0a8dfd629b41ce140aedc71ae56a86a01b3f9490cf95cb3e1d716",
+      "est_cost_usd": 0.033834,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/ummdkp.py"
+        },
+        {
+          "t": "test",
+          "resolved": false
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/ummdkp.py",
+          "lines": "6-6",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 20.0
+    },
+    {
+      "task": "nav_apparatus_29033",
+      "family": 29033,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_sufficient",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 4,
+      "prompt_tokens": 8199,
+      "completion_tokens": 717,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6018.6,
+      "semantic_supplied_path": "pkg/units/ummdkp.py",
+      "semantic_payload_sha256": "b1c81e6724a0a8dfd629b41ce140aedc71ae56a86a01b3f9490cf95cb3e1d716",
+      "est_cost_usd": 0.035352,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/ummdkp.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/ummdkp.py",
+          "lines": "6-6",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 22.1
+    },
+    {
+      "task": "nav_apparatus_29059",
+      "family": 29059,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_neutral",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 5,
+      "prompt_tokens": 10164,
+      "completion_tokens": 575,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 2,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6018.4,
+      "semantic_supplied_path": "pkg/units/uwxmrs.py",
+      "semantic_payload_sha256": "1ba9c1d33e80f7a85a4d3a0910142c3f5f3ec67ee1892b2bf9080fa0c55261c3",
+      "est_cost_usd": 0.039117,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uwxmrs.py"
+        },
+        {
+          "t": "test",
+          "resolved": false
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uwxmrs.py",
+          "lines": "6-6",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 20.4
+    },
+    {
+      "task": "nav_apparatus_29059",
+      "family": 29059,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_sufficient",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 4,
+      "prompt_tokens": 8263,
+      "completion_tokens": 600,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6011.2,
+      "semantic_supplied_path": "pkg/units/uwxmrs.py",
+      "semantic_payload_sha256": "1ba9c1d33e80f7a85a4d3a0910142c3f5f3ec67ee1892b2bf9080fa0c55261c3",
+      "est_cost_usd": 0.033789,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uwxmrs.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uwxmrs.py",
+          "lines": "6-6",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 20.6
+    },
+    {
+      "task": "nav_apparatus_29063",
+      "family": 29063,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_neutral",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 5,
+      "prompt_tokens": 11076,
+      "completion_tokens": 670,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 2,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6019.7,
+      "semantic_supplied_path": "pkg/units/ujnqpy.py",
+      "semantic_payload_sha256": "582c7b2192e95bb342cc99f514dfd02a00606d9186ee25434dd6132c8edf25c8",
+      "est_cost_usd": 0.043278,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/ujnqpy.py"
+        },
+        {
+          "t": "test",
+          "resolved": false
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/ujnqpy.py",
+          "lines": "16-16",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 21.7
+    },
+    {
+      "task": "nav_apparatus_29063",
+      "family": 29063,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_sufficient",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 4,
+      "prompt_tokens": 8488,
+      "completion_tokens": 572,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6019.8,
+      "semantic_supplied_path": "pkg/units/ujnqpy.py",
+      "semantic_payload_sha256": "582c7b2192e95bb342cc99f514dfd02a00606d9186ee25434dd6132c8edf25c8",
+      "est_cost_usd": 0.034044,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/units/ujnqpy.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/ujnqpy.py",
+          "lines": "16-16",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 19.5
+    },
+    {
+      "task": "nav_apparatus_29077",
+      "family": 29077,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_neutral",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 4,
+      "prompt_tokens": 8767,
+      "completion_tokens": 608,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 2,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6019.2,
+      "semantic_supplied_path": "pkg/units/uqxoqv.py",
+      "semantic_payload_sha256": "fa3678ea75906e8d75cac2070f055977b9d8e9f407da63857f85d8208955e901",
+      "est_cost_usd": 0.035421,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uqxoqv.py"
+        },
+        {
+          "t": "test",
+          "resolved": false
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uqxoqv.py",
+          "lines": "6-6",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 18.9
+    },
+    {
+      "task": "nav_apparatus_29077",
+      "family": 29077,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_sufficient",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 5,
+      "prompt_tokens": 10814,
+      "completion_tokens": 586,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 2,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6020.6,
+      "semantic_supplied_path": "pkg/units/uqxoqv.py",
+      "semantic_payload_sha256": "fa3678ea75906e8d75cac2070f055977b9d8e9f407da63857f85d8208955e901",
+      "est_cost_usd": 0.041232,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uqxoqv.py"
+        },
+        {
+          "t": "test",
+          "resolved": false
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uqxoqv.py",
+          "lines": "6-6",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 21.0
+    },
+    {
+      "task": "nav_apparatus_29083",
+      "family": 29083,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_neutral",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 5,
+      "prompt_tokens": 10020,
+      "completion_tokens": 528,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 2,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6020.2,
+      "semantic_supplied_path": "pkg/units/ulrzis.py",
+      "semantic_payload_sha256": "ca15116d441373d5e9b36528fe09037ce97f3d042036aa1b7252b8ee854c3326",
+      "est_cost_usd": 0.03798,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/ulrzis.py"
+        },
+        {
+          "t": "test",
+          "resolved": false
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/ulrzis.py",
+          "lines": "16-16",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 20.1
+    },
+    {
+      "task": "nav_apparatus_29083",
+      "family": 29083,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_sufficient",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 4,
+      "prompt_tokens": 8427,
+      "completion_tokens": 655,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6020.3,
+      "semantic_supplied_path": "pkg/units/ulrzis.py",
+      "semantic_payload_sha256": "ca15116d441373d5e9b36528fe09037ce97f3d042036aa1b7252b8ee854c3326",
+      "est_cost_usd": 0.035106,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/ulrzis.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/ulrzis.py",
+          "lines": "16-16",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 21.6
+    },
+    {
+      "task": "nav_apparatus_29089",
+      "family": 29089,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_neutral",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 5,
+      "prompt_tokens": 11174,
+      "completion_tokens": 711,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 2,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6018.9,
+      "semantic_supplied_path": "pkg/units/utufup.py",
+      "semantic_payload_sha256": "c2abb10a78f281bcfefb64fd46ff82681f7a666ee371d91e77b4bc68eac318a8",
+      "est_cost_usd": 0.044187,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/utufup.py"
+        },
+        {
+          "t": "test",
+          "resolved": false
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/utufup.py",
+          "lines": "21-21",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 21.1
+    },
+    {
+      "task": "nav_apparatus_29089",
+      "family": 29089,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_sufficient",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 4,
+      "prompt_tokens": 9068,
+      "completion_tokens": 776,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6020.0,
+      "semantic_supplied_path": "pkg/units/utufup.py",
+      "semantic_payload_sha256": "c2abb10a78f281bcfefb64fd46ff82681f7a666ee371d91e77b4bc68eac318a8",
+      "est_cost_usd": 0.038844,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/utufup.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/utufup.py",
+          "lines": "21-21",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 21.0
+    },
+    {
+      "task": "nav_apparatus_29101",
+      "family": 29101,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_neutral",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 5,
+      "prompt_tokens": 10309,
+      "completion_tokens": 676,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 2,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6019.5,
+      "semantic_supplied_path": "pkg/units/uktdff.py",
+      "semantic_payload_sha256": "64504845245851cde12cbf2bcce09565dc9d6d34caeebd422ea9c330b830c5be",
+      "est_cost_usd": 0.041067,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uktdff.py"
+        },
+        {
+          "t": "test",
+          "resolved": false
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uktdff.py",
+          "lines": "11-11",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 21.2
+    },
+    {
+      "task": "nav_apparatus_29101",
+      "family": 29101,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "auto_sufficient",
+      "seed": 0,
+      "model": "anthropic/claude-sonnet-4.5",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 4,
+      "prompt_tokens": 8009,
+      "completion_tokens": 616,
+      "n_read": 2,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "auto_span_lsp_latency_ms": 6019.8,
+      "semantic_supplied_path": "pkg/units/uktdff.py",
+      "semantic_payload_sha256": "64504845245851cde12cbf2bcce09565dc9d6d34caeebd422ea9c330b830c5be",
+      "est_cost_usd": 0.033267,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uktdff.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uktdff.py",
+          "lines": "11-11",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 20.0
+    }
+  ]
+}

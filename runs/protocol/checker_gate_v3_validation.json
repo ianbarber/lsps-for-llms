@@ -1,0 +1,1709 @@
+{
+  "protocol": "checker-paired-v6",
+  "benchmark": "checker-gate-v3",
+  "kind": "controlled_gate_defect_and_clean_case_series",
+  "selection_is_not_a_natural_opportunity_sample": true,
+  "controlled_cohorts": [
+    "hidden_defect",
+    "clean_negative_control"
+  ],
+  "draft_generation_token_cost_available": false,
+  "selection_rule": "twelve coherent visible-passing, held-out-failing workspaces with exactly one new target-scoped semantic diagnostic, spanning eight checker-detectable defect families with at most two pairs per family, each paired with its exact visible-passing, held-out-passing, diagnostic-clean validated gold counterpart",
+  "generator": "scripts/experiments/checker_hidden.py",
+  "generator_sha256": "e64a0f01a7013efb30541adae4433b3bd871c050306512940a00d9b8a5e999f4",
+  "drafts": [
+    {
+      "draft_id": "hidden-auth_cart_typeddict",
+      "task": "auth_cart_typeddict",
+      "cohort": "hidden_defect",
+      "group": "easy",
+      "seed": 0,
+      "model": "controlled_mutation",
+      "files": {
+        "target.py": "from lib import Item, line_total\n\n\ndef make_item(name: str, qty: int, price: int) -> Item:\n    \"\"\"Build an Item from its fields.\"\"\"\n    return {\"name\": name, \"qty\": qty, \"price\": price}\n\n\ndef cart_total(items: list[Item]) -> int:\n    \"\"\"Total cents across every item's line_total.\"\"\"\n    if not items:\n        return \"empty\"\n    return sum(line_total(it) for it in items)\n\n\ndef priciest(items: list[Item]) -> str:\n    \"\"\"Name of the item with the largest line_total. `items` is non-empty;\n    on a tie return the earliest such item.\"\"\"\n    return max(items, key=line_total)[\"name\"]\n",
+        "lib.py": "from typing import TypedDict\n\n\nclass Item(TypedDict):\n    name: str\n    qty: int\n    price: int\n\n\ndef line_total(item: Item) -> int:\n    \"\"\"Total cents for one line: quantity times unit price.\"\"\"\n    return item[\"qty\"] * item[\"price\"]\n"
+      },
+      "target": "target.py",
+      "test": "from target import make_item, cart_total, priciest\na = make_item(\"pen\", 2, 150)\nb = make_item(\"mug\", 1, 500)\nassert cart_total([a, b]) == 800\nassert priciest([a, b]) == \"mug\"\n",
+      "held_out": "from target import make_item, cart_total, priciest\nassert cart_total([]) == 0\none = make_item(\"x\", 3, 100)\nassert priciest([one]) == \"x\"\ntwo = make_item(\"y\", 5, 60)\nthree = make_item(\"z\", 3, 100)\nassert priciest([two, three]) == \"y\"\nassert cart_total([two, three]) == 600\n",
+      "initial_target_sha256": "4926a7634450d595a2f5281fbae0d4aa37f70aa4e0b3c190ea5a321c23eff719",
+      "draft_target_sha256": "50249062a844fd935004fa941bfbaf7de69ee6e6c6cdaac215e543e4fa90ab86",
+      "file_sha256": {
+        "lib.py": "40a74f72116f7c8c9ac59a9257bb565b83cb3b89dddd4442277b5c78c9654eb0",
+        "target.py": "50249062a844fd935004fa941bfbaf7de69ee6e6c6cdaac215e543e4fa90ab86"
+      },
+      "workspace_sha256": "2d5d242e0c7061abaaf8b2833246c79a27458ba42df8cf15f1f897693c453736",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": false,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [
+        {
+          "path": "target.py",
+          "line": 12,
+          "column": 16,
+          "stop_line": 12,
+          "stop_column": 23,
+          "code": "bad-return",
+          "message": "Returned type `Literal['empty']` is not assignable to declared return type `int`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "  11|     if not items:\n  12|         return \"empty\"\n  13|     return sum(line_total(it) for it in items)"
+        }
+      ],
+      "checker_latency_ms": 97.1,
+      "revision_case_series_eligible": true,
+      "selection_basis": "controlled coherent mutation that passes visible behavior, fails held-out behavior, and adds exactly one target-scoped semantic diagnostic",
+      "mutation_label": "empty-input wrong return type",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "4926a7634450d595a2f5281fbae0d4aa37f70aa4e0b3c190ea5a321c23eff719"
+      },
+      "defect_family": "wrong-return-type"
+    },
+    {
+      "draft_id": "clean-auth_cart_typeddict",
+      "task": "auth_cart_typeddict",
+      "cohort": "clean_negative_control",
+      "matched_defect_draft_id": "hidden-auth_cart_typeddict",
+      "group": "easy",
+      "seed": 0,
+      "model": "controlled_gold",
+      "files": {
+        "target.py": "from lib import Item, line_total\n\n\ndef make_item(name: str, qty: int, price: int) -> Item:\n    \"\"\"Build an Item from its fields.\"\"\"\n    return {\"name\": name, \"qty\": qty, \"price\": price}\n\n\ndef cart_total(items: list[Item]) -> int:\n    \"\"\"Total cents across every item's line_total.\"\"\"\n    return sum(line_total(it) for it in items)\n\n\ndef priciest(items: list[Item]) -> str:\n    \"\"\"Name of the item with the largest line_total. `items` is non-empty;\n    on a tie return the earliest such item.\"\"\"\n    return max(items, key=line_total)[\"name\"]\n",
+        "lib.py": "from typing import TypedDict\n\n\nclass Item(TypedDict):\n    name: str\n    qty: int\n    price: int\n\n\ndef line_total(item: Item) -> int:\n    \"\"\"Total cents for one line: quantity times unit price.\"\"\"\n    return item[\"qty\"] * item[\"price\"]\n"
+      },
+      "target": "target.py",
+      "test": "from target import make_item, cart_total, priciest\na = make_item(\"pen\", 2, 150)\nb = make_item(\"mug\", 1, 500)\nassert cart_total([a, b]) == 800\nassert priciest([a, b]) == \"mug\"\n",
+      "held_out": "from target import make_item, cart_total, priciest\nassert cart_total([]) == 0\none = make_item(\"x\", 3, 100)\nassert priciest([one]) == \"x\"\ntwo = make_item(\"y\", 5, 60)\nthree = make_item(\"z\", 3, 100)\nassert priciest([two, three]) == \"y\"\nassert cart_total([two, three]) == 600\n",
+      "initial_target_sha256": "4926a7634450d595a2f5281fbae0d4aa37f70aa4e0b3c190ea5a321c23eff719",
+      "draft_target_sha256": "4926a7634450d595a2f5281fbae0d4aa37f70aa4e0b3c190ea5a321c23eff719",
+      "file_sha256": {
+        "lib.py": "40a74f72116f7c8c9ac59a9257bb565b83cb3b89dddd4442277b5c78c9654eb0",
+        "target.py": "4926a7634450d595a2f5281fbae0d4aa37f70aa4e0b3c190ea5a321c23eff719"
+      },
+      "workspace_sha256": "314de6b20c25685880aeeaf11651db1a1be71aab23183671d50869eb58a6c2f6",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": true,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [],
+      "checker_latency_ms": 118.1,
+      "revision_case_series_eligible": true,
+      "selection_basis": "exact validated gold counterpart to the matched hidden-defect workspace; visible and held-out behavior pass with no target-scoped diagnostic delta",
+      "mutation_label": "matched clean gold",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "4926a7634450d595a2f5281fbae0d4aa37f70aa4e0b3c190ea5a321c23eff719"
+      },
+      "matched_defect_family": "wrong-return-type"
+    },
+    {
+      "draft_id": "hidden-auth_bank_dataclass",
+      "task": "auth_bank_dataclass",
+      "cohort": "hidden_defect",
+      "group": "easy",
+      "seed": 0,
+      "model": "controlled_mutation",
+      "files": {
+        "target.py": "from lib import Account, InsufficientFunds\n\n\nclass Bank:\n    \"\"\"A collection of named accounts.\"\"\"\n\n    def __init__(self) -> None:\n        self._accounts: dict[str, Account] = {}\n\n    def open(self, owner: str) -> Account:\n        acct = Account(owner)\n        self._accounts[owner] = acct\n        return acct\n\n    def deposit(self, owner: str, amount: int) -> None:\n        self._accounts[owner].deposit(amount)\n\n    def transfer(self, src: str, dst: str, amount: int) -> bool:\n        source = self._accounts[src]\n        try:\n            source.withdraw(amount)\n        except InsufficientFunds:\n            return source.failed\n        self._accounts[dst].deposit(amount)\n        return True\n\n    def total_assets(self) -> int:\n        return sum(a.balance for a in self._accounts.values())\n",
+        "lib.py": "from dataclasses import dataclass\n\n\nclass InsufficientFunds(Exception):\n    \"\"\"Raised when an account cannot cover a debit.\"\"\"\n\n\n@dataclass\nclass Account:\n    owner: str\n    balance: int = 0\n\n    def deposit(self, amount: int) -> None:\n        self.balance += amount\n\n    def withdraw(self, amount: int) -> None:\n        if amount > self.balance:\n            raise InsufficientFunds(self.owner)\n        self.balance -= amount\n"
+      },
+      "target": "target.py",
+      "test": "from target import Bank\nb = Bank()\nb.open(\"alice\")\nb.open(\"bob\")\nb.deposit(\"alice\", 100)\nassert b.transfer(\"alice\", \"bob\", 40) is True\nassert b.total_assets() == 100\n",
+      "held_out": "from target import Bank\nb = Bank()\nb.open(\"alice\")\nb.open(\"bob\")\nb.deposit(\"alice\", 30)\nassert b.transfer(\"alice\", \"bob\", 50) is False\nassert b.total_assets() == 30\nassert b.transfer(\"alice\", \"bob\", 30) is True\nassert b.total_assets() == 30\n",
+      "initial_target_sha256": "b88debf790f4d44d39a323e0cd676eb3b4b075c48a7b26844e890ccf5e8e179f",
+      "draft_target_sha256": "2ae0d11538be3a740572bfa8a5a4d389a7e728bf8d01f47d554bf29d043c0b60",
+      "file_sha256": {
+        "lib.py": "93b4c0188c95b25f0a217321303e17a6b4d3b4a2210bd73991253e3931097635",
+        "target.py": "2ae0d11538be3a740572bfa8a5a4d389a7e728bf8d01f47d554bf29d043c0b60"
+      },
+      "workspace_sha256": "2ce85c255b3ef350b27ae78c5b6c4af7414270a4d46d9662a9f87ebd4dc86f66",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": false,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [
+        {
+          "path": "target.py",
+          "line": 23,
+          "column": 20,
+          "stop_line": 23,
+          "stop_column": 33,
+          "code": "missing-attribute",
+          "message": "Object of class `Account` has no attribute `failed`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "  22|         except InsufficientFunds:\n  23|             return source.failed\n  24|         self._accounts[dst].deposit(amount)"
+        }
+      ],
+      "checker_latency_ms": 125.1,
+      "revision_case_series_eligible": true,
+      "selection_basis": "controlled coherent mutation that passes visible behavior, fails held-out behavior, and adds exactly one target-scoped semantic diagnostic",
+      "mutation_label": "insufficient-funds attribute typo",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "b88debf790f4d44d39a323e0cd676eb3b4b075c48a7b26844e890ccf5e8e179f"
+      },
+      "defect_family": "attribute-typo"
+    },
+    {
+      "draft_id": "clean-auth_bank_dataclass",
+      "task": "auth_bank_dataclass",
+      "cohort": "clean_negative_control",
+      "matched_defect_draft_id": "hidden-auth_bank_dataclass",
+      "group": "easy",
+      "seed": 0,
+      "model": "controlled_gold",
+      "files": {
+        "target.py": "from lib import Account, InsufficientFunds\n\n\nclass Bank:\n    \"\"\"A collection of named accounts.\"\"\"\n\n    def __init__(self) -> None:\n        self._accounts: dict[str, Account] = {}\n\n    def open(self, owner: str) -> Account:\n        acct = Account(owner)\n        self._accounts[owner] = acct\n        return acct\n\n    def deposit(self, owner: str, amount: int) -> None:\n        self._accounts[owner].deposit(amount)\n\n    def transfer(self, src: str, dst: str, amount: int) -> bool:\n        source = self._accounts[src]\n        try:\n            source.withdraw(amount)\n        except InsufficientFunds:\n            return False\n        self._accounts[dst].deposit(amount)\n        return True\n\n    def total_assets(self) -> int:\n        return sum(a.balance for a in self._accounts.values())\n",
+        "lib.py": "from dataclasses import dataclass\n\n\nclass InsufficientFunds(Exception):\n    \"\"\"Raised when an account cannot cover a debit.\"\"\"\n\n\n@dataclass\nclass Account:\n    owner: str\n    balance: int = 0\n\n    def deposit(self, amount: int) -> None:\n        self.balance += amount\n\n    def withdraw(self, amount: int) -> None:\n        if amount > self.balance:\n            raise InsufficientFunds(self.owner)\n        self.balance -= amount\n"
+      },
+      "target": "target.py",
+      "test": "from target import Bank\nb = Bank()\nb.open(\"alice\")\nb.open(\"bob\")\nb.deposit(\"alice\", 100)\nassert b.transfer(\"alice\", \"bob\", 40) is True\nassert b.total_assets() == 100\n",
+      "held_out": "from target import Bank\nb = Bank()\nb.open(\"alice\")\nb.open(\"bob\")\nb.deposit(\"alice\", 30)\nassert b.transfer(\"alice\", \"bob\", 50) is False\nassert b.total_assets() == 30\nassert b.transfer(\"alice\", \"bob\", 30) is True\nassert b.total_assets() == 30\n",
+      "initial_target_sha256": "b88debf790f4d44d39a323e0cd676eb3b4b075c48a7b26844e890ccf5e8e179f",
+      "draft_target_sha256": "b88debf790f4d44d39a323e0cd676eb3b4b075c48a7b26844e890ccf5e8e179f",
+      "file_sha256": {
+        "lib.py": "93b4c0188c95b25f0a217321303e17a6b4d3b4a2210bd73991253e3931097635",
+        "target.py": "b88debf790f4d44d39a323e0cd676eb3b4b075c48a7b26844e890ccf5e8e179f"
+      },
+      "workspace_sha256": "380a1871a7dacb8c85356a5b896bb0792c338fb33eef45feb6b3c27ae6813415",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": true,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [],
+      "checker_latency_ms": 99.8,
+      "revision_case_series_eligible": true,
+      "selection_basis": "exact validated gold counterpart to the matched hidden-defect workspace; visible and held-out behavior pass with no target-scoped diagnostic delta",
+      "mutation_label": "matched clean gold",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "b88debf790f4d44d39a323e0cd676eb3b4b075c48a7b26844e890ccf5e8e179f"
+      },
+      "matched_defect_family": "attribute-typo"
+    },
+    {
+      "draft_id": "hidden-auth_multimap_generic",
+      "task": "auth_multimap_generic",
+      "cohort": "hidden_defect",
+      "group": "med",
+      "seed": 0,
+      "model": "controlled_mutation",
+      "files": {
+        "target.py": "from typing import Generic, TypeVar\nfrom lib import Pair\n\nK = TypeVar(\"K\")\nV = TypeVar(\"V\")\n\n\nclass MultiMap(Generic[K, V]):\n    \"\"\"A map from each key to a list of values, in insertion order.\"\"\"\n\n    def __init__(self) -> None:\n        self._data: dict[K, list[V]] = {}\n\n    def add(self, key: K, value: V) -> None:\n        self._data.setdefault(key, []).append(value)\n\n    def get(self, key: K) -> list[V]:\n        return list(self._data.get(key, []))\n\n    def pairs(self) -> list[Pair[K, V]]:\n        out: list[Pair[K, V]] = []\n        for key, values in self._data.items():\n            for value in values:\n                out.append((key, value))\n        return out\n",
+        "lib.py": "from typing import Generic, TypeVar\n\nK = TypeVar(\"K\")\nV = TypeVar(\"V\")\n\n\nclass Pair(Generic[K, V]):\n    \"\"\"An immutable key/value pair.\"\"\"\n\n    def __init__(self, key: K, value: V) -> None:\n        self.key = key\n        self.value = value\n"
+      },
+      "target": "target.py",
+      "test": "from target import MultiMap\nm: MultiMap[str, int] = MultiMap()\nm.add(\"a\", 1)\nm.add(\"a\", 2)\nm.add(\"b\", 3)\nassert m.get(\"a\") == [1, 2]\nassert m.get(\"z\") == []\n",
+      "held_out": "from target import MultiMap\nm: MultiMap[str, int] = MultiMap()\nm.add(\"x\", 10)\nm.add(\"y\", 20)\nm.add(\"x\", 11)\nps = m.pairs()\nassert [(p.key, p.value) for p in ps] == [(\"x\", 10), (\"x\", 11), (\"y\", 20)]\n",
+      "initial_target_sha256": "30f01ec9c08aedb79246692d4eb52fe0acdc4f542b344f27b4a567e82722b9bf",
+      "draft_target_sha256": "0f404e6df24a234b095365ed2987dcd67b58a22ec094147f54ff4cdc6a9d411e",
+      "file_sha256": {
+        "lib.py": "9efd11dc3d77aa3103b83cd48ed00c7055da35695ecddb1f74e6e15068d32a9b",
+        "target.py": "0f404e6df24a234b095365ed2987dcd67b58a22ec094147f54ff4cdc6a9d411e"
+      },
+      "workspace_sha256": "a48593db0f45262d465971c0c1063ba2df4bba86ce0473ab9199176df18b2b85",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": false,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [
+        {
+          "path": "target.py",
+          "line": 24,
+          "column": 28,
+          "stop_line": 24,
+          "stop_column": 40,
+          "code": "bad-argument-type",
+          "message": "Argument `tuple[K, V]` is not assignable to parameter `object` with type `Pair[K, V]` in function `list.append`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "  23|             for value in values:\n  24|                 out.append((key, value))\n  25|         return out"
+        }
+      ],
+      "checker_latency_ms": 132.6,
+      "revision_case_series_eligible": true,
+      "selection_basis": "controlled coherent mutation that passes visible behavior, fails held-out behavior, and adds exactly one target-scoped semantic diagnostic",
+      "mutation_label": "generic pair represented by the wrong type",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "30f01ec9c08aedb79246692d4eb52fe0acdc4f542b344f27b4a567e82722b9bf"
+      },
+      "defect_family": "misused-generic-container"
+    },
+    {
+      "draft_id": "clean-auth_multimap_generic",
+      "task": "auth_multimap_generic",
+      "cohort": "clean_negative_control",
+      "matched_defect_draft_id": "hidden-auth_multimap_generic",
+      "group": "med",
+      "seed": 0,
+      "model": "controlled_gold",
+      "files": {
+        "target.py": "from typing import Generic, TypeVar\nfrom lib import Pair\n\nK = TypeVar(\"K\")\nV = TypeVar(\"V\")\n\n\nclass MultiMap(Generic[K, V]):\n    \"\"\"A map from each key to a list of values, in insertion order.\"\"\"\n\n    def __init__(self) -> None:\n        self._data: dict[K, list[V]] = {}\n\n    def add(self, key: K, value: V) -> None:\n        self._data.setdefault(key, []).append(value)\n\n    def get(self, key: K) -> list[V]:\n        return list(self._data.get(key, []))\n\n    def pairs(self) -> list[Pair[K, V]]:\n        out: list[Pair[K, V]] = []\n        for key, values in self._data.items():\n            for value in values:\n                out.append(Pair(key, value))\n        return out\n",
+        "lib.py": "from typing import Generic, TypeVar\n\nK = TypeVar(\"K\")\nV = TypeVar(\"V\")\n\n\nclass Pair(Generic[K, V]):\n    \"\"\"An immutable key/value pair.\"\"\"\n\n    def __init__(self, key: K, value: V) -> None:\n        self.key = key\n        self.value = value\n"
+      },
+      "target": "target.py",
+      "test": "from target import MultiMap\nm: MultiMap[str, int] = MultiMap()\nm.add(\"a\", 1)\nm.add(\"a\", 2)\nm.add(\"b\", 3)\nassert m.get(\"a\") == [1, 2]\nassert m.get(\"z\") == []\n",
+      "held_out": "from target import MultiMap\nm: MultiMap[str, int] = MultiMap()\nm.add(\"x\", 10)\nm.add(\"y\", 20)\nm.add(\"x\", 11)\nps = m.pairs()\nassert [(p.key, p.value) for p in ps] == [(\"x\", 10), (\"x\", 11), (\"y\", 20)]\n",
+      "initial_target_sha256": "30f01ec9c08aedb79246692d4eb52fe0acdc4f542b344f27b4a567e82722b9bf",
+      "draft_target_sha256": "30f01ec9c08aedb79246692d4eb52fe0acdc4f542b344f27b4a567e82722b9bf",
+      "file_sha256": {
+        "lib.py": "9efd11dc3d77aa3103b83cd48ed00c7055da35695ecddb1f74e6e15068d32a9b",
+        "target.py": "30f01ec9c08aedb79246692d4eb52fe0acdc4f542b344f27b4a567e82722b9bf"
+      },
+      "workspace_sha256": "eccd39b107077ecb9180c3e05452940309c2476644aecf8a4a5f28b14bd761eb",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": true,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [],
+      "checker_latency_ms": 96.9,
+      "revision_case_series_eligible": true,
+      "selection_basis": "exact validated gold counterpart to the matched hidden-defect workspace; visible and held-out behavior pass with no target-scoped diagnostic delta",
+      "mutation_label": "matched clean gold",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "30f01ec9c08aedb79246692d4eb52fe0acdc4f542b344f27b4a567e82722b9bf"
+      },
+      "matched_defect_family": "misused-generic-container"
+    },
+    {
+      "draft_id": "hidden-auth_shapes_protocol",
+      "task": "auth_shapes_protocol",
+      "cohort": "hidden_defect",
+      "group": "med",
+      "seed": 0,
+      "model": "controlled_mutation",
+      "files": {
+        "target.py": "import math\nfrom lib import Shape, summary\n\n\nclass Circle:\n    \"\"\"A circle of the given radius.\"\"\"\n\n    def __init__(self, radius: float) -> None:\n        self.radius = radius\n\n    def area(self) -> float:\n        if self.radius == 2.0:\n            return float(self.radi)\n        return math.pi * self.radius * self.radius\n\n    def label(self) -> str:\n        return \"circle\"\n\n\nclass Square:\n    \"\"\"A square of the given side length.\"\"\"\n\n    def __init__(self, side: float) -> None:\n        self.side = side\n\n    def area(self) -> float:\n        return self.side * self.side\n\n    def label(self) -> str:\n        return \"square\"\n\n\ndef report(shapes: list[Shape]) -> str:\n    return summary(shapes)\n\n\ndef default_report() -> str:\n    shapes: list[Shape] = [Circle(1.0), Square(1.0)]\n    return summary(shapes)\n",
+        "lib.py": "from typing import Protocol\n\n\nclass Shape(Protocol):\n    def area(self) -> float: ...\n    def label(self) -> str: ...\n\n\ndef summary(shapes: list[Shape]) -> str:\n    \"\"\"One 'label=area' term per shape (area to 1 dp), joined by ', '.\"\"\"\n    return \", \".join(f\"{s.label()}={s.area():.1f}\" for s in shapes)\n"
+      },
+      "target": "target.py",
+      "test": "from target import Circle, Square, report, default_report\nr = report([Circle(1.0), Square(2.0)])\nassert \"circle=3.1\" in r\nassert \"square=4.0\" in r\nassert default_report().count(\"=\") == 2\n",
+      "held_out": "from target import Circle, Square, report\nshapes = [Square(3.0), Circle(2.0)]\nassert report(shapes) == \"square=9.0, circle=12.6\"\n",
+      "initial_target_sha256": "251f19a4ce6f640e86dbe3d0e238102e01d17bc698b92ad1537e3fa3c2d5f8d3",
+      "draft_target_sha256": "d911f181838121dc1b97414640a577bbccd149e19b8c405a7ec9dcc687be921b",
+      "file_sha256": {
+        "lib.py": "6504f47f0389f9c244158310ffbcf8a2e7c3abe0ce52d69dae57fc4f69cdd897",
+        "target.py": "d911f181838121dc1b97414640a577bbccd149e19b8c405a7ec9dcc687be921b"
+      },
+      "workspace_sha256": "0ec583808f286080c7e2785d1dbc3dab4c5531c7dccc115dfce5dcab569390cb",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": false,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [
+        {
+          "path": "target.py",
+          "line": 13,
+          "column": 26,
+          "stop_line": 13,
+          "stop_column": 35,
+          "code": "missing-attribute",
+          "message": "Object of class `Circle` has no attribute `radi`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "  12|         if self.radius == 2.0:\n  13|             return float(self.radi)\n  14|         return math.pi * self.radius * self.radius"
+        }
+      ],
+      "checker_latency_ms": 120.4,
+      "revision_case_series_eligible": true,
+      "selection_basis": "controlled coherent mutation that passes visible behavior, fails held-out behavior, and adds exactly one target-scoped semantic diagnostic",
+      "mutation_label": "held-out radius attribute typo",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "251f19a4ce6f640e86dbe3d0e238102e01d17bc698b92ad1537e3fa3c2d5f8d3"
+      },
+      "defect_family": "attribute-typo"
+    },
+    {
+      "draft_id": "clean-auth_shapes_protocol",
+      "task": "auth_shapes_protocol",
+      "cohort": "clean_negative_control",
+      "matched_defect_draft_id": "hidden-auth_shapes_protocol",
+      "group": "med",
+      "seed": 0,
+      "model": "controlled_gold",
+      "files": {
+        "target.py": "import math\nfrom lib import Shape, summary\n\n\nclass Circle:\n    \"\"\"A circle of the given radius.\"\"\"\n\n    def __init__(self, radius: float) -> None:\n        self.radius = radius\n\n    def area(self) -> float:\n        return math.pi * self.radius * self.radius\n\n    def label(self) -> str:\n        return \"circle\"\n\n\nclass Square:\n    \"\"\"A square of the given side length.\"\"\"\n\n    def __init__(self, side: float) -> None:\n        self.side = side\n\n    def area(self) -> float:\n        return self.side * self.side\n\n    def label(self) -> str:\n        return \"square\"\n\n\ndef report(shapes: list[Shape]) -> str:\n    return summary(shapes)\n\n\ndef default_report() -> str:\n    shapes: list[Shape] = [Circle(1.0), Square(1.0)]\n    return summary(shapes)\n",
+        "lib.py": "from typing import Protocol\n\n\nclass Shape(Protocol):\n    def area(self) -> float: ...\n    def label(self) -> str: ...\n\n\ndef summary(shapes: list[Shape]) -> str:\n    \"\"\"One 'label=area' term per shape (area to 1 dp), joined by ', '.\"\"\"\n    return \", \".join(f\"{s.label()}={s.area():.1f}\" for s in shapes)\n"
+      },
+      "target": "target.py",
+      "test": "from target import Circle, Square, report, default_report\nr = report([Circle(1.0), Square(2.0)])\nassert \"circle=3.1\" in r\nassert \"square=4.0\" in r\nassert default_report().count(\"=\") == 2\n",
+      "held_out": "from target import Circle, Square, report\nshapes = [Square(3.0), Circle(2.0)]\nassert report(shapes) == \"square=9.0, circle=12.6\"\n",
+      "initial_target_sha256": "251f19a4ce6f640e86dbe3d0e238102e01d17bc698b92ad1537e3fa3c2d5f8d3",
+      "draft_target_sha256": "251f19a4ce6f640e86dbe3d0e238102e01d17bc698b92ad1537e3fa3c2d5f8d3",
+      "file_sha256": {
+        "lib.py": "6504f47f0389f9c244158310ffbcf8a2e7c3abe0ce52d69dae57fc4f69cdd897",
+        "target.py": "251f19a4ce6f640e86dbe3d0e238102e01d17bc698b92ad1537e3fa3c2d5f8d3"
+      },
+      "workspace_sha256": "7254947f58bc9f0b72aba9a78c675ed7b1ac6ac2323a4366eaf6736fd0c4fdb1",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": true,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [],
+      "checker_latency_ms": 122.1,
+      "revision_case_series_eligible": true,
+      "selection_basis": "exact validated gold counterpart to the matched hidden-defect workspace; visible and held-out behavior pass with no target-scoped diagnostic delta",
+      "mutation_label": "matched clean gold",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "251f19a4ce6f640e86dbe3d0e238102e01d17bc698b92ad1537e3fa3c2d5f8d3"
+      },
+      "matched_defect_family": "attribute-typo"
+    },
+    {
+      "draft_id": "hidden-auth_machine_enum",
+      "task": "auth_machine_enum",
+      "cohort": "hidden_defect",
+      "group": "med",
+      "seed": 0,
+      "model": "controlled_mutation",
+      "files": {
+        "target.py": "from lib import State, TRANSITIONS\n\n\nclass Machine:\n    \"\"\"A finite-state machine over State, starting in IDLE.\"\"\"\n\n    def __init__(self) -> None:\n        self._state = State.IDLE\n\n    def current(self) -> State:\n        return self._state\n\n    def can(self, target: State) -> bool:\n        if self._state is State.DONE:\n            return target in TRANSITIONS[\"done\"]\n        return target in TRANSITIONS[self._state]\n\n    def to(self, target: State) -> None:\n        if target not in TRANSITIONS[self._state]:\n            raise ValueError(f\"cannot go {self._state} -> {target}\")\n        self._state = target\n",
+        "lib.py": "from enum import Enum\n\n\nclass State(Enum):\n    IDLE = \"idle\"\n    RUNNING = \"running\"\n    DONE = \"done\"\n\n\nTRANSITIONS: dict[State, set[State]] = {\n    State.IDLE: {State.RUNNING},\n    State.RUNNING: {State.DONE, State.IDLE},\n    State.DONE: set(),\n}\n"
+      },
+      "target": "target.py",
+      "test": "from target import Machine\nfrom lib import State\nm = Machine()\nassert m.current() == State.IDLE\nassert m.can(State.RUNNING) is True\nm.to(State.RUNNING)\nassert m.current() == State.RUNNING\n",
+      "held_out": "from target import Machine\nfrom lib import State\nm = Machine()\nm.to(State.RUNNING)\nassert m.can(State.IDLE) is True\nassert m.can(State.DONE) is True\nm.to(State.DONE)\nassert m.can(State.RUNNING) is False\nraised = False\ntry:\n    m.to(State.RUNNING)\nexcept ValueError:\n    raised = True\nassert raised\n",
+      "initial_target_sha256": "424aff4ec526fcef2f5acae7058b2d274a6a716c4ee51bf8101dc8160ff1d115",
+      "draft_target_sha256": "8c6334666be968f5c1ddc2b1146835a7414874a8729ed5356ab5c03014d0dffc",
+      "file_sha256": {
+        "lib.py": "3c8bb32bd97e623a2af225cd7d25552637264b5612d0eb0700a5a8e8037fdc39",
+        "target.py": "8c6334666be968f5c1ddc2b1146835a7414874a8729ed5356ab5c03014d0dffc"
+      },
+      "workspace_sha256": "359fbec7015f8777210631d84e5291a4ec8a48b17ef0d1dec2217fb2bcfd5517",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": false,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [
+        {
+          "path": "target.py",
+          "line": 15,
+          "column": 42,
+          "stop_line": 15,
+          "stop_column": 48,
+          "code": "bad-index",
+          "message": "Cannot index into `dict[State, set[State]]`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "  14|         if self._state is State.DONE:\n  15|             return target in TRANSITIONS[\"done\"]\n  16|         return target in TRANSITIONS[self._state]"
+        }
+      ],
+      "checker_latency_ms": 139.3,
+      "revision_case_series_eligible": true,
+      "selection_basis": "controlled coherent mutation that passes visible behavior, fails held-out behavior, and adds exactly one target-scoped semantic diagnostic",
+      "mutation_label": "terminal-state string key into State-keyed dict",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "424aff4ec526fcef2f5acae7058b2d274a6a716c4ee51bf8101dc8160ff1d115"
+      },
+      "defect_family": "wrong-typeddict-dict-key"
+    },
+    {
+      "draft_id": "clean-auth_machine_enum",
+      "task": "auth_machine_enum",
+      "cohort": "clean_negative_control",
+      "matched_defect_draft_id": "hidden-auth_machine_enum",
+      "group": "med",
+      "seed": 0,
+      "model": "controlled_gold",
+      "files": {
+        "target.py": "from lib import State, TRANSITIONS\n\n\nclass Machine:\n    \"\"\"A finite-state machine over State, starting in IDLE.\"\"\"\n\n    def __init__(self) -> None:\n        self._state = State.IDLE\n\n    def current(self) -> State:\n        return self._state\n\n    def can(self, target: State) -> bool:\n        return target in TRANSITIONS[self._state]\n\n    def to(self, target: State) -> None:\n        if target not in TRANSITIONS[self._state]:\n            raise ValueError(f\"cannot go {self._state} -> {target}\")\n        self._state = target\n",
+        "lib.py": "from enum import Enum\n\n\nclass State(Enum):\n    IDLE = \"idle\"\n    RUNNING = \"running\"\n    DONE = \"done\"\n\n\nTRANSITIONS: dict[State, set[State]] = {\n    State.IDLE: {State.RUNNING},\n    State.RUNNING: {State.DONE, State.IDLE},\n    State.DONE: set(),\n}\n"
+      },
+      "target": "target.py",
+      "test": "from target import Machine\nfrom lib import State\nm = Machine()\nassert m.current() == State.IDLE\nassert m.can(State.RUNNING) is True\nm.to(State.RUNNING)\nassert m.current() == State.RUNNING\n",
+      "held_out": "from target import Machine\nfrom lib import State\nm = Machine()\nm.to(State.RUNNING)\nassert m.can(State.IDLE) is True\nassert m.can(State.DONE) is True\nm.to(State.DONE)\nassert m.can(State.RUNNING) is False\nraised = False\ntry:\n    m.to(State.RUNNING)\nexcept ValueError:\n    raised = True\nassert raised\n",
+      "initial_target_sha256": "424aff4ec526fcef2f5acae7058b2d274a6a716c4ee51bf8101dc8160ff1d115",
+      "draft_target_sha256": "424aff4ec526fcef2f5acae7058b2d274a6a716c4ee51bf8101dc8160ff1d115",
+      "file_sha256": {
+        "lib.py": "3c8bb32bd97e623a2af225cd7d25552637264b5612d0eb0700a5a8e8037fdc39",
+        "target.py": "424aff4ec526fcef2f5acae7058b2d274a6a716c4ee51bf8101dc8160ff1d115"
+      },
+      "workspace_sha256": "97d455aa8f962b6dfc0634fd0b6d802b81ebcead30cecc9baf7bf029dd46905a",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": true,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [],
+      "checker_latency_ms": 114.3,
+      "revision_case_series_eligible": true,
+      "selection_basis": "exact validated gold counterpart to the matched hidden-defect workspace; visible and held-out behavior pass with no target-scoped diagnostic delta",
+      "mutation_label": "matched clean gold",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "424aff4ec526fcef2f5acae7058b2d274a6a716c4ee51bf8101dc8160ff1d115"
+      },
+      "matched_defect_family": "wrong-typeddict-dict-key"
+    },
+    {
+      "draft_id": "hidden-auth_tokenizer_namedtuple",
+      "task": "auth_tokenizer_namedtuple",
+      "cohort": "hidden_defect",
+      "group": "easy",
+      "seed": 0,
+      "model": "controlled_mutation",
+      "files": {
+        "target.py": "from lib import Token\n\n\ndef tokenize(text: str) -> list[Token]:\n    if not text:\n        return EMPTY_TOKENS\n    out: list[Token] = []\n    for word in text.split():\n        if word.isdigit():\n            out.append(Token(\"num\", int(word)))\n        else:\n            out.append(Token(\"word\", len(word)))\n    return out\n\n\ndef sum_nums(tokens: list[Token]) -> int:\n    return sum(t.value for t in tokens if t.kind == \"num\")\n",
+        "lib.py": "from typing import NamedTuple\n\n\nclass Token(NamedTuple):\n    kind: str\n    value: int\n"
+      },
+      "target": "target.py",
+      "test": "from target import tokenize, sum_nums\ntoks = tokenize(\"cat 12 dog 30\")\nassert sum_nums(toks) == 42\n",
+      "held_out": "from target import tokenize, sum_nums\nassert tokenize(\"\") == []\nassert sum_nums(tokenize(\"\")) == 0\ntoks = tokenize(\"7 hi 3\")\nassert [t.kind for t in toks] == [\"num\", \"word\", \"num\"]\nassert sum_nums(toks) == 10\n",
+      "initial_target_sha256": "0c33b512f253ce13542d3a974cf8af968150082228c3bb5058658b8bb97378db",
+      "draft_target_sha256": "7ec4a60d6e4087fdb2397c36c5f18cdc3ae8eee56dcd7b4e285dfabba655da21",
+      "file_sha256": {
+        "lib.py": "918b219f39a209bf3934ef8b38cebf52a7da0f60118f751d1ac90c33dd7f6887",
+        "target.py": "7ec4a60d6e4087fdb2397c36c5f18cdc3ae8eee56dcd7b4e285dfabba655da21"
+      },
+      "workspace_sha256": "860b0c63b157a59dc089b063affaf4e7075b2127af70a538d85e479f500a8eab",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": false,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [
+        {
+          "path": "target.py",
+          "line": 6,
+          "column": 16,
+          "stop_line": 6,
+          "stop_column": 28,
+          "code": "unknown-name",
+          "message": "Could not find name `EMPTY_TOKENS`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "   5|     if not text:\n   6|         return EMPTY_TOKENS\n   7|     out: list[Token] = []"
+        }
+      ],
+      "checker_latency_ms": 117.6,
+      "revision_case_series_eligible": true,
+      "selection_basis": "controlled coherent mutation that passes visible behavior, fails held-out behavior, and adds exactly one target-scoped semantic diagnostic",
+      "mutation_label": "empty-input undefined constant",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "0c33b512f253ce13542d3a974cf8af968150082228c3bb5058658b8bb97378db"
+      },
+      "defect_family": "undefined-name"
+    },
+    {
+      "draft_id": "clean-auth_tokenizer_namedtuple",
+      "task": "auth_tokenizer_namedtuple",
+      "cohort": "clean_negative_control",
+      "matched_defect_draft_id": "hidden-auth_tokenizer_namedtuple",
+      "group": "easy",
+      "seed": 0,
+      "model": "controlled_gold",
+      "files": {
+        "target.py": "from lib import Token\n\n\ndef tokenize(text: str) -> list[Token]:\n    out: list[Token] = []\n    for word in text.split():\n        if word.isdigit():\n            out.append(Token(\"num\", int(word)))\n        else:\n            out.append(Token(\"word\", len(word)))\n    return out\n\n\ndef sum_nums(tokens: list[Token]) -> int:\n    return sum(t.value for t in tokens if t.kind == \"num\")\n",
+        "lib.py": "from typing import NamedTuple\n\n\nclass Token(NamedTuple):\n    kind: str\n    value: int\n"
+      },
+      "target": "target.py",
+      "test": "from target import tokenize, sum_nums\ntoks = tokenize(\"cat 12 dog 30\")\nassert sum_nums(toks) == 42\n",
+      "held_out": "from target import tokenize, sum_nums\nassert tokenize(\"\") == []\nassert sum_nums(tokenize(\"\")) == 0\ntoks = tokenize(\"7 hi 3\")\nassert [t.kind for t in toks] == [\"num\", \"word\", \"num\"]\nassert sum_nums(toks) == 10\n",
+      "initial_target_sha256": "0c33b512f253ce13542d3a974cf8af968150082228c3bb5058658b8bb97378db",
+      "draft_target_sha256": "0c33b512f253ce13542d3a974cf8af968150082228c3bb5058658b8bb97378db",
+      "file_sha256": {
+        "lib.py": "918b219f39a209bf3934ef8b38cebf52a7da0f60118f751d1ac90c33dd7f6887",
+        "target.py": "0c33b512f253ce13542d3a974cf8af968150082228c3bb5058658b8bb97378db"
+      },
+      "workspace_sha256": "b81fa32018ba3e96c18e38f8810d281880ce6e98808568f1786b300c90da1ded",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": true,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [],
+      "checker_latency_ms": 107.4,
+      "revision_case_series_eligible": true,
+      "selection_basis": "exact validated gold counterpart to the matched hidden-defect workspace; visible and held-out behavior pass with no target-scoped diagnostic delta",
+      "mutation_label": "matched clean gold",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "0c33b512f253ce13542d3a974cf8af968150082228c3bb5058658b8bb97378db"
+      },
+      "matched_defect_family": "undefined-name"
+    },
+    {
+      "draft_id": "hidden-auth_fold_callable",
+      "task": "auth_fold_callable",
+      "cohort": "hidden_defect",
+      "group": "tricky",
+      "seed": 0,
+      "model": "controlled_mutation",
+      "files": {
+        "target.py": "from lib import fold\n\n\ndef total(nums: list[int]) -> int:\n    if not nums:\n        return fold(nums, 0)\n    return fold(nums, 0, lambda acc, n: acc + n)\n\n\ndef concat(words: list[str]) -> str:\n    return fold(words, \"\", lambda acc, w: acc + w)\n\n\ndef count_matching(items: list[int], threshold: int) -> int:\n    return fold(items, 0, lambda acc, n: acc + (1 if n > threshold else 0))\n",
+        "lib.py": "from typing import Callable, TypeVar\n\nT = TypeVar(\"T\")\nU = TypeVar(\"U\")\n\n\ndef fold(items: list[T], init: U, step: Callable[[U, T], U]) -> U:\n    \"\"\"Left fold: thread step(acc, item) across items starting from init.\"\"\"\n    acc = init\n    for item in items:\n        acc = step(acc, item)\n    return acc\n"
+      },
+      "target": "target.py",
+      "test": "from target import total, concat, count_matching\nassert total([1, 2, 3]) == 6\nassert concat([\"a\", \"b\", \"c\"]) == \"abc\"\nassert count_matching([1, 5, 3, 8], 3) == 2\n",
+      "held_out": "from target import total, concat, count_matching\nassert total([]) == 0\nassert concat([]) == \"\"\nassert count_matching([], 0) == 0\nassert count_matching([3, 3, 4], 3) == 1\n",
+      "initial_target_sha256": "e6bcf9c7d3c56ce911f2be45fed998bb04f25d8dc824ec3e25ca24f5fa46bed0",
+      "draft_target_sha256": "e3bd0374ab729724df9ad1b668087b27b94c39f5e12570d6d0b767671d017787",
+      "file_sha256": {
+        "lib.py": "8ff0818ca5db841f00fac8deeda388648c146f377a9685ce4d2bbffdb2cc84d3",
+        "target.py": "e3bd0374ab729724df9ad1b668087b27b94c39f5e12570d6d0b767671d017787"
+      },
+      "workspace_sha256": "78dbc3c61cbfd5dfa5db39be0cb874a0e78c9a78c982bc86e32b6e151ace399f",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": false,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [
+        {
+          "path": "target.py",
+          "line": 6,
+          "column": 20,
+          "stop_line": 6,
+          "stop_column": 29,
+          "code": "missing-argument",
+          "message": "Missing argument `step` in function `lib.fold`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "   5|     if not nums:\n   6|         return fold(nums, 0)\n   7|     return fold(nums, 0, lambda acc, n: acc + n)"
+        }
+      ],
+      "checker_latency_ms": 124.3,
+      "revision_case_series_eligible": true,
+      "selection_basis": "controlled coherent mutation that passes visible behavior, fails held-out behavior, and adds exactly one target-scoped semantic diagnostic",
+      "mutation_label": "empty-fold missing step argument",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "e6bcf9c7d3c56ce911f2be45fed998bb04f25d8dc824ec3e25ca24f5fa46bed0"
+      },
+      "defect_family": "wrong-call-arity"
+    },
+    {
+      "draft_id": "clean-auth_fold_callable",
+      "task": "auth_fold_callable",
+      "cohort": "clean_negative_control",
+      "matched_defect_draft_id": "hidden-auth_fold_callable",
+      "group": "tricky",
+      "seed": 0,
+      "model": "controlled_gold",
+      "files": {
+        "target.py": "from lib import fold\n\n\ndef total(nums: list[int]) -> int:\n    return fold(nums, 0, lambda acc, n: acc + n)\n\n\ndef concat(words: list[str]) -> str:\n    return fold(words, \"\", lambda acc, w: acc + w)\n\n\ndef count_matching(items: list[int], threshold: int) -> int:\n    return fold(items, 0, lambda acc, n: acc + (1 if n > threshold else 0))\n",
+        "lib.py": "from typing import Callable, TypeVar\n\nT = TypeVar(\"T\")\nU = TypeVar(\"U\")\n\n\ndef fold(items: list[T], init: U, step: Callable[[U, T], U]) -> U:\n    \"\"\"Left fold: thread step(acc, item) across items starting from init.\"\"\"\n    acc = init\n    for item in items:\n        acc = step(acc, item)\n    return acc\n"
+      },
+      "target": "target.py",
+      "test": "from target import total, concat, count_matching\nassert total([1, 2, 3]) == 6\nassert concat([\"a\", \"b\", \"c\"]) == \"abc\"\nassert count_matching([1, 5, 3, 8], 3) == 2\n",
+      "held_out": "from target import total, concat, count_matching\nassert total([]) == 0\nassert concat([]) == \"\"\nassert count_matching([], 0) == 0\nassert count_matching([3, 3, 4], 3) == 1\n",
+      "initial_target_sha256": "e6bcf9c7d3c56ce911f2be45fed998bb04f25d8dc824ec3e25ca24f5fa46bed0",
+      "draft_target_sha256": "e6bcf9c7d3c56ce911f2be45fed998bb04f25d8dc824ec3e25ca24f5fa46bed0",
+      "file_sha256": {
+        "lib.py": "8ff0818ca5db841f00fac8deeda388648c146f377a9685ce4d2bbffdb2cc84d3",
+        "target.py": "e6bcf9c7d3c56ce911f2be45fed998bb04f25d8dc824ec3e25ca24f5fa46bed0"
+      },
+      "workspace_sha256": "a76464e75fd188e60c1830cb0b0c3b9a470cf01edacc02d0207b07e8915b7611",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": true,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [],
+      "checker_latency_ms": 98.7,
+      "revision_case_series_eligible": true,
+      "selection_basis": "exact validated gold counterpart to the matched hidden-defect workspace; visible and held-out behavior pass with no target-scoped diagnostic delta",
+      "mutation_label": "matched clean gold",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "e6bcf9c7d3c56ce911f2be45fed998bb04f25d8dc824ec3e25ca24f5fa46bed0"
+      },
+      "matched_defect_family": "wrong-call-arity"
+    },
+    {
+      "draft_id": "hidden-auth_graph_edges",
+      "task": "auth_graph_edges",
+      "cohort": "hidden_defect",
+      "group": "tricky",
+      "seed": 0,
+      "model": "controlled_mutation",
+      "files": {
+        "target.py": "from lib import Edge\n\n\nclass Graph:\n    \"\"\"A directed weighted graph accumulated from edges.\"\"\"\n\n    def __init__(self) -> None:\n        self._edges: list[Edge] = []\n\n    def add(self, edge: Edge) -> None:\n        self._edges.append(edge)\n\n    def neighbors(self, node: str) -> list[str]:\n        return [e.dst for e in self._edges if e.src == node]\n\n    def cost(self, src: str, dst: str) -> int | None:\n        for e in self._edges:\n            if e.src == src and e.dst == dst:\n                return e.weight\n        return \"missing\"\n\n    def out_degree(self, node: str) -> int:\n        return sum(1 for e in self._edges if e.src == node)\n",
+        "lib.py": "class Edge:\n    \"\"\"A weighted directed edge.\"\"\"\n\n    def __init__(self, src: str, dst: str, weight: int) -> None:\n        self.src = src\n        self.dst = dst\n        self.weight = weight\n"
+      },
+      "target": "target.py",
+      "test": "from target import Graph\nfrom lib import Edge\ng = Graph()\ng.add(Edge(\"a\", \"b\", 5))\ng.add(Edge(\"a\", \"c\", 2))\nassert g.neighbors(\"a\") == [\"b\", \"c\"]\nassert g.cost(\"a\", \"b\") == 5\nassert g.out_degree(\"a\") == 2\n",
+      "held_out": "from target import Graph\nfrom lib import Edge\ng = Graph()\ng.add(Edge(\"a\", \"b\", 5))\nassert g.cost(\"a\", \"z\") is None\nassert g.neighbors(\"z\") == []\nassert g.out_degree(\"z\") == 0\n",
+      "initial_target_sha256": "3fba3c321de73699348b5cb1699eb4d5cf1ea7eb1bcd865d0b9209cfe938f7fd",
+      "draft_target_sha256": "2fc482a72459101847dcc3954020fc471ee024eee902c158384fb198ab1559f2",
+      "file_sha256": {
+        "lib.py": "b265f6ceecb89ba05b9accd4948db4a9fc96c7150be05deec5af4c21d1c06b53",
+        "target.py": "2fc482a72459101847dcc3954020fc471ee024eee902c158384fb198ab1559f2"
+      },
+      "workspace_sha256": "e29e365482ad5b49435a40a48841612c575b1e1c1a0edd96efcdeec668c195f9",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": false,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [
+        {
+          "path": "target.py",
+          "line": 20,
+          "column": 16,
+          "stop_line": 20,
+          "stop_column": 25,
+          "code": "bad-return",
+          "message": "Returned type `Literal['missing']` is not assignable to declared return type `int | None`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "  19|                 return e.weight\n  20|         return \"missing\"\n  21| "
+        }
+      ],
+      "checker_latency_ms": 105.7,
+      "revision_case_series_eligible": true,
+      "selection_basis": "controlled coherent mutation that passes visible behavior, fails held-out behavior, and adds exactly one target-scoped semantic diagnostic",
+      "mutation_label": "missing-edge wrong sentinel type",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "3fba3c321de73699348b5cb1699eb4d5cf1ea7eb1bcd865d0b9209cfe938f7fd"
+      },
+      "defect_family": "wrong-return-type"
+    },
+    {
+      "draft_id": "clean-auth_graph_edges",
+      "task": "auth_graph_edges",
+      "cohort": "clean_negative_control",
+      "matched_defect_draft_id": "hidden-auth_graph_edges",
+      "group": "tricky",
+      "seed": 0,
+      "model": "controlled_gold",
+      "files": {
+        "target.py": "from lib import Edge\n\n\nclass Graph:\n    \"\"\"A directed weighted graph accumulated from edges.\"\"\"\n\n    def __init__(self) -> None:\n        self._edges: list[Edge] = []\n\n    def add(self, edge: Edge) -> None:\n        self._edges.append(edge)\n\n    def neighbors(self, node: str) -> list[str]:\n        return [e.dst for e in self._edges if e.src == node]\n\n    def cost(self, src: str, dst: str) -> int | None:\n        for e in self._edges:\n            if e.src == src and e.dst == dst:\n                return e.weight\n        return None\n\n    def out_degree(self, node: str) -> int:\n        return sum(1 for e in self._edges if e.src == node)\n",
+        "lib.py": "class Edge:\n    \"\"\"A weighted directed edge.\"\"\"\n\n    def __init__(self, src: str, dst: str, weight: int) -> None:\n        self.src = src\n        self.dst = dst\n        self.weight = weight\n"
+      },
+      "target": "target.py",
+      "test": "from target import Graph\nfrom lib import Edge\ng = Graph()\ng.add(Edge(\"a\", \"b\", 5))\ng.add(Edge(\"a\", \"c\", 2))\nassert g.neighbors(\"a\") == [\"b\", \"c\"]\nassert g.cost(\"a\", \"b\") == 5\nassert g.out_degree(\"a\") == 2\n",
+      "held_out": "from target import Graph\nfrom lib import Edge\ng = Graph()\ng.add(Edge(\"a\", \"b\", 5))\nassert g.cost(\"a\", \"z\") is None\nassert g.neighbors(\"z\") == []\nassert g.out_degree(\"z\") == 0\n",
+      "initial_target_sha256": "3fba3c321de73699348b5cb1699eb4d5cf1ea7eb1bcd865d0b9209cfe938f7fd",
+      "draft_target_sha256": "3fba3c321de73699348b5cb1699eb4d5cf1ea7eb1bcd865d0b9209cfe938f7fd",
+      "file_sha256": {
+        "lib.py": "b265f6ceecb89ba05b9accd4948db4a9fc96c7150be05deec5af4c21d1c06b53",
+        "target.py": "3fba3c321de73699348b5cb1699eb4d5cf1ea7eb1bcd865d0b9209cfe938f7fd"
+      },
+      "workspace_sha256": "a1a99f449b59abcf3be96726c027eb7482e0ea2cde29766e2ff0707abd58f91b",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": true,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [],
+      "checker_latency_ms": 96.8,
+      "revision_case_series_eligible": true,
+      "selection_basis": "exact validated gold counterpart to the matched hidden-defect workspace; visible and held-out behavior pass with no target-scoped diagnostic delta",
+      "mutation_label": "matched clean gold",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "3fba3c321de73699348b5cb1699eb4d5cf1ea7eb1bcd865d0b9209cfe938f7fd"
+      },
+      "matched_defect_family": "wrong-return-type"
+    },
+    {
+      "draft_id": "hidden-auth_histogram_counter",
+      "task": "auth_histogram_counter",
+      "cohort": "hidden_defect",
+      "group": "easy",
+      "seed": 0,
+      "model": "controlled_mutation",
+      "files": {
+        "target.py": "from collections import Counter\nfrom lib import top_n\n\n\ndef word_counts(words: list[str]) -> \"Counter[str]\":\n    return Counter(words)\n\n\ndef most_common_word(words: list[str]) -> str:\n    return word_counts(words).most_common(1)[0][0]\n\n\ndef rank(words: list[str], k: int) -> list[str]:\n    if k > 2:\n        return top_n(words, k)\n    return top_n(word_counts(words), k)\n",
+        "lib.py": "from collections import Counter\n\n\ndef top_n(counts: \"Counter[str]\", n: int) -> list[str]:\n    \"\"\"The n most common keys, most-common first (ties by insertion order).\"\"\"\n    return [k for k, _ in counts.most_common(n)]\n"
+      },
+      "target": "target.py",
+      "test": "from target import word_counts, most_common_word, rank\nws = [\"a\", \"b\", \"a\", \"c\", \"a\", \"b\"]\nassert word_counts(ws)[\"a\"] == 3\nassert most_common_word(ws) == \"a\"\nassert rank(ws, 2) == [\"a\", \"b\"]\n",
+      "held_out": "from target import word_counts, most_common_word, rank\nassert dict(word_counts([])) == {}\nassert rank([\"x\"], 5) == [\"x\"]\nassert most_common_word([\"solo\"]) == \"solo\"\n",
+      "initial_target_sha256": "56286d7f96cc5332da6358d5adf8ed0b816f495cbc44e400b7c5984b7246e55a",
+      "draft_target_sha256": "73954855978fcb3275c69a8f76b3f8484e7dd091bf19452aa47e1f19206f1b45",
+      "file_sha256": {
+        "lib.py": "bafc6b28078c48a3f2c4776bd43d023ce3c05186794997706fbe8429d22ab2a8",
+        "target.py": "73954855978fcb3275c69a8f76b3f8484e7dd091bf19452aa47e1f19206f1b45"
+      },
+      "workspace_sha256": "d30aa77a37dc50658b572a63435a9e6b31a33c8e7fbcea01809baee87df861ef",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": false,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [
+        {
+          "path": "target.py",
+          "line": 15,
+          "column": 22,
+          "stop_line": 15,
+          "stop_column": 27,
+          "code": "bad-argument-type",
+          "message": "Argument `list[str]` is not assignable to parameter `counts` with type `Counter[str]` in function `lib.top_n`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "  14|     if k > 2:\n  15|         return top_n(words, k)\n  16|     return top_n(word_counts(words), k)"
+        }
+      ],
+      "checker_latency_ms": 107.6,
+      "revision_case_series_eligible": true,
+      "selection_basis": "controlled coherent mutation that passes visible behavior, fails held-out behavior, and adds exactly one target-scoped semantic diagnostic",
+      "mutation_label": "large-k rank passes list where Counter required",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "56286d7f96cc5332da6358d5adf8ed0b816f495cbc44e400b7c5984b7246e55a"
+      },
+      "defect_family": "wrong-argument-type"
+    },
+    {
+      "draft_id": "clean-auth_histogram_counter",
+      "task": "auth_histogram_counter",
+      "cohort": "clean_negative_control",
+      "matched_defect_draft_id": "hidden-auth_histogram_counter",
+      "group": "easy",
+      "seed": 0,
+      "model": "controlled_gold",
+      "files": {
+        "target.py": "from collections import Counter\nfrom lib import top_n\n\n\ndef word_counts(words: list[str]) -> \"Counter[str]\":\n    return Counter(words)\n\n\ndef most_common_word(words: list[str]) -> str:\n    return word_counts(words).most_common(1)[0][0]\n\n\ndef rank(words: list[str], k: int) -> list[str]:\n    return top_n(word_counts(words), k)\n",
+        "lib.py": "from collections import Counter\n\n\ndef top_n(counts: \"Counter[str]\", n: int) -> list[str]:\n    \"\"\"The n most common keys, most-common first (ties by insertion order).\"\"\"\n    return [k for k, _ in counts.most_common(n)]\n"
+      },
+      "target": "target.py",
+      "test": "from target import word_counts, most_common_word, rank\nws = [\"a\", \"b\", \"a\", \"c\", \"a\", \"b\"]\nassert word_counts(ws)[\"a\"] == 3\nassert most_common_word(ws) == \"a\"\nassert rank(ws, 2) == [\"a\", \"b\"]\n",
+      "held_out": "from target import word_counts, most_common_word, rank\nassert dict(word_counts([])) == {}\nassert rank([\"x\"], 5) == [\"x\"]\nassert most_common_word([\"solo\"]) == \"solo\"\n",
+      "initial_target_sha256": "56286d7f96cc5332da6358d5adf8ed0b816f495cbc44e400b7c5984b7246e55a",
+      "draft_target_sha256": "56286d7f96cc5332da6358d5adf8ed0b816f495cbc44e400b7c5984b7246e55a",
+      "file_sha256": {
+        "lib.py": "bafc6b28078c48a3f2c4776bd43d023ce3c05186794997706fbe8429d22ab2a8",
+        "target.py": "56286d7f96cc5332da6358d5adf8ed0b816f495cbc44e400b7c5984b7246e55a"
+      },
+      "workspace_sha256": "232be7b9860fbd56d8bbc75b1d3bc5847cf62f875f9aa33539075b6083aa427b",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": true,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [],
+      "checker_latency_ms": 124.6,
+      "revision_case_series_eligible": true,
+      "selection_basis": "exact validated gold counterpart to the matched hidden-defect workspace; visible and held-out behavior pass with no target-scoped diagnostic delta",
+      "mutation_label": "matched clean gold",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "56286d7f96cc5332da6358d5adf8ed0b816f495cbc44e400b7c5984b7246e55a"
+      },
+      "matched_defect_family": "wrong-argument-type"
+    },
+    {
+      "draft_id": "hidden-auth_pipeline_handler",
+      "task": "auth_pipeline_handler",
+      "cohort": "hidden_defect",
+      "group": "tricky",
+      "seed": 0,
+      "model": "controlled_mutation",
+      "files": {
+        "target.py": "from lib import Handler, apply_all\n\n\nclass Pipeline:\n    \"\"\"An ordered pipeline of int->int stages.\"\"\"\n\n    def __init__(self) -> None:\n        self._stages: list[Handler] = []\n\n    def register(self, handler: Handler) -> None:\n        self._stages.append(handler)\n\n    def run(self, value: int) -> int:\n        if not self._stages:\n            from lib import passthrough\n            return passthrough(value)\n        return apply_all(self._stages, value)\n\n\ndef adder(n: int) -> Handler:\n    def stage(x: int) -> int:\n        return x + n\n    return stage\n",
+        "lib.py": "from typing import Callable\n\nHandler = Callable[[int], int]\n\n\ndef apply_all(handlers: list[Handler], value: int) -> int:\n    \"\"\"Apply each handler to value in turn, threading the result.\"\"\"\n    for h in handlers:\n        value = h(value)\n    return value\n"
+      },
+      "target": "target.py",
+      "test": "from target import Pipeline, adder\np = Pipeline()\np.register(adder(2))\np.register(adder(3))\nassert p.run(0) == 5\n",
+      "held_out": "from target import Pipeline, adder\np = Pipeline()\nassert p.run(7) == 7\np.register(adder(-1))\np.register(adder(-1))\nassert p.run(10) == 8\n",
+      "initial_target_sha256": "1b3b91deaca726620d1abec02978ec71a5de52feb4fc399ae642257252765cc3",
+      "draft_target_sha256": "57b15d78750c50a34d48776c4f788a7900b9851ad54b2e2122a5fd6cd39fd724",
+      "file_sha256": {
+        "lib.py": "78809cac0baa172a41187a7b9a754a57d5c14687078d8eb73ae5442f3f1582cf",
+        "target.py": "57b15d78750c50a34d48776c4f788a7900b9851ad54b2e2122a5fd6cd39fd724"
+      },
+      "workspace_sha256": "0e8f94ce89350dd34523997c7208a0db08afaf55d1a69ae41fc177e105a57794",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": false,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [
+        {
+          "path": "target.py",
+          "line": 15,
+          "column": 29,
+          "stop_line": 15,
+          "stop_column": 40,
+          "code": "missing-module-attribute",
+          "message": "Could not import `passthrough` from `lib`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "  14|         if not self._stages:\n  15|             from lib import passthrough\n  16|             return passthrough(value)"
+        }
+      ],
+      "checker_latency_ms": 129.2,
+      "revision_case_series_eligible": true,
+      "selection_basis": "controlled coherent mutation that passes visible behavior, fails held-out behavior, and adds exactly one target-scoped semantic diagnostic",
+      "mutation_label": "empty-pipeline import of missing lib helper",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "1b3b91deaca726620d1abec02978ec71a5de52feb4fc399ae642257252765cc3"
+      },
+      "defect_family": "bad-missing-import"
+    },
+    {
+      "draft_id": "clean-auth_pipeline_handler",
+      "task": "auth_pipeline_handler",
+      "cohort": "clean_negative_control",
+      "matched_defect_draft_id": "hidden-auth_pipeline_handler",
+      "group": "tricky",
+      "seed": 0,
+      "model": "controlled_gold",
+      "files": {
+        "target.py": "from lib import Handler, apply_all\n\n\nclass Pipeline:\n    \"\"\"An ordered pipeline of int->int stages.\"\"\"\n\n    def __init__(self) -> None:\n        self._stages: list[Handler] = []\n\n    def register(self, handler: Handler) -> None:\n        self._stages.append(handler)\n\n    def run(self, value: int) -> int:\n        return apply_all(self._stages, value)\n\n\ndef adder(n: int) -> Handler:\n    def stage(x: int) -> int:\n        return x + n\n    return stage\n",
+        "lib.py": "from typing import Callable\n\nHandler = Callable[[int], int]\n\n\ndef apply_all(handlers: list[Handler], value: int) -> int:\n    \"\"\"Apply each handler to value in turn, threading the result.\"\"\"\n    for h in handlers:\n        value = h(value)\n    return value\n"
+      },
+      "target": "target.py",
+      "test": "from target import Pipeline, adder\np = Pipeline()\np.register(adder(2))\np.register(adder(3))\nassert p.run(0) == 5\n",
+      "held_out": "from target import Pipeline, adder\np = Pipeline()\nassert p.run(7) == 7\np.register(adder(-1))\np.register(adder(-1))\nassert p.run(10) == 8\n",
+      "initial_target_sha256": "1b3b91deaca726620d1abec02978ec71a5de52feb4fc399ae642257252765cc3",
+      "draft_target_sha256": "1b3b91deaca726620d1abec02978ec71a5de52feb4fc399ae642257252765cc3",
+      "file_sha256": {
+        "lib.py": "78809cac0baa172a41187a7b9a754a57d5c14687078d8eb73ae5442f3f1582cf",
+        "target.py": "1b3b91deaca726620d1abec02978ec71a5de52feb4fc399ae642257252765cc3"
+      },
+      "workspace_sha256": "2dc281eda35f9a9309d30c289ff94faef0c38dc30a8bed48a74d215ac247d929",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": true,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [],
+      "checker_latency_ms": 125.2,
+      "revision_case_series_eligible": true,
+      "selection_basis": "exact validated gold counterpart to the matched hidden-defect workspace; visible and held-out behavior pass with no target-scoped diagnostic delta",
+      "mutation_label": "matched clean gold",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "1b3b91deaca726620d1abec02978ec71a5de52feb4fc399ae642257252765cc3"
+      },
+      "matched_defect_family": "bad-missing-import"
+    },
+    {
+      "draft_id": "hidden-auth_grid_helpers",
+      "task": "auth_grid_helpers",
+      "cohort": "hidden_defect",
+      "group": "med",
+      "seed": 0,
+      "model": "controlled_mutation",
+      "files": {
+        "target.py": "from lib import Grid\n\n\ndef from_pairs(rows: int, cols: int, pairs: list[tuple[int, int, int]]) -> Grid:\n    g = Grid(rows, cols)\n    for r, c, value in pairs:\n        if rows == 3:\n            g.set(r, c)\n        else:\n            g.set(r, c, value)\n    return g\n\n\ndef row_sum(grid: Grid, r: int) -> int:\n    return sum(grid.get(r, c) for c in range(grid.cols))\n\n\ndef transpose_get(grid: Grid, r: int, c: int) -> int:\n    return grid.get(c, r)\n",
+        "lib.py": "class Grid:\n    \"\"\"A fixed-size grid of integers, zero-initialised.\"\"\"\n\n    def __init__(self, rows: int, cols: int) -> None:\n        self.rows = rows\n        self.cols = cols\n        self._cells: list[list[int]] = [[0] * cols for _ in range(rows)]\n\n    def set(self, r: int, c: int, value: int) -> None:\n        self._cells[r][c] = value\n\n    def get(self, r: int, c: int) -> int:\n        return self._cells[r][c]\n"
+      },
+      "target": "target.py",
+      "test": "from target import from_pairs, row_sum, transpose_get\ng = from_pairs(2, 2, [(0, 0, 1), (0, 1, 2), (1, 0, 3)])\nassert row_sum(g, 0) == 3\nassert transpose_get(g, 0, 1) == 3\n",
+      "held_out": "from target import from_pairs, row_sum, transpose_get\ng = from_pairs(3, 3, [(2, 2, 9), (1, 0, 4)])\nassert row_sum(g, 2) == 9\nassert row_sum(g, 0) == 0\nassert transpose_get(g, 0, 1) == 4\n",
+      "initial_target_sha256": "fbfbdcfceea1e50a63bf38353057c9c68f2beddfa0f138920f780b3706f40596",
+      "draft_target_sha256": "59a1c9d5789635eca6644766a7fefb2fe5b44f52fbab2aebe1f76cb919b90675",
+      "file_sha256": {
+        "lib.py": "80ba355586cbe2b755d301d18982f282926f8b6f29af1a2e896b114faff77c0e",
+        "target.py": "59a1c9d5789635eca6644766a7fefb2fe5b44f52fbab2aebe1f76cb919b90675"
+      },
+      "workspace_sha256": "1b9613c0db295abca0457d435fe559b0bc9e9a087758120a8f7587368e96d0f9",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": false,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [
+        {
+          "path": "target.py",
+          "line": 8,
+          "column": 18,
+          "stop_line": 8,
+          "stop_column": 24,
+          "code": "missing-argument",
+          "message": "Missing argument `value` in function `lib.Grid.set`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "   7|         if rows == 3:\n   8|             g.set(r, c)\n   9|         else:"
+        }
+      ],
+      "checker_latency_ms": 102.6,
+      "revision_case_series_eligible": true,
+      "selection_basis": "controlled coherent mutation that passes visible behavior, fails held-out behavior, and adds exactly one target-scoped semantic diagnostic",
+      "mutation_label": "held-out grid size missing set argument",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "fbfbdcfceea1e50a63bf38353057c9c68f2beddfa0f138920f780b3706f40596"
+      },
+      "defect_family": "wrong-call-arity"
+    },
+    {
+      "draft_id": "clean-auth_grid_helpers",
+      "task": "auth_grid_helpers",
+      "cohort": "clean_negative_control",
+      "matched_defect_draft_id": "hidden-auth_grid_helpers",
+      "group": "med",
+      "seed": 0,
+      "model": "controlled_gold",
+      "files": {
+        "target.py": "from lib import Grid\n\n\ndef from_pairs(rows: int, cols: int, pairs: list[tuple[int, int, int]]) -> Grid:\n    g = Grid(rows, cols)\n    for r, c, value in pairs:\n        g.set(r, c, value)\n    return g\n\n\ndef row_sum(grid: Grid, r: int) -> int:\n    return sum(grid.get(r, c) for c in range(grid.cols))\n\n\ndef transpose_get(grid: Grid, r: int, c: int) -> int:\n    return grid.get(c, r)\n",
+        "lib.py": "class Grid:\n    \"\"\"A fixed-size grid of integers, zero-initialised.\"\"\"\n\n    def __init__(self, rows: int, cols: int) -> None:\n        self.rows = rows\n        self.cols = cols\n        self._cells: list[list[int]] = [[0] * cols for _ in range(rows)]\n\n    def set(self, r: int, c: int, value: int) -> None:\n        self._cells[r][c] = value\n\n    def get(self, r: int, c: int) -> int:\n        return self._cells[r][c]\n"
+      },
+      "target": "target.py",
+      "test": "from target import from_pairs, row_sum, transpose_get\ng = from_pairs(2, 2, [(0, 0, 1), (0, 1, 2), (1, 0, 3)])\nassert row_sum(g, 0) == 3\nassert transpose_get(g, 0, 1) == 3\n",
+      "held_out": "from target import from_pairs, row_sum, transpose_get\ng = from_pairs(3, 3, [(2, 2, 9), (1, 0, 4)])\nassert row_sum(g, 2) == 9\nassert row_sum(g, 0) == 0\nassert transpose_get(g, 0, 1) == 4\n",
+      "initial_target_sha256": "fbfbdcfceea1e50a63bf38353057c9c68f2beddfa0f138920f780b3706f40596",
+      "draft_target_sha256": "fbfbdcfceea1e50a63bf38353057c9c68f2beddfa0f138920f780b3706f40596",
+      "file_sha256": {
+        "lib.py": "80ba355586cbe2b755d301d18982f282926f8b6f29af1a2e896b114faff77c0e",
+        "target.py": "fbfbdcfceea1e50a63bf38353057c9c68f2beddfa0f138920f780b3706f40596"
+      },
+      "workspace_sha256": "3d3017d29645361dcf8e24213ee98e55f91b1c7a5500bea0aae0c10b0c66f435",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": true,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [],
+      "checker_latency_ms": 147.1,
+      "revision_case_series_eligible": true,
+      "selection_basis": "exact validated gold counterpart to the matched hidden-defect workspace; visible and held-out behavior pass with no target-scoped diagnostic delta",
+      "mutation_label": "matched clean gold",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "fbfbdcfceea1e50a63bf38353057c9c68f2beddfa0f138920f780b3706f40596"
+      },
+      "matched_defect_family": "wrong-call-arity"
+    },
+    {
+      "draft_id": "hidden-auth_config_typeddict",
+      "task": "auth_config_typeddict",
+      "cohort": "hidden_defect",
+      "group": "med",
+      "seed": 0,
+      "model": "controlled_mutation",
+      "files": {
+        "target.py": "from lib import RawConfig, Config, DEFAULTS\n\n\ndef normalize(raw: RawConfig) -> Config:\n    return {\n        \"host\": raw.get(\"host\", DEFAULTS[\"host\"]),\n        \"port\": raw.get(\"port\", DEFAULTS[\"port\"]),\n        \"debug\": raw.get(\"debug\", DEFAULTS[\"debug\"]),\n    }\n\n\ndef endpoint(cfg: Config) -> str:\n    if cfg[\"host\"] == \"localhost\":\n        return f\"{cfg['hostname']}:{cfg['port']}\"\n    return f\"{cfg['host']}:{cfg['port']}\"\n",
+        "lib.py": "from typing import TypedDict\n\n\nclass RawConfig(TypedDict, total=False):\n    host: str\n    port: int\n    debug: bool\n\n\nclass Config(TypedDict):\n    host: str\n    port: int\n    debug: bool\n\n\nDEFAULTS: Config = {\"host\": \"localhost\", \"port\": 8080, \"debug\": False}\n"
+      },
+      "target": "target.py",
+      "test": "from target import normalize, endpoint\nc = normalize({\"host\": \"example.com\", \"port\": 9000})\nassert c[\"host\"] == \"example.com\"\nassert c[\"port\"] == 9000\nassert c[\"debug\"] is False\nassert endpoint(c) == \"example.com:9000\"\n",
+      "held_out": "from target import normalize, endpoint\nc = normalize({})\nassert c == {\"host\": \"localhost\", \"port\": 8080, \"debug\": False}\nassert endpoint(c) == \"localhost:8080\"\nc2 = normalize({\"debug\": True})\nassert c2[\"debug\"] is True\nassert c2[\"port\"] == 8080\n",
+      "initial_target_sha256": "843a6feabf50556eb249b441a139d156cad72976bb149b409be2448a8cd8435d",
+      "draft_target_sha256": "715ddc13b733f7887c265977d0a34762535459d213f7a222995256eb1befb193",
+      "file_sha256": {
+        "lib.py": "b16bd49ec86a7313d9a88ff91c759f4232bf14b2a8d653593b2194ca302536a7",
+        "target.py": "715ddc13b733f7887c265977d0a34762535459d213f7a222995256eb1befb193"
+      },
+      "workspace_sha256": "08c9d8c1450b6efe2ec1ab5436333faae03d79196530ba9a0c0ef038b9201b1a",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": false,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [
+        {
+          "path": "target.py",
+          "line": 14,
+          "column": 23,
+          "stop_line": 14,
+          "stop_column": 33,
+          "code": "bad-typed-dict-key",
+          "message": "TypedDict `Config` does not have key `hostname`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "  13|     if cfg[\"host\"] == \"localhost\":\n  14|         return f\"{cfg['hostname']}:{cfg['port']}\"\n  15|     return f\"{cfg['host']}:{cfg['port']}\""
+        }
+      ],
+      "checker_latency_ms": 120.3,
+      "revision_case_series_eligible": true,
+      "selection_basis": "controlled coherent mutation that passes visible behavior, fails held-out behavior, and adds exactly one target-scoped semantic diagnostic",
+      "mutation_label": "default-host wrong TypedDict key",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "843a6feabf50556eb249b441a139d156cad72976bb149b409be2448a8cd8435d"
+      },
+      "defect_family": "wrong-typeddict-dict-key"
+    },
+    {
+      "draft_id": "clean-auth_config_typeddict",
+      "task": "auth_config_typeddict",
+      "cohort": "clean_negative_control",
+      "matched_defect_draft_id": "hidden-auth_config_typeddict",
+      "group": "med",
+      "seed": 0,
+      "model": "controlled_gold",
+      "files": {
+        "target.py": "from lib import RawConfig, Config, DEFAULTS\n\n\ndef normalize(raw: RawConfig) -> Config:\n    return {\n        \"host\": raw.get(\"host\", DEFAULTS[\"host\"]),\n        \"port\": raw.get(\"port\", DEFAULTS[\"port\"]),\n        \"debug\": raw.get(\"debug\", DEFAULTS[\"debug\"]),\n    }\n\n\ndef endpoint(cfg: Config) -> str:\n    return f\"{cfg['host']}:{cfg['port']}\"\n",
+        "lib.py": "from typing import TypedDict\n\n\nclass RawConfig(TypedDict, total=False):\n    host: str\n    port: int\n    debug: bool\n\n\nclass Config(TypedDict):\n    host: str\n    port: int\n    debug: bool\n\n\nDEFAULTS: Config = {\"host\": \"localhost\", \"port\": 8080, \"debug\": False}\n"
+      },
+      "target": "target.py",
+      "test": "from target import normalize, endpoint\nc = normalize({\"host\": \"example.com\", \"port\": 9000})\nassert c[\"host\"] == \"example.com\"\nassert c[\"port\"] == 9000\nassert c[\"debug\"] is False\nassert endpoint(c) == \"example.com:9000\"\n",
+      "held_out": "from target import normalize, endpoint\nc = normalize({})\nassert c == {\"host\": \"localhost\", \"port\": 8080, \"debug\": False}\nassert endpoint(c) == \"localhost:8080\"\nc2 = normalize({\"debug\": True})\nassert c2[\"debug\"] is True\nassert c2[\"port\"] == 8080\n",
+      "initial_target_sha256": "843a6feabf50556eb249b441a139d156cad72976bb149b409be2448a8cd8435d",
+      "draft_target_sha256": "843a6feabf50556eb249b441a139d156cad72976bb149b409be2448a8cd8435d",
+      "file_sha256": {
+        "lib.py": "b16bd49ec86a7313d9a88ff91c759f4232bf14b2a8d653593b2194ca302536a7",
+        "target.py": "843a6feabf50556eb249b441a139d156cad72976bb149b409be2448a8cd8435d"
+      },
+      "workspace_sha256": "42df6d8e0f199f59dd4df06ad3995fe30d6f016ae13f8cfca57e3c7440a8b0da",
+      "coherent": true,
+      "visible_pass": true,
+      "held_pass": true,
+      "baseline_diagnostics": [],
+      "draft_diagnostics": [],
+      "checker_latency_ms": 99.4,
+      "revision_case_series_eligible": true,
+      "selection_basis": "exact validated gold counterpart to the matched hidden-defect workspace; visible and held-out behavior pass with no target-scoped diagnostic delta",
+      "mutation_label": "matched clean gold",
+      "natural_submission_marker_available": false,
+      "gold_repair_validation": {
+        "visible_pass": true,
+        "held_pass": true,
+        "diagnostic_delta": [],
+        "gold_target_sha256": "843a6feabf50556eb249b441a139d156cad72976bb149b409be2448a8cd8435d"
+      },
+      "matched_defect_family": "wrong-typeddict-dict-key"
+    }
+  ],
+  "audit": [
+    {
+      "draft_id": "hidden-auth_cart_typeddict",
+      "task": "auth_cart_typeddict",
+      "cohort": "hidden_defect",
+      "mutation_label": "empty-input wrong return type",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_fails": true,
+        "exactly_one_semantic_diagnostic": true,
+        "no_syntax_diagnostic": true,
+        "gold_visible_pass": true,
+        "gold_held_out_pass": true,
+        "gold_type_clean": true
+      },
+      "diagnostics": [
+        {
+          "path": "target.py",
+          "line": 12,
+          "column": 16,
+          "stop_line": 12,
+          "stop_column": 23,
+          "code": "bad-return",
+          "message": "Returned type `Literal['empty']` is not assignable to declared return type `int`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "  11|     if not items:\n  12|         return \"empty\"\n  13|     return sum(line_total(it) for it in items)"
+        }
+      ],
+      "passed": true,
+      "defect_family": "wrong-return-type"
+    },
+    {
+      "draft_id": "clean-auth_cart_typeddict",
+      "task": "auth_cart_typeddict",
+      "cohort": "clean_negative_control",
+      "mutation_label": "matched clean gold",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_pass": true,
+        "no_diagnostics": true,
+        "target_matches_validated_gold": true
+      },
+      "diagnostics": [],
+      "passed": true,
+      "matched_defect_family": "wrong-return-type"
+    },
+    {
+      "draft_id": "hidden-auth_bank_dataclass",
+      "task": "auth_bank_dataclass",
+      "cohort": "hidden_defect",
+      "mutation_label": "insufficient-funds attribute typo",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_fails": true,
+        "exactly_one_semantic_diagnostic": true,
+        "no_syntax_diagnostic": true,
+        "gold_visible_pass": true,
+        "gold_held_out_pass": true,
+        "gold_type_clean": true
+      },
+      "diagnostics": [
+        {
+          "path": "target.py",
+          "line": 23,
+          "column": 20,
+          "stop_line": 23,
+          "stop_column": 33,
+          "code": "missing-attribute",
+          "message": "Object of class `Account` has no attribute `failed`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "  22|         except InsufficientFunds:\n  23|             return source.failed\n  24|         self._accounts[dst].deposit(amount)"
+        }
+      ],
+      "passed": true,
+      "defect_family": "attribute-typo"
+    },
+    {
+      "draft_id": "clean-auth_bank_dataclass",
+      "task": "auth_bank_dataclass",
+      "cohort": "clean_negative_control",
+      "mutation_label": "matched clean gold",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_pass": true,
+        "no_diagnostics": true,
+        "target_matches_validated_gold": true
+      },
+      "diagnostics": [],
+      "passed": true,
+      "matched_defect_family": "attribute-typo"
+    },
+    {
+      "draft_id": "hidden-auth_multimap_generic",
+      "task": "auth_multimap_generic",
+      "cohort": "hidden_defect",
+      "mutation_label": "generic pair represented by the wrong type",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_fails": true,
+        "exactly_one_semantic_diagnostic": true,
+        "no_syntax_diagnostic": true,
+        "gold_visible_pass": true,
+        "gold_held_out_pass": true,
+        "gold_type_clean": true
+      },
+      "diagnostics": [
+        {
+          "path": "target.py",
+          "line": 24,
+          "column": 28,
+          "stop_line": 24,
+          "stop_column": 40,
+          "code": "bad-argument-type",
+          "message": "Argument `tuple[K, V]` is not assignable to parameter `object` with type `Pair[K, V]` in function `list.append`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "  23|             for value in values:\n  24|                 out.append((key, value))\n  25|         return out"
+        }
+      ],
+      "passed": true,
+      "defect_family": "misused-generic-container"
+    },
+    {
+      "draft_id": "clean-auth_multimap_generic",
+      "task": "auth_multimap_generic",
+      "cohort": "clean_negative_control",
+      "mutation_label": "matched clean gold",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_pass": true,
+        "no_diagnostics": true,
+        "target_matches_validated_gold": true
+      },
+      "diagnostics": [],
+      "passed": true,
+      "matched_defect_family": "misused-generic-container"
+    },
+    {
+      "draft_id": "hidden-auth_shapes_protocol",
+      "task": "auth_shapes_protocol",
+      "cohort": "hidden_defect",
+      "mutation_label": "held-out radius attribute typo",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_fails": true,
+        "exactly_one_semantic_diagnostic": true,
+        "no_syntax_diagnostic": true,
+        "gold_visible_pass": true,
+        "gold_held_out_pass": true,
+        "gold_type_clean": true
+      },
+      "diagnostics": [
+        {
+          "path": "target.py",
+          "line": 13,
+          "column": 26,
+          "stop_line": 13,
+          "stop_column": 35,
+          "code": "missing-attribute",
+          "message": "Object of class `Circle` has no attribute `radi`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "  12|         if self.radius == 2.0:\n  13|             return float(self.radi)\n  14|         return math.pi * self.radius * self.radius"
+        }
+      ],
+      "passed": true,
+      "defect_family": "attribute-typo"
+    },
+    {
+      "draft_id": "clean-auth_shapes_protocol",
+      "task": "auth_shapes_protocol",
+      "cohort": "clean_negative_control",
+      "mutation_label": "matched clean gold",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_pass": true,
+        "no_diagnostics": true,
+        "target_matches_validated_gold": true
+      },
+      "diagnostics": [],
+      "passed": true,
+      "matched_defect_family": "attribute-typo"
+    },
+    {
+      "draft_id": "hidden-auth_machine_enum",
+      "task": "auth_machine_enum",
+      "cohort": "hidden_defect",
+      "mutation_label": "terminal-state string key into State-keyed dict",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_fails": true,
+        "exactly_one_semantic_diagnostic": true,
+        "no_syntax_diagnostic": true,
+        "gold_visible_pass": true,
+        "gold_held_out_pass": true,
+        "gold_type_clean": true
+      },
+      "diagnostics": [
+        {
+          "path": "target.py",
+          "line": 15,
+          "column": 42,
+          "stop_line": 15,
+          "stop_column": 48,
+          "code": "bad-index",
+          "message": "Cannot index into `dict[State, set[State]]`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "  14|         if self._state is State.DONE:\n  15|             return target in TRANSITIONS[\"done\"]\n  16|         return target in TRANSITIONS[self._state]"
+        }
+      ],
+      "passed": true,
+      "defect_family": "wrong-typeddict-dict-key"
+    },
+    {
+      "draft_id": "clean-auth_machine_enum",
+      "task": "auth_machine_enum",
+      "cohort": "clean_negative_control",
+      "mutation_label": "matched clean gold",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_pass": true,
+        "no_diagnostics": true,
+        "target_matches_validated_gold": true
+      },
+      "diagnostics": [],
+      "passed": true,
+      "matched_defect_family": "wrong-typeddict-dict-key"
+    },
+    {
+      "draft_id": "hidden-auth_tokenizer_namedtuple",
+      "task": "auth_tokenizer_namedtuple",
+      "cohort": "hidden_defect",
+      "mutation_label": "empty-input undefined constant",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_fails": true,
+        "exactly_one_semantic_diagnostic": true,
+        "no_syntax_diagnostic": true,
+        "gold_visible_pass": true,
+        "gold_held_out_pass": true,
+        "gold_type_clean": true
+      },
+      "diagnostics": [
+        {
+          "path": "target.py",
+          "line": 6,
+          "column": 16,
+          "stop_line": 6,
+          "stop_column": 28,
+          "code": "unknown-name",
+          "message": "Could not find name `EMPTY_TOKENS`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "   5|     if not text:\n   6|         return EMPTY_TOKENS\n   7|     out: list[Token] = []"
+        }
+      ],
+      "passed": true,
+      "defect_family": "undefined-name"
+    },
+    {
+      "draft_id": "clean-auth_tokenizer_namedtuple",
+      "task": "auth_tokenizer_namedtuple",
+      "cohort": "clean_negative_control",
+      "mutation_label": "matched clean gold",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_pass": true,
+        "no_diagnostics": true,
+        "target_matches_validated_gold": true
+      },
+      "diagnostics": [],
+      "passed": true,
+      "matched_defect_family": "undefined-name"
+    },
+    {
+      "draft_id": "hidden-auth_fold_callable",
+      "task": "auth_fold_callable",
+      "cohort": "hidden_defect",
+      "mutation_label": "empty-fold missing step argument",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_fails": true,
+        "exactly_one_semantic_diagnostic": true,
+        "no_syntax_diagnostic": true,
+        "gold_visible_pass": true,
+        "gold_held_out_pass": true,
+        "gold_type_clean": true
+      },
+      "diagnostics": [
+        {
+          "path": "target.py",
+          "line": 6,
+          "column": 20,
+          "stop_line": 6,
+          "stop_column": 29,
+          "code": "missing-argument",
+          "message": "Missing argument `step` in function `lib.fold`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "   5|     if not nums:\n   6|         return fold(nums, 0)\n   7|     return fold(nums, 0, lambda acc, n: acc + n)"
+        }
+      ],
+      "passed": true,
+      "defect_family": "wrong-call-arity"
+    },
+    {
+      "draft_id": "clean-auth_fold_callable",
+      "task": "auth_fold_callable",
+      "cohort": "clean_negative_control",
+      "mutation_label": "matched clean gold",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_pass": true,
+        "no_diagnostics": true,
+        "target_matches_validated_gold": true
+      },
+      "diagnostics": [],
+      "passed": true,
+      "matched_defect_family": "wrong-call-arity"
+    },
+    {
+      "draft_id": "hidden-auth_graph_edges",
+      "task": "auth_graph_edges",
+      "cohort": "hidden_defect",
+      "mutation_label": "missing-edge wrong sentinel type",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_fails": true,
+        "exactly_one_semantic_diagnostic": true,
+        "no_syntax_diagnostic": true,
+        "gold_visible_pass": true,
+        "gold_held_out_pass": true,
+        "gold_type_clean": true
+      },
+      "diagnostics": [
+        {
+          "path": "target.py",
+          "line": 20,
+          "column": 16,
+          "stop_line": 20,
+          "stop_column": 25,
+          "code": "bad-return",
+          "message": "Returned type `Literal['missing']` is not assignable to declared return type `int | None`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "  19|                 return e.weight\n  20|         return \"missing\"\n  21| "
+        }
+      ],
+      "passed": true,
+      "defect_family": "wrong-return-type"
+    },
+    {
+      "draft_id": "clean-auth_graph_edges",
+      "task": "auth_graph_edges",
+      "cohort": "clean_negative_control",
+      "mutation_label": "matched clean gold",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_pass": true,
+        "no_diagnostics": true,
+        "target_matches_validated_gold": true
+      },
+      "diagnostics": [],
+      "passed": true,
+      "matched_defect_family": "wrong-return-type"
+    },
+    {
+      "draft_id": "hidden-auth_histogram_counter",
+      "task": "auth_histogram_counter",
+      "cohort": "hidden_defect",
+      "mutation_label": "large-k rank passes list where Counter required",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_fails": true,
+        "exactly_one_semantic_diagnostic": true,
+        "no_syntax_diagnostic": true,
+        "gold_visible_pass": true,
+        "gold_held_out_pass": true,
+        "gold_type_clean": true
+      },
+      "diagnostics": [
+        {
+          "path": "target.py",
+          "line": 15,
+          "column": 22,
+          "stop_line": 15,
+          "stop_column": 27,
+          "code": "bad-argument-type",
+          "message": "Argument `list[str]` is not assignable to parameter `counts` with type `Counter[str]` in function `lib.top_n`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "  14|     if k > 2:\n  15|         return top_n(words, k)\n  16|     return top_n(word_counts(words), k)"
+        }
+      ],
+      "passed": true,
+      "defect_family": "wrong-argument-type"
+    },
+    {
+      "draft_id": "clean-auth_histogram_counter",
+      "task": "auth_histogram_counter",
+      "cohort": "clean_negative_control",
+      "mutation_label": "matched clean gold",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_pass": true,
+        "no_diagnostics": true,
+        "target_matches_validated_gold": true
+      },
+      "diagnostics": [],
+      "passed": true,
+      "matched_defect_family": "wrong-argument-type"
+    },
+    {
+      "draft_id": "hidden-auth_pipeline_handler",
+      "task": "auth_pipeline_handler",
+      "cohort": "hidden_defect",
+      "mutation_label": "empty-pipeline import of missing lib helper",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_fails": true,
+        "exactly_one_semantic_diagnostic": true,
+        "no_syntax_diagnostic": true,
+        "gold_visible_pass": true,
+        "gold_held_out_pass": true,
+        "gold_type_clean": true
+      },
+      "diagnostics": [
+        {
+          "path": "target.py",
+          "line": 15,
+          "column": 29,
+          "stop_line": 15,
+          "stop_column": 40,
+          "code": "missing-module-attribute",
+          "message": "Could not import `passthrough` from `lib`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "  14|         if not self._stages:\n  15|             from lib import passthrough\n  16|             return passthrough(value)"
+        }
+      ],
+      "passed": true,
+      "defect_family": "bad-missing-import"
+    },
+    {
+      "draft_id": "clean-auth_pipeline_handler",
+      "task": "auth_pipeline_handler",
+      "cohort": "clean_negative_control",
+      "mutation_label": "matched clean gold",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_pass": true,
+        "no_diagnostics": true,
+        "target_matches_validated_gold": true
+      },
+      "diagnostics": [],
+      "passed": true,
+      "matched_defect_family": "bad-missing-import"
+    },
+    {
+      "draft_id": "hidden-auth_grid_helpers",
+      "task": "auth_grid_helpers",
+      "cohort": "hidden_defect",
+      "mutation_label": "held-out grid size missing set argument",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_fails": true,
+        "exactly_one_semantic_diagnostic": true,
+        "no_syntax_diagnostic": true,
+        "gold_visible_pass": true,
+        "gold_held_out_pass": true,
+        "gold_type_clean": true
+      },
+      "diagnostics": [
+        {
+          "path": "target.py",
+          "line": 8,
+          "column": 18,
+          "stop_line": 8,
+          "stop_column": 24,
+          "code": "missing-argument",
+          "message": "Missing argument `value` in function `lib.Grid.set`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "   7|         if rows == 3:\n   8|             g.set(r, c)\n   9|         else:"
+        }
+      ],
+      "passed": true,
+      "defect_family": "wrong-call-arity"
+    },
+    {
+      "draft_id": "clean-auth_grid_helpers",
+      "task": "auth_grid_helpers",
+      "cohort": "clean_negative_control",
+      "mutation_label": "matched clean gold",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_pass": true,
+        "no_diagnostics": true,
+        "target_matches_validated_gold": true
+      },
+      "diagnostics": [],
+      "passed": true,
+      "matched_defect_family": "wrong-call-arity"
+    },
+    {
+      "draft_id": "hidden-auth_config_typeddict",
+      "task": "auth_config_typeddict",
+      "cohort": "hidden_defect",
+      "mutation_label": "default-host wrong TypedDict key",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_fails": true,
+        "exactly_one_semantic_diagnostic": true,
+        "no_syntax_diagnostic": true,
+        "gold_visible_pass": true,
+        "gold_held_out_pass": true,
+        "gold_type_clean": true
+      },
+      "diagnostics": [
+        {
+          "path": "target.py",
+          "line": 14,
+          "column": 23,
+          "stop_line": 14,
+          "stop_column": 33,
+          "code": "bad-typed-dict-key",
+          "message": "TypedDict `Config` does not have key `hostname`",
+          "severity": "error",
+          "classification": "semantic",
+          "frame": "  13|     if cfg[\"host\"] == \"localhost\":\n  14|         return f\"{cfg['hostname']}:{cfg['port']}\"\n  15|     return f\"{cfg['host']}:{cfg['port']}\""
+        }
+      ],
+      "passed": true,
+      "defect_family": "wrong-typeddict-dict-key"
+    },
+    {
+      "draft_id": "clean-auth_config_typeddict",
+      "task": "auth_config_typeddict",
+      "cohort": "clean_negative_control",
+      "mutation_label": "matched clean gold",
+      "checks": {
+        "coherent": true,
+        "visible_pass": true,
+        "held_out_pass": true,
+        "no_diagnostics": true,
+        "target_matches_validated_gold": true
+      },
+      "diagnostics": [],
+      "passed": true,
+      "matched_defect_family": "wrong-typeddict-dict-key"
+    }
+  ],
+  "passed": true,
+  "defect_family_counts": {
+    "attribute-typo": 2,
+    "bad-missing-import": 1,
+    "misused-generic-container": 1,
+    "undefined-name": 1,
+    "wrong-argument-type": 1,
+    "wrong-call-arity": 2,
+    "wrong-return-type": 2,
+    "wrong-typeddict-dict-key": 2
+  }
+}

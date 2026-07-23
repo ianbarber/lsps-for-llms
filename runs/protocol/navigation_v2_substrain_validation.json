@@ -1,0 +1,1450 @@
+{
+  "protocol": "navigation-v2",
+  "experiment": "substitution-training",
+  "split": "substrain",
+  "generator": "scripts/experiments/run_substitution_train.py",
+  "seeds": [
+    53003,
+    53017,
+    53023,
+    53029,
+    53047,
+    53051,
+    53063,
+    53069,
+    53077,
+    53087,
+    53093,
+    53101
+  ],
+  "templates": [
+    "add",
+    "multiply"
+  ],
+  "disjoint_from": {
+    "pilot": [
+      17011,
+      17027,
+      17033,
+      17041
+    ],
+    "apparatus_heldout_retest": [
+      29009,
+      29017,
+      29021,
+      29023,
+      29027,
+      29033,
+      29059,
+      29063,
+      29077,
+      29083,
+      29089,
+      29101
+    ],
+    "confirmation_reserved": "not built, not enumerated, asserted disjoint"
+  },
+  "protocol_source_sha256": {
+    "scripts/experiments/navigation_tasks.py": "f860fd07fdeb2d4f78d89a047c6804d79cc3babd60fab7e0a06e839679692d97",
+    "scripts/experiments/run_navigation.py": "319743150b0b49a86e8c52d5264f5736d887a396e89bb5bfa7280fdce4ea72b8",
+    "scripts/analysis/analyze_navigation.py": "c48d2c7b696244107665c0b07f2cd6c4fc2febb7b6f6d67b931ea02cc9be5a77",
+    "scripts/run_navigation_pilot.sh": "727d6780ae7d3fbac35b88e02ddbe554b3a6687293e329a1f11d05a62f2adb77",
+    "scripts/run_navigation_confirmation.sh": "af48c93caf45c9047828d5a7b76eed7977419290ad6863917a1df88fa50a1d56",
+    "scaffold/stream_agent.py": "4d628d7ccf033e9cc53153477ff180623fec0ec244e4d9d6bc9c1f626cb552c9",
+    "scaffold/real_env.py": "a1b38f3d228d659a37329eb9088a80de20422f07712de9bdd9b3c7ad694ae70b",
+    "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
+    "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
+    "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
+  },
+  "pyrefly": {
+    "path": "/home/ianbarber/Projects/Streams/.venv-streams/bin/pyrefly",
+    "version": "pyrefly 1.0.0"
+  },
+  "rows": [
+    {
+      "task": "nav_substrain_53003",
+      "split": "substrain",
+      "template": "add",
+      "n_overrides": 9,
+      "checks": {
+        "typed_base_fails": true,
+        "typed_heldout_base_fails": true,
+        "typed_gold_passes": true,
+        "typed_heldout_gold_passes": true,
+        "erased_base_fails": true,
+        "erased_heldout_base_fails": true,
+        "erased_gold_passes": true,
+        "erased_heldout_gold_passes": true,
+        "runtime_files_identical": true,
+        "runtime_outputs_identical": true,
+        "factory_implementation_identical": true,
+        "all_declared_returns_match_runtime": true,
+        "specific_overloads_precede_fallback": true,
+        "variants_type_clean": true,
+        "gold_identical": true,
+        "override_count_valid": true,
+        "registry_trace_unique": true,
+        "typed_lsp_discriminates": true,
+        "typed_lsp_span_matches_pristine_target": true,
+        "erased_lsp_nondiscriminating": true,
+        "literal_widening_removes_discrimination": true,
+        "lsp_server_healthy": true,
+        "lsp_no_errors": true,
+        "prompt_has_no_target_leak": true,
+        "positive_control_materialized": true
+      },
+      "lsp": {
+        "typed": {
+          "path": "pkg/units/uenmvs.py",
+          "span_hash": "980fd30ca69adbef1343ab45658dfd7e68cce3302154dcceb9d6d45ba20e6ca1",
+          "latency_ms": 6020.9,
+          "health_path": "pkg/units/uenmvs.py",
+          "resolved_class": "Cqzfmgjf",
+          "resolved_method_span_hash": "34133178a671322af1b40332ea88cf1c7b38e03d1440f4031d0075f36504d3b0"
+        },
+        "typed_widened": {
+          "path": "pkg/base.py",
+          "span_hash": "55e039033455b01e3fdfb7698263dc3eabfa82c4a48a50c02f2f31fd97aef28d",
+          "resolved_class": "Bleccgni"
+        },
+        "erased": {
+          "path": "pkg/base.py",
+          "span_hash": "55e039033455b01e3fdfb7698263dc3eabfa82c4a48a50c02f2f31fd97aef28d",
+          "latency_ms": 6020.2,
+          "health_path": "pkg/base.py",
+          "resolved_class": "Bleccgni",
+          "resolved_method_span_hash": "e1104753498ab891b9620e8adc2b6c4deee0ec461149a36d28c52bbe0d918b50"
+        }
+      },
+      "lsp_errors": [],
+      "runtime_factory_classes": {
+        "typed": {
+          "kbsswy": "Cfiygtsd",
+          "kbxgfh": "Cwltplam",
+          "kfrice": "Cxmtbcna",
+          "kkiygi": "Cpnwafov",
+          "klouim": "Ckhwnvef",
+          "kqbvff": "Cxstflid",
+          "krilyq": "Cjalowba",
+          "kycfns": "Cqzfmgjf",
+          "kzuxdl": "Cypjudlo"
+        },
+        "erased": {
+          "kbsswy": "Cfiygtsd",
+          "kbxgfh": "Cwltplam",
+          "kfrice": "Cxmtbcna",
+          "kkiygi": "Cpnwafov",
+          "klouim": "Ckhwnvef",
+          "kqbvff": "Cxstflid",
+          "krilyq": "Cjalowba",
+          "kycfns": "Cqzfmgjf",
+          "kzuxdl": "Cypjudlo"
+        }
+      },
+      "declared_registry_contract": {
+        "kqbvff": "Cxstflid",
+        "kbsswy": "Cfiygtsd",
+        "kkiygi": "Cpnwafov",
+        "kbxgfh": "Cwltplam",
+        "krilyq": "Cjalowba",
+        "klouim": "Ckhwnvef",
+        "kzuxdl": "Cypjudlo",
+        "kycfns": "Cqzfmgjf",
+        "kfrice": "Cxmtbcna"
+      },
+      "parsed_typed_stub_contract": {
+        "kqbvff": "Cxstflid",
+        "kbsswy": "Cfiygtsd",
+        "kkiygi": "Cpnwafov",
+        "kbxgfh": "Cwltplam",
+        "krilyq": "Cjalowba",
+        "klouim": "Ckhwnvef",
+        "kzuxdl": "Cypjudlo",
+        "kycfns": "Cqzfmgjf",
+        "kfrice": "Cxmtbcna"
+      },
+      "type_errors": {
+        "typed": [],
+        "erased": []
+      },
+      "leakage": [],
+      "passed": true
+    },
+    {
+      "task": "nav_substrain_53017",
+      "split": "substrain",
+      "template": "multiply",
+      "n_overrides": 9,
+      "checks": {
+        "typed_base_fails": true,
+        "typed_heldout_base_fails": true,
+        "typed_gold_passes": true,
+        "typed_heldout_gold_passes": true,
+        "erased_base_fails": true,
+        "erased_heldout_base_fails": true,
+        "erased_gold_passes": true,
+        "erased_heldout_gold_passes": true,
+        "runtime_files_identical": true,
+        "runtime_outputs_identical": true,
+        "factory_implementation_identical": true,
+        "all_declared_returns_match_runtime": true,
+        "specific_overloads_precede_fallback": true,
+        "variants_type_clean": true,
+        "gold_identical": true,
+        "override_count_valid": true,
+        "registry_trace_unique": true,
+        "typed_lsp_discriminates": true,
+        "typed_lsp_span_matches_pristine_target": true,
+        "erased_lsp_nondiscriminating": true,
+        "literal_widening_removes_discrimination": true,
+        "lsp_server_healthy": true,
+        "lsp_no_errors": true,
+        "prompt_has_no_target_leak": true,
+        "positive_control_materialized": true
+      },
+      "lsp": {
+        "typed": {
+          "path": "pkg/units/ucaqaj.py",
+          "span_hash": "dd140b7ff334f0d14540f6a4cc8485a033d458b003234f3d695467ffc84049fa",
+          "latency_ms": 6020.1,
+          "health_path": "pkg/units/ucaqaj.py",
+          "resolved_class": "Cavxrgea",
+          "resolved_method_span_hash": "a0313495cf150ec2823c50c4ffb80ae4d787cfc52dd86eac30e656a584cb6a61"
+        },
+        "typed_widened": {
+          "path": "pkg/base.py",
+          "span_hash": "2c47e96b57e92428f5b979c4ee936bfe28e6c902322a27d4ce2d99c2e392e388",
+          "resolved_class": "Bsjyxfwn"
+        },
+        "erased": {
+          "path": "pkg/base.py",
+          "span_hash": "2c47e96b57e92428f5b979c4ee936bfe28e6c902322a27d4ce2d99c2e392e388",
+          "latency_ms": 6020.2,
+          "health_path": "pkg/base.py",
+          "resolved_class": "Bsjyxfwn",
+          "resolved_method_span_hash": "ebf55e70a00046497e0ce9935e6be338f711ea8389cb33f82c8323f7dd58b861"
+        }
+      },
+      "lsp_errors": [],
+      "runtime_factory_classes": {
+        "typed": {
+          "kbxmdm": "Cytymksf",
+          "keepjr": "Cizeucqi",
+          "kfvzbh": "Ckjmzubh",
+          "kipqiz": "Ctwraxpj",
+          "kiqlid": "Csthddta",
+          "klvoko": "Cfhuwamm",
+          "kwutht": "Cketaivy",
+          "kwzxjz": "Cavxrgea",
+          "kzncgy": "Ccldcrao"
+        },
+        "erased": {
+          "kbxmdm": "Cytymksf",
+          "keepjr": "Cizeucqi",
+          "kfvzbh": "Ckjmzubh",
+          "kipqiz": "Ctwraxpj",
+          "kiqlid": "Csthddta",
+          "klvoko": "Cfhuwamm",
+          "kwutht": "Cketaivy",
+          "kwzxjz": "Cavxrgea",
+          "kzncgy": "Ccldcrao"
+        }
+      },
+      "declared_registry_contract": {
+        "kwutht": "Cketaivy",
+        "kzncgy": "Ccldcrao",
+        "kfvzbh": "Ckjmzubh",
+        "klvoko": "Cfhuwamm",
+        "kbxmdm": "Cytymksf",
+        "kipqiz": "Ctwraxpj",
+        "kwzxjz": "Cavxrgea",
+        "keepjr": "Cizeucqi",
+        "kiqlid": "Csthddta"
+      },
+      "parsed_typed_stub_contract": {
+        "kwutht": "Cketaivy",
+        "kzncgy": "Ccldcrao",
+        "kfvzbh": "Ckjmzubh",
+        "klvoko": "Cfhuwamm",
+        "kbxmdm": "Cytymksf",
+        "kipqiz": "Ctwraxpj",
+        "kwzxjz": "Cavxrgea",
+        "keepjr": "Cizeucqi",
+        "kiqlid": "Csthddta"
+      },
+      "type_errors": {
+        "typed": [],
+        "erased": []
+      },
+      "leakage": [],
+      "passed": true
+    },
+    {
+      "task": "nav_substrain_53023",
+      "split": "substrain",
+      "template": "add",
+      "n_overrides": 8,
+      "checks": {
+        "typed_base_fails": true,
+        "typed_heldout_base_fails": true,
+        "typed_gold_passes": true,
+        "typed_heldout_gold_passes": true,
+        "erased_base_fails": true,
+        "erased_heldout_base_fails": true,
+        "erased_gold_passes": true,
+        "erased_heldout_gold_passes": true,
+        "runtime_files_identical": true,
+        "runtime_outputs_identical": true,
+        "factory_implementation_identical": true,
+        "all_declared_returns_match_runtime": true,
+        "specific_overloads_precede_fallback": true,
+        "variants_type_clean": true,
+        "gold_identical": true,
+        "override_count_valid": true,
+        "registry_trace_unique": true,
+        "typed_lsp_discriminates": true,
+        "typed_lsp_span_matches_pristine_target": true,
+        "erased_lsp_nondiscriminating": true,
+        "literal_widening_removes_discrimination": true,
+        "lsp_server_healthy": true,
+        "lsp_no_errors": true,
+        "prompt_has_no_target_leak": true,
+        "positive_control_materialized": true
+      },
+      "lsp": {
+        "typed": {
+          "path": "pkg/units/uwequt.py",
+          "span_hash": "3f439f3307b2f5fa337a97fd5730ba09204d8aa74a6bb5e6a338cf3c363aa309",
+          "latency_ms": 6020.6,
+          "health_path": "pkg/units/uwequt.py",
+          "resolved_class": "Crqvqtux",
+          "resolved_method_span_hash": "cd98dde5ed20f918618e1f1f02145850dad9c0ad2775ca6df0e333fd0fc58389"
+        },
+        "typed_widened": {
+          "path": "pkg/base.py",
+          "span_hash": "48d5ac098d30cb882179824a9cb762b0773ff91c7ce2a1a5cbef3f0ab0dbbbd9",
+          "resolved_class": "Bvnjrqil"
+        },
+        "erased": {
+          "path": "pkg/base.py",
+          "span_hash": "48d5ac098d30cb882179824a9cb762b0773ff91c7ce2a1a5cbef3f0ab0dbbbd9",
+          "latency_ms": 6019.6,
+          "health_path": "pkg/base.py",
+          "resolved_class": "Bvnjrqil",
+          "resolved_method_span_hash": "bc3e7de9026e192c65ab262dfd1f883709503c198e235cd8e3d5e4c8c4148003"
+        }
+      },
+      "lsp_errors": [],
+      "runtime_factory_classes": {
+        "typed": {
+          "kgyryx": "Cvyjczap",
+          "khezsu": "Clpgznsc",
+          "kiutnn": "Cysnbyee",
+          "knmcfw": "Clzwjuui",
+          "krhmxg": "Cfljqbzw",
+          "kvhrwc": "Crqvqtux",
+          "kxrlre": "Cafddrrd",
+          "kzyxtt": "Czdmnaou"
+        },
+        "erased": {
+          "kgyryx": "Cvyjczap",
+          "khezsu": "Clpgznsc",
+          "kiutnn": "Cysnbyee",
+          "knmcfw": "Clzwjuui",
+          "krhmxg": "Cfljqbzw",
+          "kvhrwc": "Crqvqtux",
+          "kxrlre": "Cafddrrd",
+          "kzyxtt": "Czdmnaou"
+        }
+      },
+      "declared_registry_contract": {
+        "kgyryx": "Cvyjczap",
+        "krhmxg": "Cfljqbzw",
+        "knmcfw": "Clzwjuui",
+        "kiutnn": "Cysnbyee",
+        "khezsu": "Clpgznsc",
+        "kvhrwc": "Crqvqtux",
+        "kzyxtt": "Czdmnaou",
+        "kxrlre": "Cafddrrd"
+      },
+      "parsed_typed_stub_contract": {
+        "kgyryx": "Cvyjczap",
+        "krhmxg": "Cfljqbzw",
+        "knmcfw": "Clzwjuui",
+        "kiutnn": "Cysnbyee",
+        "khezsu": "Clpgznsc",
+        "kvhrwc": "Crqvqtux",
+        "kzyxtt": "Czdmnaou",
+        "kxrlre": "Cafddrrd"
+      },
+      "type_errors": {
+        "typed": [],
+        "erased": []
+      },
+      "leakage": [],
+      "passed": true
+    },
+    {
+      "task": "nav_substrain_53029",
+      "split": "substrain",
+      "template": "multiply",
+      "n_overrides": 9,
+      "checks": {
+        "typed_base_fails": true,
+        "typed_heldout_base_fails": true,
+        "typed_gold_passes": true,
+        "typed_heldout_gold_passes": true,
+        "erased_base_fails": true,
+        "erased_heldout_base_fails": true,
+        "erased_gold_passes": true,
+        "erased_heldout_gold_passes": true,
+        "runtime_files_identical": true,
+        "runtime_outputs_identical": true,
+        "factory_implementation_identical": true,
+        "all_declared_returns_match_runtime": true,
+        "specific_overloads_precede_fallback": true,
+        "variants_type_clean": true,
+        "gold_identical": true,
+        "override_count_valid": true,
+        "registry_trace_unique": true,
+        "typed_lsp_discriminates": true,
+        "typed_lsp_span_matches_pristine_target": true,
+        "erased_lsp_nondiscriminating": true,
+        "literal_widening_removes_discrimination": true,
+        "lsp_server_healthy": true,
+        "lsp_no_errors": true,
+        "prompt_has_no_target_leak": true,
+        "positive_control_materialized": true
+      },
+      "lsp": {
+        "typed": {
+          "path": "pkg/units/ucjnee.py",
+          "span_hash": "a22101aa6a305817a95046ec2abcc52b0c7857ecc6426e1ca219eb2167e33ec7",
+          "latency_ms": 6018.7,
+          "health_path": "pkg/units/ucjnee.py",
+          "resolved_class": "Cymokspc",
+          "resolved_method_span_hash": "72e6112513caf27ac6c7f8786b6a412a6a3e99d530de7a2a4594cd96eb250b8d"
+        },
+        "typed_widened": {
+          "path": "pkg/base.py",
+          "span_hash": "1cd6569cee19af14d459b7568375055f7b265eb3b229281e5a177a7d1735e18a",
+          "resolved_class": "Baquqoxb"
+        },
+        "erased": {
+          "path": "pkg/base.py",
+          "span_hash": "1cd6569cee19af14d459b7568375055f7b265eb3b229281e5a177a7d1735e18a",
+          "latency_ms": 6018.6,
+          "health_path": "pkg/base.py",
+          "resolved_class": "Baquqoxb",
+          "resolved_method_span_hash": "52909e53f4d0fc327b3b044663a35df5993486e93c1635b3fee7cbc56ee3e2b3"
+        }
+      },
+      "lsp_errors": [],
+      "runtime_factory_classes": {
+        "typed": {
+          "kakheb": "Cqrzrcix",
+          "kbgpuy": "Cqhlkoqi",
+          "kbrwqj": "Cymokspc",
+          "kgcupj": "Crcipkpi",
+          "kjwtyt": "Cvlkviws",
+          "kkljdq": "Cmqhqiaa",
+          "ktxouf": "Cfhoawei",
+          "ktzuks": "Cpuewyht",
+          "kykudo": "Cflcjrdl"
+        },
+        "erased": {
+          "kakheb": "Cqrzrcix",
+          "kbgpuy": "Cqhlkoqi",
+          "kbrwqj": "Cymokspc",
+          "kgcupj": "Crcipkpi",
+          "kjwtyt": "Cvlkviws",
+          "kkljdq": "Cmqhqiaa",
+          "ktxouf": "Cfhoawei",
+          "ktzuks": "Cpuewyht",
+          "kykudo": "Cflcjrdl"
+        }
+      },
+      "declared_registry_contract": {
+        "kbrwqj": "Cymokspc",
+        "kakheb": "Cqrzrcix",
+        "kjwtyt": "Cvlkviws",
+        "kkljdq": "Cmqhqiaa",
+        "kykudo": "Cflcjrdl",
+        "ktzuks": "Cpuewyht",
+        "kgcupj": "Crcipkpi",
+        "ktxouf": "Cfhoawei",
+        "kbgpuy": "Cqhlkoqi"
+      },
+      "parsed_typed_stub_contract": {
+        "kbrwqj": "Cymokspc",
+        "kakheb": "Cqrzrcix",
+        "kjwtyt": "Cvlkviws",
+        "kkljdq": "Cmqhqiaa",
+        "kykudo": "Cflcjrdl",
+        "ktzuks": "Cpuewyht",
+        "kgcupj": "Crcipkpi",
+        "ktxouf": "Cfhoawei",
+        "kbgpuy": "Cqhlkoqi"
+      },
+      "type_errors": {
+        "typed": [],
+        "erased": []
+      },
+      "leakage": [],
+      "passed": true
+    },
+    {
+      "task": "nav_substrain_53047",
+      "split": "substrain",
+      "template": "add",
+      "n_overrides": 10,
+      "checks": {
+        "typed_base_fails": true,
+        "typed_heldout_base_fails": true,
+        "typed_gold_passes": true,
+        "typed_heldout_gold_passes": true,
+        "erased_base_fails": true,
+        "erased_heldout_base_fails": true,
+        "erased_gold_passes": true,
+        "erased_heldout_gold_passes": true,
+        "runtime_files_identical": true,
+        "runtime_outputs_identical": true,
+        "factory_implementation_identical": true,
+        "all_declared_returns_match_runtime": true,
+        "specific_overloads_precede_fallback": true,
+        "variants_type_clean": true,
+        "gold_identical": true,
+        "override_count_valid": true,
+        "registry_trace_unique": true,
+        "typed_lsp_discriminates": true,
+        "typed_lsp_span_matches_pristine_target": true,
+        "erased_lsp_nondiscriminating": true,
+        "literal_widening_removes_discrimination": true,
+        "lsp_server_healthy": true,
+        "lsp_no_errors": true,
+        "prompt_has_no_target_leak": true,
+        "positive_control_materialized": true
+      },
+      "lsp": {
+        "typed": {
+          "path": "pkg/units/utdjce.py",
+          "span_hash": "0931e226ceda5a516ad93b902d46e93908f651aee752f32aa056504a35ff97c0",
+          "latency_ms": 6019.9,
+          "health_path": "pkg/units/utdjce.py",
+          "resolved_class": "Cihhtrli",
+          "resolved_method_span_hash": "77fd1a0fcd5b7eb47430fdfab8aa2c2fcbc90913d8b94941c969e96b1e209fc0"
+        },
+        "typed_widened": {
+          "path": "pkg/base.py",
+          "span_hash": "9c47f0e3bfda68494ec4c2c3dd97c761c9ec7ff134173ed25e495c736672fd99",
+          "resolved_class": "Brwdmijq"
+        },
+        "erased": {
+          "path": "pkg/base.py",
+          "span_hash": "9c47f0e3bfda68494ec4c2c3dd97c761c9ec7ff134173ed25e495c736672fd99",
+          "latency_ms": 6019.9,
+          "health_path": "pkg/base.py",
+          "resolved_class": "Brwdmijq",
+          "resolved_method_span_hash": "a2612002a0f2dc6236ae110858ef4f837fd8871a5eb366e27ed8580b1f77de6d"
+        }
+      },
+      "lsp_errors": [],
+      "runtime_factory_classes": {
+        "typed": {
+          "khcuqq": "Cuglgpmq",
+          "khjgqn": "Cquckpiy",
+          "kjctef": "Chrucrdz",
+          "kjpwml": "Ckpeozbl",
+          "kkemgb": "Carnuvzw",
+          "kpcucs": "Czepceux",
+          "kwfjzj": "Cpkwjzzt",
+          "kxcoty": "Cfysbtpa",
+          "kyxzcb": "Cihhtrli",
+          "kzmbvk": "Caxcnvvh"
+        },
+        "erased": {
+          "khcuqq": "Cuglgpmq",
+          "khjgqn": "Cquckpiy",
+          "kjctef": "Chrucrdz",
+          "kjpwml": "Ckpeozbl",
+          "kkemgb": "Carnuvzw",
+          "kpcucs": "Czepceux",
+          "kwfjzj": "Cpkwjzzt",
+          "kxcoty": "Cfysbtpa",
+          "kyxzcb": "Cihhtrli",
+          "kzmbvk": "Caxcnvvh"
+        }
+      },
+      "declared_registry_contract": {
+        "kpcucs": "Czepceux",
+        "kzmbvk": "Caxcnvvh",
+        "khcuqq": "Cuglgpmq",
+        "kkemgb": "Carnuvzw",
+        "kyxzcb": "Cihhtrli",
+        "kwfjzj": "Cpkwjzzt",
+        "kjpwml": "Ckpeozbl",
+        "kjctef": "Chrucrdz",
+        "khjgqn": "Cquckpiy",
+        "kxcoty": "Cfysbtpa"
+      },
+      "parsed_typed_stub_contract": {
+        "kpcucs": "Czepceux",
+        "kzmbvk": "Caxcnvvh",
+        "khcuqq": "Cuglgpmq",
+        "kkemgb": "Carnuvzw",
+        "kyxzcb": "Cihhtrli",
+        "kwfjzj": "Cpkwjzzt",
+        "kjpwml": "Ckpeozbl",
+        "kjctef": "Chrucrdz",
+        "khjgqn": "Cquckpiy",
+        "kxcoty": "Cfysbtpa"
+      },
+      "type_errors": {
+        "typed": [],
+        "erased": []
+      },
+      "leakage": [],
+      "passed": true
+    },
+    {
+      "task": "nav_substrain_53051",
+      "split": "substrain",
+      "template": "multiply",
+      "n_overrides": 13,
+      "checks": {
+        "typed_base_fails": true,
+        "typed_heldout_base_fails": true,
+        "typed_gold_passes": true,
+        "typed_heldout_gold_passes": true,
+        "erased_base_fails": true,
+        "erased_heldout_base_fails": true,
+        "erased_gold_passes": true,
+        "erased_heldout_gold_passes": true,
+        "runtime_files_identical": true,
+        "runtime_outputs_identical": true,
+        "factory_implementation_identical": true,
+        "all_declared_returns_match_runtime": true,
+        "specific_overloads_precede_fallback": true,
+        "variants_type_clean": true,
+        "gold_identical": true,
+        "override_count_valid": true,
+        "registry_trace_unique": true,
+        "typed_lsp_discriminates": true,
+        "typed_lsp_span_matches_pristine_target": true,
+        "erased_lsp_nondiscriminating": true,
+        "literal_widening_removes_discrimination": true,
+        "lsp_server_healthy": true,
+        "lsp_no_errors": true,
+        "prompt_has_no_target_leak": true,
+        "positive_control_materialized": true
+      },
+      "lsp": {
+        "typed": {
+          "path": "pkg/units/uldosn.py",
+          "span_hash": "cf39c5dce4309f215ae3f7eb97b280735b0e7a2f96e51c7cceb25854c7c2299c",
+          "latency_ms": 6020.5,
+          "health_path": "pkg/units/uldosn.py",
+          "resolved_class": "Choroykb",
+          "resolved_method_span_hash": "575db299e3b69d286b4597d13c09cf57a84f2dc92f4635bedf61945774e98678"
+        },
+        "typed_widened": {
+          "path": "pkg/base.py",
+          "span_hash": "16a8c9302a32caf442ca5a6c80c78e362e65f4aad2406a3689097089fe123c28",
+          "resolved_class": "Bzcfwlnv"
+        },
+        "erased": {
+          "path": "pkg/base.py",
+          "span_hash": "16a8c9302a32caf442ca5a6c80c78e362e65f4aad2406a3689097089fe123c28",
+          "latency_ms": 6020.2,
+          "health_path": "pkg/base.py",
+          "resolved_class": "Bzcfwlnv",
+          "resolved_method_span_hash": "274396caad97a1b0472819c1c71f12d8c065d7598f16b02f3d1419685dfb682b"
+        }
+      },
+      "lsp_errors": [],
+      "runtime_factory_classes": {
+        "typed": {
+          "kbfoeh": "Czluerkf",
+          "kchwwj": "Ctttialf",
+          "kdclee": "Cvxmaqfc",
+          "klvzbg": "Cmcsveft",
+          "kmdkhc": "Ctvvydeh",
+          "kqbdyz": "Cftjyjta",
+          "kqqofe": "Cgjwjmqm",
+          "kvurgr": "Ckgqmpla",
+          "kvvjwt": "Ckwiwrzj",
+          "kwckja": "Crmfkdak",
+          "kxoeyg": "Ciryiuny",
+          "kyacwl": "Cvykofkl",
+          "kzduzw": "Choroykb"
+        },
+        "erased": {
+          "kbfoeh": "Czluerkf",
+          "kchwwj": "Ctttialf",
+          "kdclee": "Cvxmaqfc",
+          "klvzbg": "Cmcsveft",
+          "kmdkhc": "Ctvvydeh",
+          "kqbdyz": "Cftjyjta",
+          "kqqofe": "Cgjwjmqm",
+          "kvurgr": "Ckgqmpla",
+          "kvvjwt": "Ckwiwrzj",
+          "kwckja": "Crmfkdak",
+          "kxoeyg": "Ciryiuny",
+          "kyacwl": "Cvykofkl",
+          "kzduzw": "Choroykb"
+        }
+      },
+      "declared_registry_contract": {
+        "kqqofe": "Cgjwjmqm",
+        "kqbdyz": "Cftjyjta",
+        "kwckja": "Crmfkdak",
+        "kdclee": "Cvxmaqfc",
+        "kzduzw": "Choroykb",
+        "kchwwj": "Ctttialf",
+        "kyacwl": "Cvykofkl",
+        "kvvjwt": "Ckwiwrzj",
+        "klvzbg": "Cmcsveft",
+        "kmdkhc": "Ctvvydeh",
+        "kbfoeh": "Czluerkf",
+        "kvurgr": "Ckgqmpla",
+        "kxoeyg": "Ciryiuny"
+      },
+      "parsed_typed_stub_contract": {
+        "kqqofe": "Cgjwjmqm",
+        "kqbdyz": "Cftjyjta",
+        "kwckja": "Crmfkdak",
+        "kdclee": "Cvxmaqfc",
+        "kzduzw": "Choroykb",
+        "kchwwj": "Ctttialf",
+        "kyacwl": "Cvykofkl",
+        "kvvjwt": "Ckwiwrzj",
+        "klvzbg": "Cmcsveft",
+        "kmdkhc": "Ctvvydeh",
+        "kbfoeh": "Czluerkf",
+        "kvurgr": "Ckgqmpla",
+        "kxoeyg": "Ciryiuny"
+      },
+      "type_errors": {
+        "typed": [],
+        "erased": []
+      },
+      "leakage": [],
+      "passed": true
+    },
+    {
+      "task": "nav_substrain_53063",
+      "split": "substrain",
+      "template": "add",
+      "n_overrides": 12,
+      "checks": {
+        "typed_base_fails": true,
+        "typed_heldout_base_fails": true,
+        "typed_gold_passes": true,
+        "typed_heldout_gold_passes": true,
+        "erased_base_fails": true,
+        "erased_heldout_base_fails": true,
+        "erased_gold_passes": true,
+        "erased_heldout_gold_passes": true,
+        "runtime_files_identical": true,
+        "runtime_outputs_identical": true,
+        "factory_implementation_identical": true,
+        "all_declared_returns_match_runtime": true,
+        "specific_overloads_precede_fallback": true,
+        "variants_type_clean": true,
+        "gold_identical": true,
+        "override_count_valid": true,
+        "registry_trace_unique": true,
+        "typed_lsp_discriminates": true,
+        "typed_lsp_span_matches_pristine_target": true,
+        "erased_lsp_nondiscriminating": true,
+        "literal_widening_removes_discrimination": true,
+        "lsp_server_healthy": true,
+        "lsp_no_errors": true,
+        "prompt_has_no_target_leak": true,
+        "positive_control_materialized": true
+      },
+      "lsp": {
+        "typed": {
+          "path": "pkg/units/usredd.py",
+          "span_hash": "4fec587e1daff7bdff0190fd327f5cb3fe875947b7d9166aa88624230a05115d",
+          "latency_ms": 6020.5,
+          "health_path": "pkg/units/usredd.py",
+          "resolved_class": "Cermbsfn",
+          "resolved_method_span_hash": "414b9a0967d4f69a72a6a17ca6f9c68ddad582822a150ed94a990c9cf3de14ad"
+        },
+        "typed_widened": {
+          "path": "pkg/base.py",
+          "span_hash": "30e5ecd1c7b48f2fb2d8cd4cc9063e51d2f7eb487cd1d81d4983a59f2336c839",
+          "resolved_class": "Biuyddpd"
+        },
+        "erased": {
+          "path": "pkg/base.py",
+          "span_hash": "30e5ecd1c7b48f2fb2d8cd4cc9063e51d2f7eb487cd1d81d4983a59f2336c839",
+          "latency_ms": 6020.1,
+          "health_path": "pkg/base.py",
+          "resolved_class": "Biuyddpd",
+          "resolved_method_span_hash": "6f4a5d639005ba6eb3a5b82ce8c9f2c3d760300ea958e37276a5ed780b0df7cc"
+        }
+      },
+      "lsp_errors": [],
+      "runtime_factory_classes": {
+        "typed": {
+          "kdktkh": "Cermbsfn",
+          "kejrgk": "Cexlsngn",
+          "kfvnov": "Czovuyen",
+          "klnpuu": "Chuiiafs",
+          "knfxyh": "Cpktsxoz",
+          "knfyyz": "Cgosxnbl",
+          "ktmbpk": "Cnabwzaz",
+          "kvugqv": "Cqasktwp",
+          "kxvfve": "Cyjknocs",
+          "kyosnc": "Cimqmfeq",
+          "kzebhn": "Coasujtl",
+          "kzuopd": "Cfedpzym"
+        },
+        "erased": {
+          "kdktkh": "Cermbsfn",
+          "kejrgk": "Cexlsngn",
+          "kfvnov": "Czovuyen",
+          "klnpuu": "Chuiiafs",
+          "knfxyh": "Cpktsxoz",
+          "knfyyz": "Cgosxnbl",
+          "ktmbpk": "Cnabwzaz",
+          "kvugqv": "Cqasktwp",
+          "kxvfve": "Cyjknocs",
+          "kyosnc": "Cimqmfeq",
+          "kzebhn": "Coasujtl",
+          "kzuopd": "Cfedpzym"
+        }
+      },
+      "declared_registry_contract": {
+        "knfxyh": "Cpktsxoz",
+        "kvugqv": "Cqasktwp",
+        "kxvfve": "Cyjknocs",
+        "klnpuu": "Chuiiafs",
+        "kfvnov": "Czovuyen",
+        "knfyyz": "Cgosxnbl",
+        "kyosnc": "Cimqmfeq",
+        "kzuopd": "Cfedpzym",
+        "kdktkh": "Cermbsfn",
+        "kzebhn": "Coasujtl",
+        "ktmbpk": "Cnabwzaz",
+        "kejrgk": "Cexlsngn"
+      },
+      "parsed_typed_stub_contract": {
+        "knfxyh": "Cpktsxoz",
+        "kvugqv": "Cqasktwp",
+        "kxvfve": "Cyjknocs",
+        "klnpuu": "Chuiiafs",
+        "kfvnov": "Czovuyen",
+        "knfyyz": "Cgosxnbl",
+        "kyosnc": "Cimqmfeq",
+        "kzuopd": "Cfedpzym",
+        "kdktkh": "Cermbsfn",
+        "kzebhn": "Coasujtl",
+        "ktmbpk": "Cnabwzaz",
+        "kejrgk": "Cexlsngn"
+      },
+      "type_errors": {
+        "typed": [],
+        "erased": []
+      },
+      "leakage": [],
+      "passed": true
+    },
+    {
+      "task": "nav_substrain_53069",
+      "split": "substrain",
+      "template": "multiply",
+      "n_overrides": 8,
+      "checks": {
+        "typed_base_fails": true,
+        "typed_heldout_base_fails": true,
+        "typed_gold_passes": true,
+        "typed_heldout_gold_passes": true,
+        "erased_base_fails": true,
+        "erased_heldout_base_fails": true,
+        "erased_gold_passes": true,
+        "erased_heldout_gold_passes": true,
+        "runtime_files_identical": true,
+        "runtime_outputs_identical": true,
+        "factory_implementation_identical": true,
+        "all_declared_returns_match_runtime": true,
+        "specific_overloads_precede_fallback": true,
+        "variants_type_clean": true,
+        "gold_identical": true,
+        "override_count_valid": true,
+        "registry_trace_unique": true,
+        "typed_lsp_discriminates": true,
+        "typed_lsp_span_matches_pristine_target": true,
+        "erased_lsp_nondiscriminating": true,
+        "literal_widening_removes_discrimination": true,
+        "lsp_server_healthy": true,
+        "lsp_no_errors": true,
+        "prompt_has_no_target_leak": true,
+        "positive_control_materialized": true
+      },
+      "lsp": {
+        "typed": {
+          "path": "pkg/units/ujoboe.py",
+          "span_hash": "9b4d19bca7a3c25e89e75abfead479cbe1fab3b936b1453e9f37dbbbe44cc5a9",
+          "latency_ms": 6020.3,
+          "health_path": "pkg/units/ujoboe.py",
+          "resolved_class": "Cricshbe",
+          "resolved_method_span_hash": "e7e5ac7631928efbfe20b6266b5b9442c7f7aad45b330cf5862f4a1d6e97c630"
+        },
+        "typed_widened": {
+          "path": "pkg/base.py",
+          "span_hash": "694eb2977e7c39f93728583a2690918e4264b07196687ca2e025c5b22dcba03a",
+          "resolved_class": "Blabqzxu"
+        },
+        "erased": {
+          "path": "pkg/base.py",
+          "span_hash": "694eb2977e7c39f93728583a2690918e4264b07196687ca2e025c5b22dcba03a",
+          "latency_ms": 6019.9,
+          "health_path": "pkg/base.py",
+          "resolved_class": "Blabqzxu",
+          "resolved_method_span_hash": "8bdaca78f5b94b7c899e30373e09d8cd1a87e342e257d218b55fc69e2e7e14e5"
+        }
+      },
+      "lsp_errors": [],
+      "runtime_factory_classes": {
+        "typed": {
+          "kbvfsl": "Cricshbe",
+          "kfdeix": "Cmjtatap",
+          "kfytis": "Covbzgjk",
+          "kipvun": "Cyaiiinj",
+          "knjqvt": "Ceegmoki",
+          "kujcad": "Caaaudqj",
+          "kyesca": "Ccoeqhgy",
+          "kymiup": "Cezkbjxp"
+        },
+        "erased": {
+          "kbvfsl": "Cricshbe",
+          "kfdeix": "Cmjtatap",
+          "kfytis": "Covbzgjk",
+          "kipvun": "Cyaiiinj",
+          "knjqvt": "Ceegmoki",
+          "kujcad": "Caaaudqj",
+          "kyesca": "Ccoeqhgy",
+          "kymiup": "Cezkbjxp"
+        }
+      },
+      "declared_registry_contract": {
+        "knjqvt": "Ceegmoki",
+        "kbvfsl": "Cricshbe",
+        "kipvun": "Cyaiiinj",
+        "kymiup": "Cezkbjxp",
+        "kujcad": "Caaaudqj",
+        "kfdeix": "Cmjtatap",
+        "kyesca": "Ccoeqhgy",
+        "kfytis": "Covbzgjk"
+      },
+      "parsed_typed_stub_contract": {
+        "knjqvt": "Ceegmoki",
+        "kbvfsl": "Cricshbe",
+        "kipvun": "Cyaiiinj",
+        "kymiup": "Cezkbjxp",
+        "kujcad": "Caaaudqj",
+        "kfdeix": "Cmjtatap",
+        "kyesca": "Ccoeqhgy",
+        "kfytis": "Covbzgjk"
+      },
+      "type_errors": {
+        "typed": [],
+        "erased": []
+      },
+      "leakage": [],
+      "passed": true
+    },
+    {
+      "task": "nav_substrain_53077",
+      "split": "substrain",
+      "template": "add",
+      "n_overrides": 15,
+      "checks": {
+        "typed_base_fails": true,
+        "typed_heldout_base_fails": true,
+        "typed_gold_passes": true,
+        "typed_heldout_gold_passes": true,
+        "erased_base_fails": true,
+        "erased_heldout_base_fails": true,
+        "erased_gold_passes": true,
+        "erased_heldout_gold_passes": true,
+        "runtime_files_identical": true,
+        "runtime_outputs_identical": true,
+        "factory_implementation_identical": true,
+        "all_declared_returns_match_runtime": true,
+        "specific_overloads_precede_fallback": true,
+        "variants_type_clean": true,
+        "gold_identical": true,
+        "override_count_valid": true,
+        "registry_trace_unique": true,
+        "typed_lsp_discriminates": true,
+        "typed_lsp_span_matches_pristine_target": true,
+        "erased_lsp_nondiscriminating": true,
+        "literal_widening_removes_discrimination": true,
+        "lsp_server_healthy": true,
+        "lsp_no_errors": true,
+        "prompt_has_no_target_leak": true,
+        "positive_control_materialized": true
+      },
+      "lsp": {
+        "typed": {
+          "path": "pkg/units/uwdvkr.py",
+          "span_hash": "bb2439ea30f4a0f308084268eccaa50171fd4968d006ff263df21a9381ebf2ac",
+          "latency_ms": 6019.3,
+          "health_path": "pkg/units/uwdvkr.py",
+          "resolved_class": "Ctqomhkl",
+          "resolved_method_span_hash": "bd441ee553db8eaec685bb5a88210e763ac50ecf7bf46cbe90329303a04d3a13"
+        },
+        "typed_widened": {
+          "path": "pkg/base.py",
+          "span_hash": "a3f9930145eff8b892796ace15c841190e8a2919d8b48d5744f4cff2ad2edb69",
+          "resolved_class": "Buosfodo"
+        },
+        "erased": {
+          "path": "pkg/base.py",
+          "span_hash": "a3f9930145eff8b892796ace15c841190e8a2919d8b48d5744f4cff2ad2edb69",
+          "latency_ms": 6020.0,
+          "health_path": "pkg/base.py",
+          "resolved_class": "Buosfodo",
+          "resolved_method_span_hash": "f81fd5b228a241459840a4c9091aa99f6d8a7526debc0605379cfcd1bd9c628a"
+        }
+      },
+      "lsp_errors": [],
+      "runtime_factory_classes": {
+        "typed": {
+          "kaskut": "Ctntegoc",
+          "kaxcji": "Cncmfgvw",
+          "kbldyy": "Cxruxcfz",
+          "kcyusf": "Coesxhza",
+          "khjeps": "Cuelrjbq",
+          "kjovii": "Cecoxtsb",
+          "kkejsu": "Ctqomhkl",
+          "ksnits": "Crqpdnpt",
+          "kttral": "Cregdrjd",
+          "kurvmu": "Cmpouasc",
+          "kvjvhh": "Ckydoxbz",
+          "kvxygf": "Cxjqaodx",
+          "kxvkzg": "Cnpuvyiw",
+          "kyfxki": "Cbmjnqwm",
+          "kzgzna": "Cqvqdmbh"
+        },
+        "erased": {
+          "kaskut": "Ctntegoc",
+          "kaxcji": "Cncmfgvw",
+          "kbldyy": "Cxruxcfz",
+          "kcyusf": "Coesxhza",
+          "khjeps": "Cuelrjbq",
+          "kjovii": "Cecoxtsb",
+          "kkejsu": "Ctqomhkl",
+          "ksnits": "Crqpdnpt",
+          "kttral": "Cregdrjd",
+          "kurvmu": "Cmpouasc",
+          "kvjvhh": "Ckydoxbz",
+          "kvxygf": "Cxjqaodx",
+          "kxvkzg": "Cnpuvyiw",
+          "kyfxki": "Cbmjnqwm",
+          "kzgzna": "Cqvqdmbh"
+        }
+      },
+      "declared_registry_contract": {
+        "kjovii": "Cecoxtsb",
+        "kyfxki": "Cbmjnqwm",
+        "kbldyy": "Cxruxcfz",
+        "kurvmu": "Cmpouasc",
+        "kcyusf": "Coesxhza",
+        "kkejsu": "Ctqomhkl",
+        "khjeps": "Cuelrjbq",
+        "ksnits": "Crqpdnpt",
+        "kvjvhh": "Ckydoxbz",
+        "kzgzna": "Cqvqdmbh",
+        "kaxcji": "Cncmfgvw",
+        "kaskut": "Ctntegoc",
+        "kxvkzg": "Cnpuvyiw",
+        "kvxygf": "Cxjqaodx",
+        "kttral": "Cregdrjd"
+      },
+      "parsed_typed_stub_contract": {
+        "kjovii": "Cecoxtsb",
+        "kyfxki": "Cbmjnqwm",
+        "kbldyy": "Cxruxcfz",
+        "kurvmu": "Cmpouasc",
+        "kcyusf": "Coesxhza",
+        "kkejsu": "Ctqomhkl",
+        "khjeps": "Cuelrjbq",
+        "ksnits": "Crqpdnpt",
+        "kvjvhh": "Ckydoxbz",
+        "kzgzna": "Cqvqdmbh",
+        "kaxcji": "Cncmfgvw",
+        "kaskut": "Ctntegoc",
+        "kxvkzg": "Cnpuvyiw",
+        "kvxygf": "Cxjqaodx",
+        "kttral": "Cregdrjd"
+      },
+      "type_errors": {
+        "typed": [],
+        "erased": []
+      },
+      "leakage": [],
+      "passed": true
+    },
+    {
+      "task": "nav_substrain_53087",
+      "split": "substrain",
+      "template": "multiply",
+      "n_overrides": 14,
+      "checks": {
+        "typed_base_fails": true,
+        "typed_heldout_base_fails": true,
+        "typed_gold_passes": true,
+        "typed_heldout_gold_passes": true,
+        "erased_base_fails": true,
+        "erased_heldout_base_fails": true,
+        "erased_gold_passes": true,
+        "erased_heldout_gold_passes": true,
+        "runtime_files_identical": true,
+        "runtime_outputs_identical": true,
+        "factory_implementation_identical": true,
+        "all_declared_returns_match_runtime": true,
+        "specific_overloads_precede_fallback": true,
+        "variants_type_clean": true,
+        "gold_identical": true,
+        "override_count_valid": true,
+        "registry_trace_unique": true,
+        "typed_lsp_discriminates": true,
+        "typed_lsp_span_matches_pristine_target": true,
+        "erased_lsp_nondiscriminating": true,
+        "literal_widening_removes_discrimination": true,
+        "lsp_server_healthy": true,
+        "lsp_no_errors": true,
+        "prompt_has_no_target_leak": true,
+        "positive_control_materialized": true
+      },
+      "lsp": {
+        "typed": {
+          "path": "pkg/units/uysdhf.py",
+          "span_hash": "cbd97bf32fa1d77a8657e52250f23dda3836138a3a69dfc7c849b41c5a34e364",
+          "latency_ms": 6019.0,
+          "health_path": "pkg/units/uysdhf.py",
+          "resolved_class": "Cctssodg",
+          "resolved_method_span_hash": "74649ff4a134b47c52ec9d002f9d20d34607121fc687b436ff0c8d23a5cb15e3"
+        },
+        "typed_widened": {
+          "path": "pkg/base.py",
+          "span_hash": "bcf64b5ab6390435d07950f90952f02b7787aa3c7ab0989a0ae28ddfa07acaaf",
+          "resolved_class": "Biioprcu"
+        },
+        "erased": {
+          "path": "pkg/base.py",
+          "span_hash": "bcf64b5ab6390435d07950f90952f02b7787aa3c7ab0989a0ae28ddfa07acaaf",
+          "latency_ms": 6012.5,
+          "health_path": "pkg/base.py",
+          "resolved_class": "Biioprcu",
+          "resolved_method_span_hash": "8b21a5e8e8acf09fc16a9aab82990ce6949fe4a862904d2ee3c19fddc282fa06"
+        }
+      },
+      "lsp_errors": [],
+      "runtime_factory_classes": {
+        "typed": {
+          "kecawa": "Cctssodg",
+          "kfizwf": "Crfhpbtn",
+          "khoztn": "Cogaqtyh",
+          "kisqpo": "Cfbfjycw",
+          "kklwri": "Cuocsbxn",
+          "klzvhw": "Cxcnktcw",
+          "kmifcm": "Cbldealh",
+          "kpmtnp": "Cdxerypv",
+          "kqmkub": "Ctjeasig",
+          "kufrmi": "Cztumqty",
+          "kuhlxi": "Cbknipuo",
+          "kvagkh": "Cxjotric",
+          "kxjmxq": "Cckemcqp",
+          "kxwbgd": "Clrxbztf"
+        },
+        "erased": {
+          "kecawa": "Cctssodg",
+          "kfizwf": "Crfhpbtn",
+          "khoztn": "Cogaqtyh",
+          "kisqpo": "Cfbfjycw",
+          "kklwri": "Cuocsbxn",
+          "klzvhw": "Cxcnktcw",
+          "kmifcm": "Cbldealh",
+          "kpmtnp": "Cdxerypv",
+          "kqmkub": "Ctjeasig",
+          "kufrmi": "Cztumqty",
+          "kuhlxi": "Cbknipuo",
+          "kvagkh": "Cxjotric",
+          "kxjmxq": "Cckemcqp",
+          "kxwbgd": "Clrxbztf"
+        }
+      },
+      "declared_registry_contract": {
+        "kvagkh": "Cxjotric",
+        "kmifcm": "Cbldealh",
+        "kqmkub": "Ctjeasig",
+        "kpmtnp": "Cdxerypv",
+        "kuhlxi": "Cbknipuo",
+        "kecawa": "Cctssodg",
+        "kklwri": "Cuocsbxn",
+        "kxjmxq": "Cckemcqp",
+        "khoztn": "Cogaqtyh",
+        "klzvhw": "Cxcnktcw",
+        "kxwbgd": "Clrxbztf",
+        "kisqpo": "Cfbfjycw",
+        "kufrmi": "Cztumqty",
+        "kfizwf": "Crfhpbtn"
+      },
+      "parsed_typed_stub_contract": {
+        "kvagkh": "Cxjotric",
+        "kmifcm": "Cbldealh",
+        "kqmkub": "Ctjeasig",
+        "kpmtnp": "Cdxerypv",
+        "kuhlxi": "Cbknipuo",
+        "kecawa": "Cctssodg",
+        "kklwri": "Cuocsbxn",
+        "kxjmxq": "Cckemcqp",
+        "khoztn": "Cogaqtyh",
+        "klzvhw": "Cxcnktcw",
+        "kxwbgd": "Clrxbztf",
+        "kisqpo": "Cfbfjycw",
+        "kufrmi": "Cztumqty",
+        "kfizwf": "Crfhpbtn"
+      },
+      "type_errors": {
+        "typed": [],
+        "erased": []
+      },
+      "leakage": [],
+      "passed": true
+    },
+    {
+      "task": "nav_substrain_53093",
+      "split": "substrain",
+      "template": "add",
+      "n_overrides": 8,
+      "checks": {
+        "typed_base_fails": true,
+        "typed_heldout_base_fails": true,
+        "typed_gold_passes": true,
+        "typed_heldout_gold_passes": true,
+        "erased_base_fails": true,
+        "erased_heldout_base_fails": true,
+        "erased_gold_passes": true,
+        "erased_heldout_gold_passes": true,
+        "runtime_files_identical": true,
+        "runtime_outputs_identical": true,
+        "factory_implementation_identical": true,
+        "all_declared_returns_match_runtime": true,
+        "specific_overloads_precede_fallback": true,
+        "variants_type_clean": true,
+        "gold_identical": true,
+        "override_count_valid": true,
+        "registry_trace_unique": true,
+        "typed_lsp_discriminates": true,
+        "typed_lsp_span_matches_pristine_target": true,
+        "erased_lsp_nondiscriminating": true,
+        "literal_widening_removes_discrimination": true,
+        "lsp_server_healthy": true,
+        "lsp_no_errors": true,
+        "prompt_has_no_target_leak": true,
+        "positive_control_materialized": true
+      },
+      "lsp": {
+        "typed": {
+          "path": "pkg/units/uetcyf.py",
+          "span_hash": "36fc4a80b8847ee2d4b1a153c42790556b71ba78512f7994554878d17b0998ec",
+          "latency_ms": 6020.7,
+          "health_path": "pkg/units/uetcyf.py",
+          "resolved_class": "Ctbvjhum",
+          "resolved_method_span_hash": "eb5a8da571f191e465beab1886d4c234df52b8fad85846629ca713397d5d7c3e"
+        },
+        "typed_widened": {
+          "path": "pkg/base.py",
+          "span_hash": "d67f76f0b04a985261aaebdbe37b5605457747f029ae921984ba6ffef68c0e88",
+          "resolved_class": "Bivmzgyc"
+        },
+        "erased": {
+          "path": "pkg/base.py",
+          "span_hash": "d67f76f0b04a985261aaebdbe37b5605457747f029ae921984ba6ffef68c0e88",
+          "latency_ms": 6020.1,
+          "health_path": "pkg/base.py",
+          "resolved_class": "Bivmzgyc",
+          "resolved_method_span_hash": "3da3f711aee982a2ba71f829d6610c5166fbe6ec5fb826f99fa27eab60dedf72"
+        }
+      },
+      "lsp_errors": [],
+      "runtime_factory_classes": {
+        "typed": {
+          "kcmmay": "Cgjgnhxn",
+          "kgakde": "Cxciljbb",
+          "kjprqp": "Cpzaesey",
+          "kniubo": "Caafjzwt",
+          "krlspv": "Ckqlfllx",
+          "ktespq": "Ccwkggiq",
+          "kuddbd": "Ctbvjhum",
+          "kzelxe": "Cyeuvmed"
+        },
+        "erased": {
+          "kcmmay": "Cgjgnhxn",
+          "kgakde": "Cxciljbb",
+          "kjprqp": "Cpzaesey",
+          "kniubo": "Caafjzwt",
+          "krlspv": "Ckqlfllx",
+          "ktespq": "Ccwkggiq",
+          "kuddbd": "Ctbvjhum",
+          "kzelxe": "Cyeuvmed"
+        }
+      },
+      "declared_registry_contract": {
+        "kcmmay": "Cgjgnhxn",
+        "krlspv": "Ckqlfllx",
+        "kgakde": "Cxciljbb",
+        "kuddbd": "Ctbvjhum",
+        "kzelxe": "Cyeuvmed",
+        "kjprqp": "Cpzaesey",
+        "kniubo": "Caafjzwt",
+        "ktespq": "Ccwkggiq"
+      },
+      "parsed_typed_stub_contract": {
+        "kcmmay": "Cgjgnhxn",
+        "krlspv": "Ckqlfllx",
+        "kgakde": "Cxciljbb",
+        "kuddbd": "Ctbvjhum",
+        "kzelxe": "Cyeuvmed",
+        "kjprqp": "Cpzaesey",
+        "kniubo": "Caafjzwt",
+        "ktespq": "Ccwkggiq"
+      },
+      "type_errors": {
+        "typed": [],
+        "erased": []
+      },
+      "leakage": [],
+      "passed": true
+    },
+    {
+      "task": "nav_substrain_53101",
+      "split": "substrain",
+      "template": "multiply",
+      "n_overrides": 12,
+      "checks": {
+        "typed_base_fails": true,
+        "typed_heldout_base_fails": true,
+        "typed_gold_passes": true,
+        "typed_heldout_gold_passes": true,
+        "erased_base_fails": true,
+        "erased_heldout_base_fails": true,
+        "erased_gold_passes": true,
+        "erased_heldout_gold_passes": true,
+        "runtime_files_identical": true,
+        "runtime_outputs_identical": true,
+        "factory_implementation_identical": true,
+        "all_declared_returns_match_runtime": true,
+        "specific_overloads_precede_fallback": true,
+        "variants_type_clean": true,
+        "gold_identical": true,
+        "override_count_valid": true,
+        "registry_trace_unique": true,
+        "typed_lsp_discriminates": true,
+        "typed_lsp_span_matches_pristine_target": true,
+        "erased_lsp_nondiscriminating": true,
+        "literal_widening_removes_discrimination": true,
+        "lsp_server_healthy": true,
+        "lsp_no_errors": true,
+        "prompt_has_no_target_leak": true,
+        "positive_control_materialized": true
+      },
+      "lsp": {
+        "typed": {
+          "path": "pkg/units/ukqhsu.py",
+          "span_hash": "d828f6987b0931c36696ab17565030186cc71ddf44065034b531812affaac997",
+          "latency_ms": 6020.0,
+          "health_path": "pkg/units/ukqhsu.py",
+          "resolved_class": "Cpreapuj",
+          "resolved_method_span_hash": "2c7485627303aa7fc985637d724a63eece9b26f41a40c524dd912a849e0f089f"
+        },
+        "typed_widened": {
+          "path": "pkg/base.py",
+          "span_hash": "5ae32bc161116f1b864d7dff272ef5665f241fc0c960343a9f009652bb84226c",
+          "resolved_class": "Bumecvjg"
+        },
+        "erased": {
+          "path": "pkg/base.py",
+          "span_hash": "5ae32bc161116f1b864d7dff272ef5665f241fc0c960343a9f009652bb84226c",
+          "latency_ms": 6012.2,
+          "health_path": "pkg/base.py",
+          "resolved_class": "Bumecvjg",
+          "resolved_method_span_hash": "27977dc3171324f3e0a99804c4bb78d447526b03a3c35fea1710c20343f3a84c"
+        }
+      },
+      "lsp_errors": [],
+      "runtime_factory_classes": {
+        "typed": {
+          "kabxuk": "Cpreapuj",
+          "kapuwi": "Cdxhszkb",
+          "kbftgc": "Cvuskvyv",
+          "kbvymj": "Cpybujeo",
+          "kjqtzk": "Cdgrqzts",
+          "kmbnqi": "Crkjxkvd",
+          "kppbuh": "Cwjqyuwf",
+          "kqozvp": "Calsvhju",
+          "kwedmk": "Cnezajwx",
+          "kwtcin": "Chbexkte",
+          "kxwnkp": "Cnonelpo",
+          "kxxyas": "Cshzsqem"
+        },
+        "erased": {
+          "kabxuk": "Cpreapuj",
+          "kapuwi": "Cdxhszkb",
+          "kbftgc": "Cvuskvyv",
+          "kbvymj": "Cpybujeo",
+          "kjqtzk": "Cdgrqzts",
+          "kmbnqi": "Crkjxkvd",
+          "kppbuh": "Cwjqyuwf",
+          "kqozvp": "Calsvhju",
+          "kwedmk": "Cnezajwx",
+          "kwtcin": "Chbexkte",
+          "kxwnkp": "Cnonelpo",
+          "kxxyas": "Cshzsqem"
+        }
+      },
+      "declared_registry_contract": {
+        "kjqtzk": "Cdgrqzts",
+        "kqozvp": "Calsvhju",
+        "kwedmk": "Cnezajwx",
+        "kppbuh": "Cwjqyuwf",
+        "kmbnqi": "Crkjxkvd",
+        "kbvymj": "Cpybujeo",
+        "kapuwi": "Cdxhszkb",
+        "kbftgc": "Cvuskvyv",
+        "kxxyas": "Cshzsqem",
+        "kxwnkp": "Cnonelpo",
+        "kabxuk": "Cpreapuj",
+        "kwtcin": "Chbexkte"
+      },
+      "parsed_typed_stub_contract": {
+        "kjqtzk": "Cdgrqzts",
+        "kqozvp": "Calsvhju",
+        "kwedmk": "Cnezajwx",
+        "kppbuh": "Cwjqyuwf",
+        "kmbnqi": "Crkjxkvd",
+        "kbvymj": "Cpybujeo",
+        "kapuwi": "Cdxhszkb",
+        "kbftgc": "Cvuskvyv",
+        "kxxyas": "Cshzsqem",
+        "kxwnkp": "Cnonelpo",
+        "kabxuk": "Cpreapuj",
+        "kwtcin": "Chbexkte"
+      },
+      "type_errors": {
+        "typed": [],
+        "erased": []
+      },
+      "leakage": [],
+      "passed": true
+    }
+  ],
+  "passed": true
+}

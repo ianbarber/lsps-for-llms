@@ -16,6 +16,7 @@ Conditions (retrieval-tool advertisement is the only variable; capability held f
 """
 import os
 import re
+import ast
 import sys
 import json
 import time
@@ -26,7 +27,10 @@ if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
 from scaffold.stream_agent import StreamAgent
-from scripts.realbench.dispatch_tasks import build_tasks, make_env
+from scripts.realbench.dispatch_tasks import build_tasks, make_env, TASK_SPECS
+
+# buggy class per task, used ONLY by the hidden-visibility leak guard (never shown to the model)
+_BUGGY_CLASS = {s["name"]: s["buggy_class"] for s in TASK_SPECS}
 
 
 # --------------------------------------------------------------------------- condition prompts
@@ -90,6 +94,64 @@ def build_prompt(task, env):
     )
 
 
+# --------------------------------------------------------------------------- hidden visibility (L3)
+def _redacted_asserts(test_src):
+    """The test's assert statements with the receiver expression replaced by `x`, so the
+    behavioral spec stays in the prompt while every type-bearing token (class name,
+    constructor call and its arguments, import path) is removed. AST-mechanical."""
+
+    class _RedactRecv(ast.NodeTransformer):
+        def visit_Call(self, node):
+            self.generic_visit(node)
+            if isinstance(node.func, ast.Name) and node.func.id == "run" and node.args:
+                node.args = [ast.Name(id="x", ctx=ast.Load())] + node.args[1:]
+            return node
+
+    tree = _RedactRecv().visit(ast.parse(test_src))
+    ast.fix_missing_locations(tree)
+    return [ast.unparse(node) for node in ast.walk(tree) if isinstance(node, ast.Assert)]
+
+
+def build_prompt_hidden(task, env):
+    """L3 "hidden" variant (closes the visible-ladder design caveat, docs/real_repo_progress.md):
+    the SAME task framing as build_prompt, but NEITHER app.py NOR the test source is shown, so
+    the receiver's type is not readable from the prompt -- it must be RETRIEVED via tools
+    (read app.py, read the test, grep, or <defn> at the given use-site). The behavioral spec
+    survives as the test's assert lines with the receiver expression redacted to `x`. The
+    use-site coordinates stay in the prompt (metadata, not source) so <defn> remains callable
+    without a prior read -- the language server's best remaining shot."""
+    us = task["use_site"]
+    test_src = env.read_file("test_dispatch.py")
+    sym = task["symbol"]
+    asserts = "\n".join("    " + a for a in _redacted_asserts(test_src))
+    prompt = (
+        "A method `%s` is overridden on %d classes across the files you may edit. Exactly one "
+        "override -- the one that RUNS for the statically-typed receiver in `%s` -- returns the "
+        "wrong result, so the test `test_dispatch.py` fails.\n\n"
+        "NEITHER `%s` NOR the test source is shown here. Both are on disk: retrieve whatever "
+        "you need with the tools.\n\n"
+        "In `%s` the receiver `x` is type-annotated and the call `x.%s(...)` is on line %d; the "
+        "method name `%s` starts at column %d (use these as the use-site if you look the "
+        "definition up).\n\n"
+        "The failing test asserts (the receiver construction is redacted to `x`; do NOT edit "
+        "the test):\n%s\n\n"
+        "The fix is a ONE-LINE change in the correct override. Find WHICH class's `%s` runs for "
+        "the receiver in `%s`, fix the single wrong line in that override, then run <test/> "
+        "until it passes."
+        % (sym, task["n_overrides"], task["target_file"],
+           task["target_file"],
+           task["target_file"], sym, us["line"], sym, us["col"],
+           asserts,
+           sym, task["target_file"])
+    )
+    # mechanical leak guard: the type-bearing tokens must not appear in the prompt
+    leaked = [t for t in (_BUGGY_CLASS[task["name"]], task["buggy_rel"]) if t in prompt]
+    if leaked:
+        raise RuntimeError("hidden prompt leaks type-bearing token(s) %r for task %s"
+                           % (leaked, task["name"]))
+    return prompt
+
+
 # --------------------------------------------------------------------------- event accounting
 def count_events(events):
     n_grep = sum(1 for e in events if e.get("type") == "grep")
@@ -127,9 +189,18 @@ def main():
     ap.add_argument("--typing", default="annotated",
                     choices=["annotated", "stripped", "indirection"],
                     help="receiver-type ablation level (default annotated = current behavior)")
+    ap.add_argument("--visibility", default="visible", choices=["visible", "hidden"],
+                    help="hidden = L3: app.py and the test source are NOT shown in the prompt; "
+                         "the receiver type must be retrieved via tools "
+                         "(default visible = current behavior)")
+    ap.add_argument("--revision", default=None,
+                    help="HF model revision to pin (recorded in the output)")
     ap.add_argument("--out", default=None)
     ap.add_argument("--names", default=None, help="comma-separated task names subset")
     args = ap.parse_args()
+
+    if args.visibility == "hidden" and args.typing != "annotated":
+        ap.error("--visibility hidden is defined over the annotated (L0) repos only")
 
     conds = args.conds.split(",")
     n_seeds = 1 if args.temp == 0 else args.seeds
@@ -147,13 +218,17 @@ def main():
     print("[load] %s%s  temp=%s seeds=%d gpu_only=%s"
           % (args.model, (" + " + args.adapter) if args.adapter else "", args.temp, n_seeds, args.gpu_only),
           flush=True)
-    tok = AutoTokenizer.from_pretrained(args.model)
+    tok = AutoTokenizer.from_pretrained(args.model, revision=args.revision)
     _dm = {"": 0} if args.gpu_only else "auto"
-    model = AutoModelForCausalLM.from_pretrained(args.model, dtype=torch.bfloat16, device_map=_dm)
+    model = AutoModelForCausalLM.from_pretrained(args.model, revision=args.revision,
+                                                 dtype=torch.bfloat16, device_map=_dm)
     if args.adapter:
         from peft import PeftModel
         model = PeftModel.from_pretrained(model, args.adapter)
     model = model.eval()
+    model_meta = {"revision": getattr(model.config, "_commit_hash", None) or args.revision,
+                  "transformers": __import__("transformers").__version__,
+                  "torch": torch.__version__, "dtype": str(model.dtype)}
 
     out = args.out or os.path.join(ROOT, "runs/realbench/dispatch",
                                    "local_%s.json" % modeltag(args.model, args.adapter))
@@ -171,8 +246,10 @@ def main():
                         max_turns=args.max_turns, temperature=args.temp, seed=seed,
                         use_lsp_defn=(c != "grep_base"), lsp_disabled=(c == "grep_base"),
                         sys_override=SYS[c])
+                    prompt = (build_prompt(task, env) if args.visibility == "visible"
+                              else build_prompt_hidden(task, env))
                     t0 = time.time()
-                    r = agent.run(build_prompt(task, env), task["target_file"], editable=task["editable"])
+                    r = agent.run(prompt, task["target_file"], editable=task["editable"])
                     dt = time.time() - t0
                     n_grep, n_defn, n_read_whole, n_read_ranged = count_events(r["events"])
                     row = {"task": task["name"], "cond": c, "seed": seed,
@@ -190,7 +267,8 @@ def main():
                              n_read_whole, n_read_ranged, row["n_edits"], row["n_tests"], dt), flush=True)
                 finally:
                     env.close()
-        json.dump({"model": args.model, "adapter": args.adapter, "config": vars(args), "rows": rows},
+        json.dump({"model": args.model, "adapter": args.adapter, "model_meta": model_meta,
+                   "config": vars(args), "rows": rows},
                   open(out, "w"), indent=2)
 
     # ----------------------------------------------------------------- summary
@@ -249,8 +327,8 @@ def main():
                   % (p["task"], p["base_in_toks"], defn_c, p["defn_in_toks"], p["delta"]), flush=True)
 
     summary["efficiency_deltas"] = deltas
-    json.dump({"model": args.model, "adapter": args.adapter, "config": vars(args),
-               "summary": summary, "rows": rows}, open(out, "w"), indent=2)
+    json.dump({"model": args.model, "adapter": args.adapter, "model_meta": model_meta,
+               "config": vars(args), "summary": summary, "rows": rows}, open(out, "w"), indent=2)
     print("\n-> %s" % out, flush=True)
 
 

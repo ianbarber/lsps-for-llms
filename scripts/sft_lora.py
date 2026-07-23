@@ -20,6 +20,11 @@ from peft import LoraConfig, get_peft_model
 ap = argparse.ArgumentParser()
 ap.add_argument("--harvest", nargs="+", required=True, help="harvest json(s) with --save-sft rows")
 ap.add_argument("--model", default="Qwen/Qwen2.5-Coder-7B-Instruct")
+ap.add_argument("--revision", default=None, help="pin the model revision (recorded in the run log)")
+ap.add_argument("--filter", default="teacher", choices=["teacher", "sft_keep"],
+                help="teacher = the historical clean-retrieval filter (default, unchanged); "
+                     "sft_keep = trust the harvest driver's own row['sft_keep'] flag "
+                     "(substitution harvest: the driver already applied its acceptance criteria)")
 ap.add_argument("--out", default="runs/sft/effic_lora")
 ap.add_argument("--epochs", type=float, default=3)
 ap.add_argument("--lr", type=float, default=1e-4)
@@ -57,7 +62,10 @@ for path in A.harvest:
         seen += 1
         if "sft_input_ids" not in r:
             continue
-        if not is_clean_teacher(r):
+        if A.filter == "sft_keep":
+            if not r.get("sft_keep"):
+                continue
+        elif not is_clean_teacher(r):
             continue
         ids, labs = r["sft_input_ids"], r["sft_labels"]
         if len(ids) > A.max_len:
@@ -74,11 +82,12 @@ if kept == 0:
     print("[data] NOTHING to train on — check the harvest filter (resolved + real <defn>)."); sys.exit(1)
 
 # ---- model + LoRA ----
-print(f"[load] {A.model}", flush=True)
-tok = AutoTokenizer.from_pretrained(A.model)
+print(f"[load] {A.model}{'@'+A.revision if A.revision else ''}  filter={A.filter}", flush=True)
+tok = AutoTokenizer.from_pretrained(A.model, revision=A.revision)
 if tok.pad_token_id is None:
     tok.pad_token = tok.eos_token
-model = AutoModelForCausalLM.from_pretrained(A.model, dtype=torch.bfloat16, device_map={"": 0})
+model = AutoModelForCausalLM.from_pretrained(A.model, revision=A.revision,
+                                             dtype=torch.bfloat16, device_map={"": 0})
 model.config.use_cache = False
 model.gradient_checkpointing_enable()
 model.enable_input_require_grads()
@@ -133,4 +142,7 @@ for ep in range(n_epochs):
 os.makedirs(A.out, exist_ok=True)
 model.save_pretrained(A.out)
 tok.save_pretrained(A.out)
+json.dump({"config": vars(A), "n_examples": len(examples), "n_rows_scanned": seen,
+           "by_task": by_task, "torch": torch.__version__},
+          open(os.path.join(A.out, "streams_train_meta.json"), "w"), indent=2)
 print(f"[done] adapter saved -> {A.out}", flush=True)

@@ -84,6 +84,7 @@ def _protocol_hashes() -> dict[str, str]:
         Path(__file__).resolve(),
         ROOT / "scripts" / "experiments" / "diagnostics.py",
         ROOT / "scripts" / "experiments" / "checker_hidden.py",
+        ROOT / "scripts" / "experiments" / "stub_policy.py",
         ROOT / "scripts" / "analysis" / "analyze_checker_paired.py",
         ROOT / "scripts" / "synth_tasks_authoring.py",
         ROOT / "scaffold" / "stream_agent.py",
@@ -93,6 +94,7 @@ def _protocol_hashes() -> dict[str, str]:
         ROOT / "scripts" / "run_checker_case_series.sh",
         ROOT / "scripts" / "run_checker_hidden.sh",
         ROOT / "scripts" / "run_checker_gate_v2.sh",
+        ROOT / "scripts" / "run_checker_gate_v3.sh",
     ]
     return {
         str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
@@ -685,6 +687,394 @@ def revise(args) -> int:
     return 0
 
 
+def _stub_script(draft: dict, arm: str, tasks: dict) -> list:
+    """Deterministic action script for one dry-run cell.
+
+    Clean controls (and any diagnostic-free draft) simply test and submit in every arm.
+    Defect drafts: control submits the bad completion; diagnostics repairs after reading
+    the one-shot delta, retests, and submits; gate submits, is rejected, repairs,
+    retests, and resubmits; noisy repairs first (triggering the volunteered
+    after-every-edit check), then tests and submits.
+    """
+    semantic = any(item["classification"] == "semantic" for item in draft["draft_diagnostics"])
+    if draft.get("cohort") == "clean_negative_control" or not semantic:
+        return ["<test/>", "<done/>"]
+    from scripts.experiments.stub_policy import gold_repair_line_edit
+    repair = gold_repair_line_edit(
+        draft["files"][draft["target"]], tasks[draft["task"]]["gold_target"], draft["target"]
+    )
+    if arm == "control":
+        return ["<test/>", "<done/>"]
+    if arm == "diagnostics":
+        return ["<test/>", repair, "<test/>", "<done/>"]
+    if arm == "gate":
+        return ["<test/>", "<done/>", repair, "<test/>", "<done/>"]
+    return [repair, "<test/>", "<done/>"]
+
+
+def _run_stub_cell(draft: dict, arm: str, script: list, max_new: int, max_turns: int,
+                   max_reads: int) -> dict:
+    """Execute one scripted trajectory through the real StreamAgent scaffold."""
+    from scripts.experiments.stub_policy import CharTokenizer, ScriptedStubModel
+
+    tokenizer = CharTokenizer()
+    model = ScriptedStubModel(tokenizer, script)
+    env = DeltaDiagnosticEnv(
+        draft["files"], draft["target"], draft["test"],
+        baseline_diagnostics=draft["baseline_diagnostics"],
+        diagnostic_scope={draft["target"]}, held_out_src=draft["held_out"],
+        skip_pyrefly=False,
+    )
+    try:
+        agent = StreamAgent(
+            model, tokenizer, env, edit_mode="line", sys_override=REVISION_SYS,
+            max_new_tokens=max_new, max_turns=max_turns, max_reads=max_reads,
+            temperature=0.0, seed=0,
+            auto_check=(arm == "noisy"), acceptance_gate=(arm == "gate"),
+            lsp_disabled=True,
+        )
+        started = time.perf_counter()
+        result = agent.run(_revision_prompt(draft, arm), draft["target"],
+                           editable=[draft["target"]])
+        wall = time.perf_counter() - started
+        held = bool(env.score()["resolved"])
+        final_diags = env.raw_diagnostic_delta()
+        final_files = {path: env.read_file(path) for path in env.list_files()}
+        checker_latency = env.last_checker_latency
+    finally:
+        env.close()
+    return {
+        "result": result, "wall": wall, "held": held, "final_diags": final_diags,
+        "final_files": final_files, "checker_latency": checker_latency,
+    }
+
+
+def _stub_row(draft: dict, arm: str, cell: dict, script: list) -> dict:
+    """Mirror the revise() row schema so the dry-run grid passes the same validators."""
+    result = cell["result"]
+    held, final_diags, final_files = cell["held"], cell["final_diags"], cell["final_files"]
+    one_shot_latency = draft["checker_latency_ms"] if arm == "diagnostics" else 0.0
+    events = result["events"]
+    done_events = [event for event in events if event.get("type") == "done_attempt"]
+    done_attempts = len(done_events)
+    gate_invocations = sum(event.get("type") == "gate_check" for event in events)
+    gate_acceptances = sum(event.get("type") == "gate_accept" for event in events)
+    gate_rejections = sum(event.get("type") == "gate_reject" for event in events)
+    accepted = bool(gate_acceptances) if arm == "gate" else bool(result.get("done_seen"))
+    post_rejection_edits, edited_rejected_location = _post_rejection_metrics(events)
+    final_file_hashes, final_workspace_hash = _workspace_hashes(final_files)
+    serialization_failures = [
+        event for event in events
+        if event.get("type") == "line_edit"
+        and event.get("serialization_mode") == "ambiguous_inline_indentation"
+    ]
+    return {
+        "draft_id": draft["draft_id"], "draft_hash": draft["draft_target_sha256"],
+        "task": draft["task"], "group": draft["group"], "arm": arm, "seed": 0,
+        "cohort": draft.get("cohort"),
+        "initial_visible_pass": draft.get("visible_pass"),
+        "initial_held_pass": draft.get("held_pass"),
+        "opportunity": any(item["classification"] == "semantic"
+                           for item in draft["draft_diagnostics"]),
+        "initial_diagnostics": draft["draft_diagnostics"],
+        "final_diagnostics": final_diags,
+        **_diag_effect(draft["draft_diagnostics"], final_diags),
+        "edited_diagnosed_location": _edited_diagnosed_location(
+            events, draft["draft_diagnostics"], draft["files"], final_files),
+        "visible_pass": bool(result["resolved"]), "held_pass": held,
+        "type_clean": not final_diags, "accepted": accepted,
+        "semantic_clean": not any(item["classification"] == "semantic"
+                                  for item in final_diags),
+        "syntax_clean": not any(item["classification"] == "syntax_or_partial"
+                                for item in final_diags),
+        "accepted_type_clean": bool(accepted and not final_diags),
+        "accepted_type_clean_correct": bool(accepted and not final_diags and held),
+        "unsubmitted": not bool(done_attempts),
+        "done_attempts": done_attempts,
+        "first_done_model_generated": bool(
+            done_events and done_events[0].get("source") == "model"
+        ),
+        "gate_invocations": gate_invocations,
+        "gate_acceptances": gate_acceptances,
+        "gate_rejections": gate_rejections,
+        "gate_never_invoked": bool(arm == "gate" and not gate_invocations),
+        "gate_rejected_then_accepted": bool(gate_rejections and gate_acceptances),
+        "gate_rejected_unresolved": bool(gate_rejections and not gate_acceptances),
+        "post_rejection_edits": post_rejection_edits,
+        "edited_rejected_location": edited_rejected_location,
+        "accepted_dirty": bool(accepted and final_diags),
+        "first_done_prefix_sha256": next(
+            (event.get("prefix_sha256") for event in events
+             if event.get("type") == "done_attempt"), None
+        ),
+        "trajectory_sha256": _sha(result["stream"]),
+        "serialization_failures": serialization_failures,
+        "final_target_sha256": _sha(final_files[draft["target"]]),
+        "final_file_sha256": final_file_hashes,
+        "final_workspace_sha256": final_workspace_hash,
+        "draft_in_tokens": draft.get("in_tokens"),
+        "draft_out_tokens": draft.get("out_tokens"),
+        "in_tokens": result["in_tokens"], "out_tokens": result["out_tokens"],
+        "turns": result["turns"], "n_edits": result["n_edits"],
+        "n_tests": result["n_tests"], "n_checks": result["n_checks"],
+        "checker_latency_ms": round(one_shot_latency + cell["checker_latency"] * 1000, 1),
+        "wall_sec": round(cell["wall"], 3),
+        "termination_reason": result["termination_reason"],
+        "events": events,
+        "stream_tail": result["stream"][-2500:],
+        "scripted_actions": [item if item is not None else "<EOS>" for item in script],
+    }
+
+
+def _event_type_subsequence(events: list[dict], wanted: list[str]) -> bool:
+    """True if `wanted` appears as an ordered (not necessarily contiguous) subsequence."""
+    index = 0
+    for event in events:
+        if index < len(wanted) and event.get("type") == wanted[index]:
+            index += 1
+    return index == len(wanted)
+
+
+def _dry_run_mechanics(defect: dict, tasks: dict, max_new: int, max_turns: int,
+                       max_reads: int) -> list[dict]:
+    """Targeted single-cell scenarios for the v6 mechanics, outside the paired grid."""
+    from scripts.experiments.stub_policy import gold_repair_line_edit
+
+    repair = gold_repair_line_edit(
+        defect["files"][defect["target"]], tasks[defect["task"]]["gold_target"],
+        defect["target"]
+    )
+    gold_sha = defect["gold_repair_validation"]["gold_target_sha256"]
+    scenarios = []
+
+    # 1. Observation boundary: the passing-test observation contains literal `<done/>`
+    #    text. With v6 cursor advancement no completion may fire from it.
+    cell = _run_stub_cell(defect, "control", ["<test/>"], max_new, max_turns, max_reads)
+    events = cell["result"]["events"]
+    done_attempts = sum(event.get("type") == "done_attempt" for event in events)
+    scenarios.append({
+        "scenario": "observation_boundary_blocks_literal_done",
+        "arm": "control", "script": ["<test/>"],
+        "observed": {
+            "done_attempts": done_attempts,
+            "termination_reason": cell["result"]["termination_reason"],
+        },
+        "passed": done_attempts == 0
+        and cell["result"]["termination_reason"] == "tests_passed_without_done",
+    })
+
+    # 2. Stale-test invalidation: a successful edit after a passing test must clear the
+    #    resolved state, so an end-of-turn EOS may not terminate the trajectory.
+    script = ["<test/>", repair, None, "<test/>", "<done/>"]
+    cell = _run_stub_cell(defect, "control", script, max_new, max_turns, max_reads)
+    result = cell["result"]
+    turn_after_edit = _event_type_subsequence(result["events"], ["line_edit", "turn", "test"])
+    scenarios.append({
+        "scenario": "stale_test_state_invalidated_by_edit",
+        "arm": "control", "script": [s if s is not None else "<EOS>" for s in script],
+        "observed": {
+            "termination_reason": result["termination_reason"],
+            "n_tests": result["n_tests"],
+            "turn_delivered_after_edit_eos": turn_after_edit,
+            "final_target_is_gold": _sha(cell["final_files"][defect["target"]]) == gold_sha,
+        },
+        "passed": result["termination_reason"] == "done" and result["n_tests"] == 2
+        and turn_after_edit
+        and _sha(cell["final_files"][defect["target"]]) == gold_sha,
+    })
+
+    # 3. Full rejection -> repair -> retest -> resubmit -> accept cycle with
+    #    model-generated completions on both submissions.
+    script = ["<test/>", "<done/>", repair, "<test/>", "<done/>"]
+    cell = _run_stub_cell(defect, "gate", script, max_new, max_turns, max_reads)
+    result = cell["result"]
+    events = result["events"]
+    done_events = [event for event in events if event.get("type") == "done_attempt"]
+    ordered = _event_type_subsequence(events, [
+        "test", "done_attempt", "gate_check", "gate_reject",
+        "line_edit", "test", "done_attempt", "gate_check", "gate_accept",
+    ])
+    prefixes = [event.get("prefix_sha256") for event in done_events]
+    scenarios.append({
+        "scenario": "gate_reject_repair_retest_resubmit_accept",
+        "arm": "gate", "script": script,
+        "observed": {
+            "event_order_ok": ordered,
+            "done_sources": [event.get("source") for event in done_events],
+            "distinct_completion_prefixes": len(set(prefixes)) == len(prefixes),
+            "held_pass": cell["held"], "type_clean": not cell["final_diags"],
+            "final_target_is_gold": _sha(cell["final_files"][defect["target"]]) == gold_sha,
+        },
+        "passed": ordered and len(done_events) == 2
+        and all(event.get("source") == "model" for event in done_events)
+        and len(set(prefixes)) == 2
+        and cell["held"] and not cell["final_diags"]
+        and _sha(cell["final_files"][defect["target"]]) == gold_sha,
+    })
+
+    # 4. Documented property (descriptive, always "passes" as documentation): after a
+    #    rejection the gate mechanically requires a fresh MODEL-GENERATED <done/> and has
+    #    invalidated stale test state, but it re-checks diagnostics only — a repaired
+    #    resubmission WITHOUT a fresh <test/> is still accepted when type-clean. The
+    #    fresh-test step in live runs is elicited by the rejection instruction text.
+    script = ["<test/>", "<done/>", repair, "<done/>"]
+    cell = _run_stub_cell(defect, "gate", script, max_new, max_turns, max_reads)
+    result = cell["result"]
+    accepted = sum(event.get("type") == "gate_accept" for event in result["events"])
+    scenarios.append({
+        "scenario": "resubmission_without_retest_documented",
+        "arm": "gate", "script": script,
+        "observed": {
+            "accepted": bool(accepted), "n_tests": result["n_tests"],
+            "done_attempts": sum(
+                event.get("type") == "done_attempt" for event in result["events"]
+            ),
+        },
+        "documented_property": (
+            "acceptance requires a fresh model-generated <done/>; a fresh <test/> is "
+            "instructed, not mechanically enforced"
+        ),
+        "passed": bool(accepted) and result["n_tests"] == 1,
+    })
+    return scenarios
+
+
+def _dry_run_grid_checks(rows: list[dict], drafts: list[dict]) -> dict:
+    """Row-level assertions over the scripted grid, by cohort and arm."""
+    by_cell = {(row["draft_id"], row["arm"]): row for row in rows}
+    defects = [draft for draft in drafts if draft.get("cohort") == "hidden_defect"]
+    clean = [draft for draft in drafts if draft.get("cohort") == "clean_negative_control"]
+    checks = {
+        "all_completions_model_generated": all(
+            row["first_done_model_generated"] for row in rows if row["done_attempts"]
+        ),
+        "no_serialization_failures": not any(row["serialization_failures"] for row in rows),
+        "control_accepts_every_bad_completion": all(
+            by_cell[(d["draft_id"], "control")]["accepted"]
+            and not by_cell[(d["draft_id"], "control")]["type_clean"]
+            and not by_cell[(d["draft_id"], "control")]["held_pass"]
+            for d in defects
+        ),
+        "gate_rejects_then_recovers_every_defect": all(
+            by_cell[(d["draft_id"], "gate")]["gate_rejections"] == 1
+            and by_cell[(d["draft_id"], "gate")]["gate_acceptances"] == 1
+            and by_cell[(d["draft_id"], "gate")]["done_attempts"] == 2
+            and by_cell[(d["draft_id"], "gate")]["post_rejection_edits"] == 1
+            and by_cell[(d["draft_id"], "gate")]["edited_rejected_location"]
+            and by_cell[(d["draft_id"], "gate")]["accepted_type_clean_correct"]
+            for d in defects
+        ),
+        "gate_accepts_every_clean_first_check": all(
+            by_cell[(d["draft_id"], "gate")]["gate_invocations"] == 1
+            and by_cell[(d["draft_id"], "gate")]["gate_rejections"] == 0
+            and by_cell[(d["draft_id"], "gate")]["accepted"]
+            for d in clean
+        ),
+        "noisy_volunteers_check_after_edit_on_defects": all(
+            by_cell[(d["draft_id"], "noisy")]["n_checks"] >= 1
+            and any(event.get("type") == "auto_check"
+                    for event in by_cell[(d["draft_id"], "noisy")]["events"])
+            for d in defects
+        ) if any((d["draft_id"], "noisy") in by_cell for d in defects) else None,
+        "diagnostics_prompt_contains_one_shot_delta": all(
+            "<diagnostic_delta>" in _revision_prompt(d, "diagnostics") for d in defects
+        ),
+        "repaired_arms_restore_exact_gold_target": all(
+            by_cell[(d["draft_id"], arm)]["final_target_sha256"]
+            == d["gold_repair_validation"]["gold_target_sha256"]
+            for d in defects for arm in ("diagnostics", "gate", "noisy")
+            if (d["draft_id"], arm) in by_cell
+        ),
+        "control_gate_first_completion_prefixes_identical": all(
+            by_cell[(d["draft_id"], "control")]["first_done_prefix_sha256"]
+            == by_cell[(d["draft_id"], "gate")]["first_done_prefix_sha256"]
+            for d in drafts
+        ),
+    }
+    return checks
+
+
+def dry_run(args) -> int:
+    """Scripted-policy dry run of the phase-gradient arms (no model, CPU only)."""
+    payload = json.loads(Path(args.drafts).read_text())
+    if Path(args.out).exists():
+        raise FileExistsError(f"refusing to overwrite dry-run artifact: {args.out}")
+    drafts = [draft for draft in payload["drafts"]
+              if (draft.get("draft_submitted") or draft.get("revision_case_series_eligible"))
+              and draft.get("coherent")]
+    if args.names:
+        wanted = set(args.names.split(","))
+        drafts = [draft for draft in drafts if draft["task"] in wanted]
+    if not drafts:
+        raise ValueError("no eligible drafts selected for the dry run")
+    arms = args.arms.split(",")
+    unknown = set(arms) - set(ARMS)
+    if unknown:
+        raise ValueError(f"unknown arms: {sorted(unknown)}")
+    tasks = _task_map()
+    rows = []
+    for draft, arm in itertools.product(drafts, arms):
+        script = _stub_script(draft, arm, tasks)
+        cell = _run_stub_cell(draft, arm, script, args.max_new, args.max_turns,
+                              args.max_reads)
+        row = _stub_row(draft, arm, cell, script)
+        rows.append(row)
+        print(f"{draft['draft_id']} {arm}: held={row['held_pass']} "
+              f"clean={row['type_clean']} accepted={row['accepted']} "
+              f"rejects={row['gate_rejections']} done={row['done_attempts']}", flush=True)
+    grid_checks = _dry_run_grid_checks(rows, drafts)
+    defects = [draft for draft in drafts if draft.get("cohort") == "hidden_defect"]
+    mechanics = _dry_run_mechanics(defects[0], tasks, args.max_new, args.max_turns,
+                                   args.max_reads) if defects else []
+    passed = all(value for value in grid_checks.values() if value is not None) and all(
+        scenario["passed"] for scenario in mechanics
+    )
+    result_payload = {
+        "protocol": PROTOCOL_VERSION,
+        "benchmark": payload.get("benchmark"),
+        "kind": "controlled_gate_scripted_dry_run",
+        "model": "scripted-stub-policy",
+        "model_meta": {
+            "policy": "deterministic scripted action replay through the live StreamAgent",
+            "weights_loaded": False,
+            "token_unit": "characters (stub char-level tokenizer), not model tokens",
+        },
+        "source_drafts": args.drafts,
+        "source_drafts_sha256": hashlib.sha256(Path(args.drafts).read_bytes()).hexdigest(),
+        "config": vars(args),
+        "pyrefly": _pyrefly_meta(),
+        "protocol_source_sha256": _protocol_hashes(),
+        "arm_divergence_notes": {
+            "control_vs_gate": (
+                "identical system and user prompts; identical scripted prefixes through "
+                "the first completion attempt, enforced by the v6 case-series validator"
+            ),
+            "diagnostics": (
+                "the one-shot delta is appended to the revision prompt, so trajectories "
+                "may diverge from the first token (C26 delivery design; accepted)"
+            ),
+            "noisy": (
+                "the after-every-edit advertisement changes the system prompt and each "
+                "applied edit volunteers a checker observation, so trajectories diverge "
+                "before any completion (authoring feedback-arm design; accepted)"
+            ),
+        },
+        "rows": rows,
+        "grid_checks": grid_checks,
+        "mechanics_scenarios": mechanics,
+        "passed": passed,
+    }
+    _publish_revision_payload(
+        Path(args.out), result_payload, drafts, rows, arms, 1,
+        validate_case_series=bool(payload.get("selection_is_not_a_natural_opportunity_sample")),
+    )
+    print(f"grid checks: { {k: v for k, v in grid_checks.items()} }")
+    for scenario in mechanics:
+        print(f"mechanics {scenario['scenario']}: {'PASS' if scenario['passed'] else 'FAIL'}")
+    print(f"dry run {'PASSED' if passed else 'FAILED'} -> {args.out}")
+    return 0 if passed else 2
+
+
 def parser() -> argparse.ArgumentParser:
     root = argparse.ArgumentParser()
     commands = root.add_subparsers(dest="command", required=True)
@@ -719,6 +1109,15 @@ def parser() -> argparse.ArgumentParser:
     generate.add_argument("--max-reads", type=int, default=6)
     generate.add_argument("--gpu-only", action="store_true")
 
+    dry = commands.add_parser("dry-run")
+    dry.add_argument("drafts")
+    dry.add_argument("out")
+    dry.add_argument("--names", default=None)
+    dry.add_argument("--arms", default="control,diagnostics,gate,noisy")
+    dry.add_argument("--max-new", type=int, default=8000)
+    dry.add_argument("--max-turns", type=int, default=12)
+    dry.add_argument("--max-reads", type=int, default=4)
+
     revision = commands.add_parser("revise")
     revision.add_argument("drafts")
     revision.add_argument("out")
@@ -747,6 +1146,8 @@ def main() -> int:
         return calibrate_drafts(args.drafts, args.minimum, args.maximum, args.min_coherent)
     if args.command == "select-legacy-case-series":
         return select_legacy_case_series(args.source, args.out, args.names)
+    if args.command == "dry-run":
+        return dry_run(args)
     if args.command == "generate":
         return generate_drafts(args)
     return revise(args)
