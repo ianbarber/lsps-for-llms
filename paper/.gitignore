@@ -1,0 +1,7 @@
+# LaTeX build byproducts (report.tex and report.pdf ARE committed on purpose)
+*.aux
+*.log
+*.blg
+*.bbl
+*.out
+*.toc

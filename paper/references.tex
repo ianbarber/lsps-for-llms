@@ -1,0 +1,11 @@
+%% paper/references.tex
+%% Included after the document body (pandoc --include-after-body).
+%% Emits the References section from the vendored references.bib.
+%%
+%% The References list now reflects REAL citations: report-filters.lua converts
+%% the 8 related-work arXiv links into \citep{...} (keeping the visible work
+%% name) and attaches \citep{ross2011dagger} at the "DAgger-style relabel"
+%% anchor. Only those cited works are listed (9 entries). The remaining .bib
+%% entries stay available for when more of the text is wired to \citep.
+\bibliographystyle{plainnat}
+\bibliography{references}
