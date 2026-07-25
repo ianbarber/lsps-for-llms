@@ -1017,3 +1017,32 @@ Artifacts: `runs/protocol/navigation_v2_substrain_validation.json`,
 `runs/agent/substitution_harvest_qwen36_27b.json`, `runs/sft/substitution_lora_27b/`,
 `runs/pilot/navigation_v2_reread_qwen36_27b_apparatus_trained.json`,
 `runs/pilot/navigation_v2_reread_qwen36_27b_apparatus_baseline_rerun.json`.
+
+## Push-vs-elect reread: election is not substitution (2026-07-24)
+
+Clean within-instance follow-up to C31/C33. Question: does a SELF-ELECTED span (vs a pushed one) get
+substituted? C27 saw 0/11 reread when a 27B elected in the `effic_real2` suite; C31's own elective arm was
+vacuous (composed resolver returned a usable span 0/12). This run fixes that — same navigation apparatus
+instances, two arms (`push_span` / `elect_span`), the identical span mechanically verified usable and
+byte-identical across arms (sha match 12/12, 7-point usability 24/24), delivered in `elect_span` only on
+the model's own tool call.
+
+Qwen3.6-27B (local, temp 0), GLM-4.6, GPT-5.6 "Luna" (both OpenRouter), 12 instances x 2 arms each. Spend
+~$0.35.
+
+```
+model            push reread   elect reread (among elected)   elected/12
+Qwen3.6-27B        11/12         9/9                            9
+GLM-4.6            12/12         4/9                            9
+GPT-5.6 Luna       12/12         7/12                           12
+```
+
+Findings: (1) push -> reread is universal (35/36), replicating C31. (2) Election does NOT reliably produce
+substitution: the local 27B rereads on every instance it elected (9/9, zero effect), and the two frontier
+API models reduce but do not eliminate the reread (4/9, 7/12). (3) So C27's clean elective substitution is
+specific to that suite/model, not a general property. (4) Training remains the only reliable lever (C33:
+0/12). Caveats: the local arm is the clean within-instance contrast (defn delivery recorded 9/9); the API
+`elect_span` arm delivered an identical usable span (payload present) but records thinner counters
+(defn_found/n_lsp null on the API path); GLM-4.6 solved only 5-6/12 of the harder xor/arithmetic tasks
+(reread measured independently of success); n=12, one seed, single apparatus. Artifacts:
+`runs/pilot/navigation_v2_reread_pushvselect_{qwen36_27b,glm46,gpt56luna}.json`.

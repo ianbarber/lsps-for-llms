@@ -42,7 +42,10 @@ from scripts.experiments.navigation_tasks import (  # noqa: E402
     make_env,
     run_heldout,
 )
-from scripts.experiments.run_navigation import _method_from_lsp  # noqa: E402
+from scripts.experiments.run_navigation import (  # noqa: E402
+    _method_from_lsp,
+    _method_from_metadata,
+)
 
 
 TOOLS_TEXT = (
@@ -66,10 +69,196 @@ SUFFICIENT_TEXT = (
     "context for the edit: do NOT call read_file on the defining file unless the span is insufficient. "
     "Edit directly at the span's stated path and line numbers, then run the tests.\n"
 )
+# push-vs-elect contrast (C31 follow-up). elect_span advertises a defn tool; the span is returned
+# ONLY when the model elects it, and it is the SAME bytes the push arm delivers unsolicited.
+ELECT_TEXT = (
+    "You are fixing one one-line Python bug in an implementation module under pkg/units/. "
+    "Work iteratively using the tools provided (call tools; do not paste code in prose):\n"
+    "- read_file(path): read a workspace file (numbered view, truncated).\n"
+    "- defn(symbol): look up a symbol's definition at the visible call site. It is CHEAPER than "
+    "reading a whole file and returns the exact current source of the implementation that binds "
+    "there. Prefer one defn lookup over tracing the factory/registry by reading files.\n"
+    "- edit_lines(path, start, end, new_text): replace the inclusive 1-based line range "
+    "START..END of `path` with new_text.\n"
+    "- run_tests(): run the behavioral test; returns 'ALL TESTS PASS' or the failure.\n"
+    "- done(): finish after the test passes.\n\n"
+)
 ARM_SYS = {
     "auto_neutral": TOOLS_TEXT + AUTO_TEXT,
     "auto_sufficient": TOOLS_TEXT + SUFFICIENT_TEXT,
+    "push_span": TOOLS_TEXT + AUTO_TEXT,   # identical framing to auto_neutral; span pushed in prompt
+    "elect_span": ELECT_TEXT,              # span withheld; delivered verbatim on defn election
 }
+SHARED_ARMS = ("push_span", "elect_span")
+
+
+def _shared_span_and_verify(task):
+    """The single span push_span and elect_span both deliver, plus a mechanical usability gate.
+    Deterministic pristine metadata span, cross-checked byte-for-byte against the live-LSP span."""
+    meta_span, meta_path = _method_from_metadata(task)
+    env = make_env(task, "typed")
+    lsp_span = lsp_path = None
+    lsp_errors = []
+    try:
+        lsp_span, lsp_path, _lat = _method_from_lsp(task, "typed", env)
+        lsp_errors = list(env.lsp_errors)
+    finally:
+        env.close()
+    checks = {
+        "meta_path_is_target": meta_path == task["target_path"],
+        "lsp_path_is_target": lsp_path == task["target_path"],
+        "lsp_span_equals_metadata": lsp_span == meta_span,
+        "no_lsp_errors": not lsp_errors,
+        "gold_not_in_span": task["gold"]["new_text"] not in meta_span,
+        "span_has_numbered_lines": meta_span.count("|") >= 2,
+        "span_names_target_path": meta_path in meta_span,
+    }
+    return meta_span, meta_path, checks
+
+
+def run_rollout_shared(client, model, task, arm, args, price, spent_so_far, shared):
+    """push_span / elect_span rollout. Identical span bytes in both; only delivery differs.
+    Kept separate from run_rollout so the legacy auto arms stay byte-identical."""
+    supplied, supplied_path, checks = shared
+    if not all(checks.values()):
+        raise RuntimeError(f"shared span failed usability gate for {task['name']}: {checks}")
+    elect = arm == "elect_span"
+    env = make_env(task, "typed")
+    try:
+        prompt = build_prompt(task, "typed")
+        if not elect:
+            prompt += (
+                "\n\nThe following current source span was supplied from a language-server "
+                "definition result at the visible call site. It is source context, not a "
+                "proposed correction.\n<semantic_result kind=\"current_source\">\n"
+                + supplied + "\n</semantic_result>"
+            )
+        ro = Rollout(env, "pkg/app.py", args.max_reads)
+        tools = build_tools(no_defn=True, with_check=False)
+        if elect:
+            tools.insert(1, {"type": "function", "function": {
+                "name": "defn",
+                "description": ("Look up a symbol's definition/signature at the visible call site "
+                                "(cheaper than reading the whole file; returns the exact current "
+                                "source that binds there)."),
+                "parameters": {"type": "object",
+                               "properties": {"symbol": {"type": "string"}},
+                               "required": ["symbol"]}}})
+        messages = [
+            {"role": "system", "content": ARM_SYS[arm]},
+            {"role": "user", "content": prompt},
+        ]
+        pp, cp = price
+        est_cost = 0.0
+        in_tok = out_tok = turns = 0
+        stop_reason = "max_turns"
+
+        for _turn in range(args.max_turns):
+            if spent_so_far + est_cost >= args.budget_usd:
+                stop_reason = "budget"
+                break
+            resp = None
+            last_err = None
+            for attempt in range(4):
+                try:
+                    resp = client.chat.completions.create(
+                        model=model, messages=messages, tools=tools,
+                        tool_choice="auto", temperature=args.temperature, seed=args.seed,
+                    )
+                    break
+                except Exception as e:  # noqa: BLE001 - transient-API resilience
+                    last_err = e
+                    msg = str(e).lower()
+                    transient = any(s in msg for s in ("429", "rate", "timeout", "timed out",
+                                                       "502", "503", "overload", "temporarily"))
+                    if attempt < 3 and transient:
+                        time.sleep(2 * (attempt + 1))
+                        continue
+                    break
+            if resp is None:
+                stop_reason = f"api_error: {type(last_err).__name__}: {str(last_err)[:200]}"
+                ro.trace.append({"t": "api_error", "err": str(last_err)[:200]})
+                break
+            turns += 1
+            u = getattr(resp, "usage", None)
+            if u is not None:
+                in_tok += getattr(u, "prompt_tokens", 0) or 0
+                out_tok += getattr(u, "completion_tokens", 0) or 0
+                est_cost = in_tok * pp + out_tok * cp
+            if not getattr(resp, "choices", None):
+                stop_reason = "no_choices"
+                break
+            msg = resp.choices[0].message
+            tcs = getattr(msg, "tool_calls", None) or []
+            amsg = {"role": "assistant", "content": msg.content or ""}
+            if tcs:
+                amsg["tool_calls"] = [
+                    {"id": tc.id, "type": "function",
+                     "function": {"name": tc.function.name,
+                                  "arguments": tc.function.arguments or "{}"}}
+                    for tc in tcs]
+            messages.append(amsg)
+            if not tcs:
+                messages.append({"role": "user",
+                                 "content": "Use the tools to make progress: edit_lines, "
+                                            "run_tests, then done. Do not answer in prose."})
+                continue
+            for tc in tcs:
+                try:
+                    a = json.loads(tc.function.arguments or "{}")
+                except Exception:  # noqa: BLE001
+                    a = {}
+                if elect and tc.function.name == "defn":
+                    # oracle-backed election: return the SAME span the push arm pushes (identical bytes)
+                    ro.counts["defn"] += 1
+                    ro.trace.append({"t": "defn", "sym": a.get("symbol", ""), "found": True,
+                                     "oracle": True, "path": supplied_path})
+                    result = (f"definition of `{a.get('symbol', '')}` (in {supplied_path}):\n"
+                              + supplied)
+                else:
+                    result = ro.execute(tc.function.name, a)
+                messages.append({"role": "tool", "tool_call_id": tc.id, "content": str(result)})
+            if ro.done:
+                stop_reason = "done"
+                break
+            if ro.last_test and ro.last_test.get("resolved"):
+                stop_reason = "tests_pass"
+                break
+
+        visible = env.run_tests()
+        held_out_pass = run_heldout(task, "typed")
+        if elect:
+            first_defn = next((i for i, tr in enumerate(ro.trace) if tr.get("t") == "defn"), None)
+            if first_defn is None:
+                after = []
+            else:
+                after = [tr for j, tr in enumerate(ro.trace)
+                         if j > first_defn and tr.get("t") == "read"
+                         and tr.get("path") == task["target_path"] and not tr.get("capped")]
+        else:
+            after = [tr for tr in ro.trace
+                     if tr.get("t") == "read" and tr.get("path") == task["target_path"]
+                     and not tr.get("capped")]
+        row = {
+            "task": task["name"], "family": task["seed"], "split": args.split,
+            "variant": "typed", "arm": arm, "seed": args.seed, "model": model,
+            "resolved": held_out_pass, "visible_pass": bool(visible.get("resolved")),
+            "held_out_pass": held_out_pass, "stop_reason": stop_reason,
+            "turns": turns, "prompt_tokens": in_tok, "completion_tokens": out_tok,
+            "n_read": ro.counts["read"], "n_defn": ro.counts["defn"], "n_edit": ro.counts["edit"],
+            "n_test": ro.counts["test"],
+            "n_reads_after_span": len(after),
+            "read_after_span": bool(after),
+            "elected_defn": (ro.counts["defn"] > 0) if elect else None,
+            "semantic_supplied_path": supplied_path,
+            "semantic_payload_sha256": hashlib.sha256(supplied.encode()).hexdigest(),
+            "shared_span_sha256": hashlib.sha256(supplied.encode()).hexdigest(),
+            "span_usability_check": checks,
+            "est_cost_usd": round(est_cost, 6), "trace": ro.trace,
+        }
+        return row, est_cost
+    finally:
+        env.close()
 
 
 def run_rollout(client, model, task, arm, args, price, spent_so_far):
@@ -243,15 +432,26 @@ def main() -> int:
             "rows": rows,
         }, indent=2) + "\n", encoding="utf-8")
 
+    use_shared = any(a in SHARED_ARMS for a in arms)
     for task in tasks:
         if budget_hit:
             break
+        shared = None
+        if use_shared:
+            shared = _shared_span_and_verify(task)
+            print(f"  [{task['name']:22}] shared-span usability: "
+                  f"{'OK' if all(shared[2].values()) else 'FAIL ' + str(shared[2])} "
+                  f"sha={hashlib.sha256(shared[0].encode()).hexdigest()[:12]}", flush=True)
         for arm in arms:
             if spent >= args.budget_usd:
                 budget_hit = True
                 break
             t0 = time.time()
-            row, cost = run_rollout(client, args.model, task, arm, args, (pp, cp), spent)
+            if arm in SHARED_ARMS:
+                row, cost = run_rollout_shared(client, args.model, task, arm, args,
+                                               (pp, cp), spent, shared)
+            else:
+                row, cost = run_rollout(client, args.model, task, arm, args, (pp, cp), spent)
             spent += cost
             row["sec"] = round(time.time() - t0, 1)
             rows.append(row)
@@ -271,9 +471,14 @@ def main() -> int:
         if not sub:
             continue
         n = len(sub)
+        elect = ""
+        if any(r.get("elected_defn") is not None for r in sub):
+            n_e = sum(1 for r in sub if r.get("elected_defn"))
+            n_re = sum(1 for r in sub if r.get("elected_defn") and r["read_after_span"])
+            elect = f"  elected={n_e}/{n}  reread|elected={n_re}/{max(n_e,1)}"
         print(f"  {arm:16s} pass={sum(1 for r in sub if r['resolved'])}/{n}  "
               f"read_after_span={sum(1 for r in sub if r['read_after_span'])}/{n}  "
-              f"mean_in_toks={round(sum(r['prompt_tokens'] for r in sub) / n, 1)}", flush=True)
+              f"mean_in_toks={round(sum(r['prompt_tokens'] for r in sub) / n, 1)}{elect}", flush=True)
     print(f"total spend: ${spent:.4f} ({'BUDGET HIT' if budget_hit else 'within budget'})",
           flush=True)
     return 0

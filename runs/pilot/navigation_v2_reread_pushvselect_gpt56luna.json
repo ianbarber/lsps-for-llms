@@ -1,0 +1,1621 @@
+{
+  "protocol": "navigation-v2",
+  "experiment": "reread-after-span-api",
+  "model": "openai/gpt-5.6-luna",
+  "matched_pricing_id": "openai/gpt-5.6-luna",
+  "config": {
+    "out": "runs/pilot/navigation_v2_reread_pushvselect_gpt56luna.json",
+    "model": "openai/gpt-5.6-luna",
+    "split": "apparatus",
+    "arms": "push_span,elect_span",
+    "names": null,
+    "seed": 0,
+    "temperature": 0.0,
+    "max_turns": 12,
+    "max_reads": 12,
+    "budget_usd": 3.0,
+    "tmp_root": null
+  },
+  "arms": [
+    "push_span",
+    "elect_span"
+  ],
+  "total_cost_usd": 0.154489,
+  "budget_hit": false,
+  "rows": [
+    {
+      "task": "nav_apparatus_29009",
+      "family": 29009,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "push_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 3,
+      "prompt_tokens": 3339,
+      "completion_tokens": 194,
+      "n_read": 4,
+      "n_defn": 0,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "elected_defn": null,
+      "semantic_supplied_path": "pkg/units/uwmxju.py",
+      "semantic_payload_sha256": "8667ea57493fc99819e2bc81dfa98fdb57066303179dd9b811fd9a8c33f6c648",
+      "shared_span_sha256": "8667ea57493fc99819e2bc81dfa98fdb57066303179dd9b811fd9a8c33f6c648",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.004503,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uwmxju.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/registry.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uwmxju.py",
+          "lines": "6-6",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 5.4
+    },
+    {
+      "task": "nav_apparatus_29009",
+      "family": 29009,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "elect_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 8,
+      "prompt_tokens": 9310,
+      "completion_tokens": 776,
+      "n_read": 2,
+      "n_defn": 1,
+      "n_edit": 3,
+      "n_test": 2,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "elected_defn": true,
+      "semantic_supplied_path": "pkg/units/uwmxju.py",
+      "semantic_payload_sha256": "8667ea57493fc99819e2bc81dfa98fdb57066303179dd9b811fd9a8c33f6c648",
+      "shared_span_sha256": "8667ea57493fc99819e2bc81dfa98fdb57066303179dd9b811fd9a8c33f6c648",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.013966,
+      "trace": [
+        {
+          "t": "defn",
+          "sym": "mxbjajyv",
+          "found": true,
+          "oracle": true,
+          "path": "pkg/units/uwmxju.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uwmxju.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uwmxju.py",
+          "lines": "6-6",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": false
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uwmxju.py",
+          "lines": "5-5",
+          "ok": true
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uwmxju.py",
+          "lines": "6-6",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 22.7
+    },
+    {
+      "task": "nav_apparatus_29017",
+      "family": 29017,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "push_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 3,
+      "prompt_tokens": 3837,
+      "completion_tokens": 196,
+      "n_read": 3,
+      "n_defn": 0,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "elected_defn": null,
+      "semantic_supplied_path": "pkg/units/uffvgm.py",
+      "semantic_payload_sha256": "2a390ff7ce86a793da2740fe8195df767c8f1142be7e75c4909faa57c97cd283",
+      "shared_span_sha256": "2a390ff7ce86a793da2740fe8195df767c8f1142be7e75c4909faa57c97cd283",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.005013,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/units/uffvgm.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/registry.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uffvgm.py",
+          "lines": "21-21",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 5.4
+    },
+    {
+      "task": "nav_apparatus_29017",
+      "family": 29017,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "elect_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 8,
+      "prompt_tokens": 11171,
+      "completion_tokens": 804,
+      "n_read": 2,
+      "n_defn": 1,
+      "n_edit": 3,
+      "n_test": 2,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "elected_defn": true,
+      "semantic_supplied_path": "pkg/units/uffvgm.py",
+      "semantic_payload_sha256": "2a390ff7ce86a793da2740fe8195df767c8f1142be7e75c4909faa57c97cd283",
+      "shared_span_sha256": "2a390ff7ce86a793da2740fe8195df767c8f1142be7e75c4909faa57c97cd283",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.015995,
+      "trace": [
+        {
+          "t": "defn",
+          "sym": "mxxzqmyt",
+          "found": true,
+          "oracle": true,
+          "path": "pkg/units/uffvgm.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uffvgm.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uffvgm.py",
+          "lines": "21-21",
+          "ok": true
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uffvgm.py",
+          "lines": "20-20",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": false
+        },
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uffvgm.py",
+          "lines": "21-21",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 18.5
+    },
+    {
+      "task": "nav_apparatus_29021",
+      "family": 29021,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "push_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 4,
+      "prompt_tokens": 6584,
+      "completion_tokens": 388,
+      "n_read": 7,
+      "n_defn": 0,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "elected_defn": null,
+      "semantic_supplied_path": "pkg/units/uakhuo.py",
+      "semantic_payload_sha256": "dbc80c0ccb304a0524c426a5f553951bda759b53d467155f3ca00731f2ca542d",
+      "shared_span_sha256": "dbc80c0ccb304a0524c426a5f553951bda759b53d467155f3ca00731f2ca542d",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.008912,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/units/uakhuo.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/registry.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uxmpad.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/umuoyi.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/unwpkj.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/base.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uakhuo.py",
+          "lines": "21-21",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 6.9
+    },
+    {
+      "task": "nav_apparatus_29021",
+      "family": 29021,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "elect_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 3,
+      "prompt_tokens": 2134,
+      "completion_tokens": 182,
+      "n_read": 0,
+      "n_defn": 1,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 0,
+      "read_after_span": false,
+      "elected_defn": true,
+      "semantic_supplied_path": "pkg/units/uakhuo.py",
+      "semantic_payload_sha256": "dbc80c0ccb304a0524c426a5f553951bda759b53d467155f3ca00731f2ca542d",
+      "shared_span_sha256": "dbc80c0ccb304a0524c426a5f553951bda759b53d467155f3ca00731f2ca542d",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.003226,
+      "trace": [
+        {
+          "t": "defn",
+          "sym": "mfbazruz",
+          "found": true,
+          "oracle": true,
+          "path": "pkg/units/uakhuo.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uakhuo.py",
+          "lines": "21-21",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 5.2
+    },
+    {
+      "task": "nav_apparatus_29023",
+      "family": 29023,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "push_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 4,
+      "prompt_tokens": 4510,
+      "completion_tokens": 269,
+      "n_read": 5,
+      "n_defn": 0,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "elected_defn": null,
+      "semantic_supplied_path": "pkg/units/urzwiz.py",
+      "semantic_payload_sha256": "2a82c01a2d068fff29406e7ba6bc646b6445e3bbe7efed9bf464b12df857e93f",
+      "shared_span_sha256": "2a82c01a2d068fff29406e7ba6bc646b6445e3bbe7efed9bf464b12df857e93f",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.006124,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/units/urzwiz.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/registry.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/__init__.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/base.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/urzwiz.py",
+          "lines": "11-11",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 10.6
+    },
+    {
+      "task": "nav_apparatus_29023",
+      "family": 29023,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "elect_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 7,
+      "prompt_tokens": 8127,
+      "completion_tokens": 509,
+      "n_read": 4,
+      "n_defn": 2,
+      "n_edit": 2,
+      "n_test": 2,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "elected_defn": true,
+      "semantic_supplied_path": "pkg/units/urzwiz.py",
+      "semantic_payload_sha256": "2a82c01a2d068fff29406e7ba6bc646b6445e3bbe7efed9bf464b12df857e93f",
+      "shared_span_sha256": "2a82c01a2d068fff29406e7ba6bc646b6445e3bbe7efed9bf464b12df857e93f",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.011181,
+      "trace": [
+        {
+          "t": "defn",
+          "sym": "mzzcvlsa",
+          "found": true,
+          "oracle": true,
+          "path": "pkg/units/urzwiz.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/urzwiz.py",
+          "lines": "11-11",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": false
+        },
+        {
+          "t": "defn",
+          "sym": "make",
+          "found": true,
+          "oracle": true,
+          "path": "pkg/units/urzwiz.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/urzwiz.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/registry.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/urzwiz.py",
+          "lines": "11-11",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 20.7
+    },
+    {
+      "task": "nav_apparatus_29027",
+      "family": 29027,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "push_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 3,
+      "prompt_tokens": 3157,
+      "completion_tokens": 194,
+      "n_read": 3,
+      "n_defn": 0,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "elected_defn": null,
+      "semantic_supplied_path": "pkg/units/uwhbgk.py",
+      "semantic_payload_sha256": "005bd73cdabc74584a10b31af1a23549d709893b90e1deb95bbaa233e22d4ab8",
+      "shared_span_sha256": "005bd73cdabc74584a10b31af1a23549d709893b90e1deb95bbaa233e22d4ab8",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.004321,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uwhbgk.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uwhbgk.py",
+          "lines": "6-6",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 4.9
+    },
+    {
+      "task": "nav_apparatus_29027",
+      "family": 29027,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "elect_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 3,
+      "prompt_tokens": 2034,
+      "completion_tokens": 159,
+      "n_read": 0,
+      "n_defn": 1,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 0,
+      "read_after_span": false,
+      "elected_defn": true,
+      "semantic_supplied_path": "pkg/units/uwhbgk.py",
+      "semantic_payload_sha256": "005bd73cdabc74584a10b31af1a23549d709893b90e1deb95bbaa233e22d4ab8",
+      "shared_span_sha256": "005bd73cdabc74584a10b31af1a23549d709893b90e1deb95bbaa233e22d4ab8",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.002988,
+      "trace": [
+        {
+          "t": "defn",
+          "sym": "mkntafuz",
+          "found": true,
+          "oracle": true,
+          "path": "pkg/units/uwhbgk.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uwhbgk.py",
+          "lines": "6-6",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 5.1
+    },
+    {
+      "task": "nav_apparatus_29033",
+      "family": 29033,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "push_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 4,
+      "prompt_tokens": 3991,
+      "completion_tokens": 192,
+      "n_read": 2,
+      "n_defn": 0,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "elected_defn": null,
+      "semantic_supplied_path": "pkg/units/ummdkp.py",
+      "semantic_payload_sha256": "b1c81e6724a0a8dfd629b41ce140aedc71ae56a86a01b3f9490cf95cb3e1d716",
+      "shared_span_sha256": "b1c81e6724a0a8dfd629b41ce140aedc71ae56a86a01b3f9490cf95cb3e1d716",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.005143,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/ummdkp.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/ummdkp.py",
+          "lines": "6-6",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 6.4
+    },
+    {
+      "task": "nav_apparatus_29033",
+      "family": 29033,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "elect_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 6,
+      "prompt_tokens": 5903,
+      "completion_tokens": 407,
+      "n_read": 3,
+      "n_defn": 2,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "elected_defn": true,
+      "semantic_supplied_path": "pkg/units/ummdkp.py",
+      "semantic_payload_sha256": "b1c81e6724a0a8dfd629b41ce140aedc71ae56a86a01b3f9490cf95cb3e1d716",
+      "shared_span_sha256": "b1c81e6724a0a8dfd629b41ce140aedc71ae56a86a01b3f9490cf95cb3e1d716",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.008345,
+      "trace": [
+        {
+          "t": "defn",
+          "sym": "moutsxzk",
+          "found": true,
+          "oracle": true,
+          "path": "pkg/units/ummdkp.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/ummdkp.py"
+        },
+        {
+          "t": "defn",
+          "sym": "make",
+          "found": true,
+          "oracle": true,
+          "path": "pkg/units/ummdkp.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/registry.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/ummdkp.py",
+          "lines": "5-6",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 12.6
+    },
+    {
+      "task": "nav_apparatus_29059",
+      "family": 29059,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "push_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 3,
+      "prompt_tokens": 3532,
+      "completion_tokens": 206,
+      "n_read": 4,
+      "n_defn": 0,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "elected_defn": null,
+      "semantic_supplied_path": "pkg/units/uwxmrs.py",
+      "semantic_payload_sha256": "1ba9c1d33e80f7a85a4d3a0910142c3f5f3ec67ee1892b2bf9080fa0c55261c3",
+      "shared_span_sha256": "1ba9c1d33e80f7a85a4d3a0910142c3f5f3ec67ee1892b2bf9080fa0c55261c3",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.004768,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uwxmrs.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/registry.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uwxmrs.py",
+          "lines": "6-6",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 4.0
+    },
+    {
+      "task": "nav_apparatus_29059",
+      "family": 29059,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "elect_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 3,
+      "prompt_tokens": 2097,
+      "completion_tokens": 138,
+      "n_read": 0,
+      "n_defn": 1,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 0,
+      "read_after_span": false,
+      "elected_defn": true,
+      "semantic_supplied_path": "pkg/units/uwxmrs.py",
+      "semantic_payload_sha256": "1ba9c1d33e80f7a85a4d3a0910142c3f5f3ec67ee1892b2bf9080fa0c55261c3",
+      "shared_span_sha256": "1ba9c1d33e80f7a85a4d3a0910142c3f5f3ec67ee1892b2bf9080fa0c55261c3",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.002925,
+      "trace": [
+        {
+          "t": "defn",
+          "sym": "mzrsaomz",
+          "found": true,
+          "oracle": true,
+          "path": "pkg/units/uwxmrs.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uwxmrs.py",
+          "lines": "6-6",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 4.5
+    },
+    {
+      "task": "nav_apparatus_29063",
+      "family": 29063,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "push_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 3,
+      "prompt_tokens": 3736,
+      "completion_tokens": 210,
+      "n_read": 3,
+      "n_defn": 0,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "elected_defn": null,
+      "semantic_supplied_path": "pkg/units/ujnqpy.py",
+      "semantic_payload_sha256": "582c7b2192e95bb342cc99f514dfd02a00606d9186ee25434dd6132c8edf25c8",
+      "shared_span_sha256": "582c7b2192e95bb342cc99f514dfd02a00606d9186ee25434dd6132c8edf25c8",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.004996,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/ujnqpy.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/registry.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/ujnqpy.py",
+          "lines": "16-16",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 6.1
+    },
+    {
+      "task": "nav_apparatus_29063",
+      "family": 29063,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "elect_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 3,
+      "prompt_tokens": 2148,
+      "completion_tokens": 162,
+      "n_read": 0,
+      "n_defn": 1,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 0,
+      "read_after_span": false,
+      "elected_defn": true,
+      "semantic_supplied_path": "pkg/units/ujnqpy.py",
+      "semantic_payload_sha256": "582c7b2192e95bb342cc99f514dfd02a00606d9186ee25434dd6132c8edf25c8",
+      "shared_span_sha256": "582c7b2192e95bb342cc99f514dfd02a00606d9186ee25434dd6132c8edf25c8",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.00312,
+      "trace": [
+        {
+          "t": "defn",
+          "sym": "mokteidm",
+          "found": true,
+          "oracle": true,
+          "path": "pkg/units/ujnqpy.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/ujnqpy.py",
+          "lines": "16-16",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 5.7
+    },
+    {
+      "task": "nav_apparatus_29077",
+      "family": 29077,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "push_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 3,
+      "prompt_tokens": 3592,
+      "completion_tokens": 242,
+      "n_read": 3,
+      "n_defn": 0,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "elected_defn": null,
+      "semantic_supplied_path": "pkg/units/uqxoqv.py",
+      "semantic_payload_sha256": "fa3678ea75906e8d75cac2070f055977b9d8e9f407da63857f85d8208955e901",
+      "shared_span_sha256": "fa3678ea75906e8d75cac2070f055977b9d8e9f407da63857f85d8208955e901",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.005044,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uqxoqv.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/registry.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uqxoqv.py",
+          "lines": "6-6",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 6.4
+    },
+    {
+      "task": "nav_apparatus_29077",
+      "family": 29077,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "elect_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 6,
+      "prompt_tokens": 6242,
+      "completion_tokens": 284,
+      "n_read": 2,
+      "n_defn": 2,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "elected_defn": true,
+      "semantic_supplied_path": "pkg/units/uqxoqv.py",
+      "semantic_payload_sha256": "fa3678ea75906e8d75cac2070f055977b9d8e9f407da63857f85d8208955e901",
+      "shared_span_sha256": "fa3678ea75906e8d75cac2070f055977b9d8e9f407da63857f85d8208955e901",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.007946,
+      "trace": [
+        {
+          "t": "defn",
+          "sym": "menezzft",
+          "found": true,
+          "oracle": true,
+          "path": "pkg/units/uqxoqv.py"
+        },
+        {
+          "t": "defn",
+          "sym": "make",
+          "found": true,
+          "oracle": true,
+          "path": "pkg/units/uqxoqv.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uqxoqv.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uqxoqv.py",
+          "lines": "6-6",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 9.2
+    },
+    {
+      "task": "nav_apparatus_29083",
+      "family": 29083,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "push_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 3,
+      "prompt_tokens": 3520,
+      "completion_tokens": 209,
+      "n_read": 4,
+      "n_defn": 0,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "elected_defn": null,
+      "semantic_supplied_path": "pkg/units/ulrzis.py",
+      "semantic_payload_sha256": "ca15116d441373d5e9b36528fe09037ce97f3d042036aa1b7252b8ee854c3326",
+      "shared_span_sha256": "ca15116d441373d5e9b36528fe09037ce97f3d042036aa1b7252b8ee854c3326",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.004774,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/ulrzis.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/registry.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/ulrzis.py",
+          "lines": "16-16",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 5.5
+    },
+    {
+      "task": "nav_apparatus_29083",
+      "family": 29083,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "elect_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 5,
+      "prompt_tokens": 4995,
+      "completion_tokens": 281,
+      "n_read": 3,
+      "n_defn": 2,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "elected_defn": true,
+      "semantic_supplied_path": "pkg/units/ulrzis.py",
+      "semantic_payload_sha256": "ca15116d441373d5e9b36528fe09037ce97f3d042036aa1b7252b8ee854c3326",
+      "shared_span_sha256": "ca15116d441373d5e9b36528fe09037ce97f3d042036aa1b7252b8ee854c3326",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.006681,
+      "trace": [
+        {
+          "t": "defn",
+          "sym": "mfqyzwfr",
+          "found": true,
+          "oracle": true,
+          "path": "pkg/units/ulrzis.py"
+        },
+        {
+          "t": "defn",
+          "sym": "make",
+          "found": true,
+          "oracle": true,
+          "path": "pkg/units/ulrzis.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/ulrzis.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/registry.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/ulrzis.py",
+          "lines": "16-16",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 8.7
+    },
+    {
+      "task": "nav_apparatus_29089",
+      "family": 29089,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "push_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 3,
+      "prompt_tokens": 3763,
+      "completion_tokens": 245,
+      "n_read": 3,
+      "n_defn": 0,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "elected_defn": null,
+      "semantic_supplied_path": "pkg/units/utufup.py",
+      "semantic_payload_sha256": "c2abb10a78f281bcfefb64fd46ff82681f7a666ee371d91e77b4bc68eac318a8",
+      "shared_span_sha256": "c2abb10a78f281bcfefb64fd46ff82681f7a666ee371d91e77b4bc68eac318a8",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.005233,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/utufup.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/registry.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/utufup.py",
+          "lines": "21-21",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 6.0
+    },
+    {
+      "task": "nav_apparatus_29089",
+      "family": 29089,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "elect_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 6,
+      "prompt_tokens": 8709,
+      "completion_tokens": 412,
+      "n_read": 5,
+      "n_defn": 1,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "elected_defn": true,
+      "semantic_supplied_path": "pkg/units/utufup.py",
+      "semantic_payload_sha256": "c2abb10a78f281bcfefb64fd46ff82681f7a666ee371d91e77b4bc68eac318a8",
+      "shared_span_sha256": "c2abb10a78f281bcfefb64fd46ff82681f7a666ee371d91e77b4bc68eac318a8",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.011181,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "defn",
+          "sym": "Cyivpxbo",
+          "found": true,
+          "oracle": true,
+          "path": "pkg/units/utufup.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/utufup.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/unjdoz.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uacwds.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uzfkea.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/utufup.py",
+          "lines": "21-21",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 12.3
+    },
+    {
+      "task": "nav_apparatus_29101",
+      "family": 29101,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "push_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 3,
+      "prompt_tokens": 3451,
+      "completion_tokens": 276,
+      "n_read": 4,
+      "n_defn": 0,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 1,
+      "read_after_span": true,
+      "elected_defn": null,
+      "semantic_supplied_path": "pkg/units/uktdff.py",
+      "semantic_payload_sha256": "64504845245851cde12cbf2bcce09565dc9d6d34caeebd422ea9c330b830c5be",
+      "shared_span_sha256": "64504845245851cde12cbf2bcce09565dc9d6d34caeebd422ea9c330b830c5be",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.005107,
+      "trace": [
+        {
+          "t": "read",
+          "path": "pkg/factory.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/uktdff.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/registry.py"
+        },
+        {
+          "t": "read",
+          "path": "pkg/units/__init__.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uktdff.py",
+          "lines": "11-11",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 12.1
+    },
+    {
+      "task": "nav_apparatus_29101",
+      "family": 29101,
+      "split": "apparatus",
+      "variant": "typed",
+      "arm": "elect_span",
+      "seed": 0,
+      "model": "openai/gpt-5.6-luna",
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "stop_reason": "tests_pass",
+      "turns": 3,
+      "prompt_tokens": 2103,
+      "completion_tokens": 149,
+      "n_read": 0,
+      "n_defn": 1,
+      "n_edit": 1,
+      "n_test": 1,
+      "n_reads_after_span": 0,
+      "read_after_span": false,
+      "elected_defn": true,
+      "semantic_supplied_path": "pkg/units/uktdff.py",
+      "semantic_payload_sha256": "64504845245851cde12cbf2bcce09565dc9d6d34caeebd422ea9c330b830c5be",
+      "shared_span_sha256": "64504845245851cde12cbf2bcce09565dc9d6d34caeebd422ea9c330b830c5be",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "est_cost_usd": 0.002997,
+      "trace": [
+        {
+          "t": "defn",
+          "sym": "mrnjhclb",
+          "found": true,
+          "oracle": true,
+          "path": "pkg/units/uktdff.py"
+        },
+        {
+          "t": "edit",
+          "path": "pkg/units/uktdff.py",
+          "lines": "11-11",
+          "ok": true
+        },
+        {
+          "t": "test",
+          "resolved": true
+        }
+      ],
+      "sec": 5.0
+    }
+  ]
+}

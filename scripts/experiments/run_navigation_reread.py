@@ -55,6 +55,7 @@ from scripts.experiments.run_navigation import (  # noqa: E402
     FRAMED_SYS,
     TOOLS,
     _method_from_lsp,
+    _method_from_metadata,
     _metrics,
 )
 
@@ -71,7 +72,43 @@ ARM_SPECS = {
     "auto_neutral": {"auto": True, "system": AUTO_SYS},
     "auto_sufficient": {"auto": True, "system": SUFFICIENT_SYS},
     "framed_elective": {"auto": False, "system": FRAMED_SYS},
+    # ---- push-vs-elect within-instance contrast (C31 follow-up) ----
+    # Both arms deliver the IDENTICAL, provably-usable pristine target-method span (from frozen
+    # task metadata, verified per instance to equal the live-LSP composed span). They differ ONLY
+    # in delivery mode: push_span injects the span unsolicited (as C31 auto_neutral); elect_span
+    # withholds it and returns the same bytes verbatim when the model calls <defn> (oracle-backed,
+    # so election can never be vacuous the way C31's framed_elective was).
+    "push_span": {"auto": True, "system": AUTO_SYS, "shared_span": True},
+    "elect_span": {"auto": False, "system": FRAMED_SYS, "shared_span": True, "oracle": True},
 }
+
+
+def _shared_span_and_verify(task: dict) -> tuple[str, str, dict]:
+    """The single span both push_span and elect_span deliver, plus a mechanical usability gate.
+
+    Sourced deterministically from frozen task metadata (`target_method_span`, the same payload the
+    frozen `semantic_span_control` uses), then cross-checked byte-for-byte against the live-LSP
+    composed span so the delivered bytes are provably the genuine push payload. Feeding the SAME
+    string to both arms guarantees identical span content within each instance."""
+    meta_span, meta_path = _method_from_metadata(task)
+    env = make_env(task, "typed")
+    lsp_span = lsp_path = None
+    lsp_errors: list = []
+    try:
+        lsp_span, lsp_path, _lat = _method_from_lsp(task, "typed", env)
+        lsp_errors = list(env.lsp_errors)
+    finally:
+        env.close()
+    checks = {
+        "meta_path_is_target": meta_path == task["target_path"],
+        "lsp_path_is_target": lsp_path == task["target_path"],
+        "lsp_span_equals_metadata": lsp_span == meta_span,
+        "no_lsp_errors": not lsp_errors,
+        "gold_not_in_span": task["gold"]["new_text"] not in meta_span,
+        "span_has_numbered_lines": meta_span.count("|") >= 2,
+        "span_names_target_path": meta_path in meta_span,
+    }
+    return meta_span, meta_path, checks
 
 
 def _reread_metrics(events: list[dict], target_path: str, auto: bool) -> dict:
@@ -176,8 +213,17 @@ def main() -> int:
         [pyrefly, "--version"], capture_output=True, text=True
     ).stdout.strip()
 
+    use_shared = any(ARM_SPECS[a].get("shared_span") for a in arms)
+
     rows = []
     for task in tasks:
+        shared_span = shared_path = shared_checks = shared_sha = None
+        if use_shared:
+            shared_span, shared_path, shared_checks = _shared_span_and_verify(task)
+            shared_sha = hashlib.sha256(shared_span.encode()).hexdigest()
+            print(f"{task['name']} shared-span usability: "
+                  f"{'OK' if all(shared_checks.values()) else 'FAIL ' + str(shared_checks)} "
+                  f"sha={shared_sha[:12]}", flush=True)
         for arm in arms:
             spec = ARM_SPECS[arm]
             env = make_env(task, "typed")
@@ -185,8 +231,26 @@ def main() -> int:
                 supplied = None
                 supplied_path = None
                 lsp_latency = 0.0
+                defn_oracle = None
                 prompt = build_prompt(task, "typed")
-                if spec["auto"]:
+                if spec.get("shared_span"):
+                    if not all(shared_checks.values()):
+                        raise RuntimeError(
+                            f"shared span failed usability gate for {task['name']}: {shared_checks}"
+                        )
+                    supplied, supplied_path = shared_span, shared_path
+                    if spec["auto"]:
+                        # push arm: span delivered unsolicited in the prompt (identical text to C31 auto)
+                        prompt += (
+                            "\n\nThe following current source span was supplied from a language-server "
+                            "definition result at the visible call site. It is source context, not a "
+                            "proposed correction.\n<semantic_result kind=\"current_source\">\n"
+                            + supplied + "\n</semantic_result>"
+                        )
+                    if spec.get("oracle"):
+                        # elect arm: span NOT in the prompt; returned verbatim when the model calls <defn>
+                        defn_oracle = {"span": supplied, "path": supplied_path}
+                elif spec["auto"]:
                     supplied, supplied_path, lsp_latency = _method_from_lsp(task, "typed", env)
                     if supplied_path != task["target_path"]:
                         raise RuntimeError(
@@ -208,7 +272,7 @@ def main() -> int:
                     max_new_tokens=args.max_new, max_turns=args.max_turns,
                     max_reads=args.max_reads, temperature=args.temperature, seed=args.seed,
                     use_lsp_defn=tool_enabled, lsp_disabled=not tool_enabled,
-                    lsp_fallback=False,
+                    lsp_fallback=False, defn_oracle=defn_oracle,
                 )
                 started = time.perf_counter()
                 result = agent.run(prompt, "pkg/app.py", editable=task["editable"])
@@ -235,6 +299,14 @@ def main() -> int:
                     **_metrics(task, result["events"], supplied_path),
                     "events": result["events"], "stream_tail": result["stream"][-2500:],
                 }
+                if spec.get("shared_span"):
+                    # push-vs-elect audit fields — added ONLY on the new shared-span arms so the
+                    # legacy arms' row schema (and byte-identity) is untouched.
+                    row["shared_span_sha256"] = shared_sha
+                    row["span_usability_check"] = shared_checks
+                    row["elected_defn"] = (
+                        bool(reread["n_defn_found"]) if not spec["auto"] else None
+                    )
                 rows.append(row)
                 print(f"{task['name']} typed/{arm} s{args.seed}: pass={row['resolved']} "
                       f"in={row['in_tokens']} reads_after_span={row['n_reads_after_span']} "
@@ -259,8 +331,13 @@ def main() -> int:
         n_reread = sum(1 for r in sub if r["read_after_span"])
         mean_in = round(sum(r["in_tokens"] for r in sub) / n, 1)
         mean_after = round(sum(r["n_reads_after_span"] for r in sub) / n, 2)
+        elect = ""
+        if not ARM_SPECS[arm]["auto"]:
+            n_elect = sum(1 for r in sub if r.get("n_defn_found"))
+            n_reread_elect = sum(1 for r in sub if r.get("n_defn_found") and r["read_after_span"])
+            elect = f"  elected={n_elect}/{n}  reread|elected={n_reread_elect}/{max(n_elect,1)}"
         print(f"  {arm:16s} pass={n_pass}/{n}  read_after_span={n_reread}/{n} "
-              f"(mean {mean_after}/task)  mean_in_toks={mean_in}", flush=True)
+              f"(mean {mean_after}/task)  mean_in_toks={mean_in}{elect}", flush=True)
     return 0
 
 

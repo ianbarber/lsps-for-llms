@@ -189,7 +189,8 @@ class StreamAgent:
                  force_lsp=False, relabel=False, device=None,
                  use_lsp_defn=False, advertised_symbols=None, lsp_disabled=False,
                  sys_override=None, authoring=False, allow_check=False, auto_check=False,
-                 lsp_fallback=True, acceptance_gate=False, draft_submission=False):
+                 lsp_fallback=True, acceptance_gate=False, draft_submission=False,
+                 defn_oracle=None):
         assert edit_mode in ("search", "line")
         self.sys_override = sys_override   # dispatch experiment: runner supplies the per-condition tool advertisement
         self.authoring = authoring   # Exp 2: reframe the system prompt as IMPLEMENT-a-module (not fix-a-bug)
@@ -208,6 +209,13 @@ class StreamAgent:
         self.advertised_symbols = advertised_symbols or []   # symbols the model may query when reads are blocked
         self.lsp_disabled = lsp_disabled   # tool-value ablation: <defn>/<findrefs> genuinely UNAVAILABLE (read-only)
         self.lsp_fallback = lsp_fallback
+        # push-vs-elect reread contrast (C31 follow-up): when set to {"span": str, "path": str},
+        # an ELECTED <defn> returns this exact pre-supplied span verbatim instead of the live
+        # resolver's result. This makes the elective span provably usable and byte-identical to the
+        # push arm's span (C31's elective arm was vacuous: the composed resolver returned a usable
+        # span 0/12). Default None -> the live/AST resolver path is unchanged, so every existing
+        # suite that does not pass this kwarg is byte-identical.
+        self.defn_oracle = defn_oracle
         self.test_p2p_cap = 5    # in-loop <test/> caps P2P for speed; final resolved runs full
         self.edit_mode = edit_mode
         self.dev = device or model.device
@@ -717,11 +725,21 @@ class StreamAgent:
                     events.append({"tok": t, "type": "findrefs", "n": n_lsp, "sym": sym, "hits": len(refs or [])})
                 else:
                     lsp_from = dfm.end(); n_lsp += 1; sym = dfm["sym"]
-                    defn, dpath = self._resolve_defn(sym, file=dfm.group("file"),
-                                                     line=dfm.group("line"), col=dfm.group("col"))
-                    obs = self._fmt_defn(sym, defn, dpath)
-                    events.append({"tok": t, "type": "defn", "n": n_lsp, "sym": sym, "found": bool(defn),
-                                   "path": dpath, "response_chars": len(obs)})
+                    if self.defn_oracle is not None:
+                        # Oracle-backed election: return the SAME pristine span the push arm delivers
+                        # (byte-identical), regardless of the model's query args. This is the exact fix
+                        # for C31's vacuous elective arm; only the delivery mode (elect vs push) differs.
+                        defn, dpath = self.defn_oracle["span"], self.defn_oracle["path"]
+                        obs = f'<defn sym="{sym}" path="{dpath}">\n{defn}\n</defn>'
+                    else:
+                        defn, dpath = self._resolve_defn(sym, file=dfm.group("file"),
+                                                         line=dfm.group("line"), col=dfm.group("col"))
+                        obs = self._fmt_defn(sym, defn, dpath)
+                    defn_ev = {"tok": t, "type": "defn", "n": n_lsp, "sym": sym, "found": bool(defn),
+                               "path": dpath, "response_chars": len(obs)}
+                    if self.defn_oracle is not None:
+                        defn_ev["oracle"] = True
+                    events.append(defn_ev)
                 turns += 1
                 deliver_turn(obs)
                 continue
