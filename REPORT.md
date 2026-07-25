@@ -6,7 +6,7 @@ Three questions organize the experiments: does a language server help a coding a
 
 **Resolution: little, as long as types are readable in source — which is where the value actually sits.** A capable model resolves dispatch-ambiguous targets by reading the receiver's type wherever it appears in visible source, then opens the right file directly; live go-to-definition is token-neutral (ratios 0.94–1.07) across an ablation ladder that moves the type from annotation to construction site to factory indirection. Hide the type-bearing source so the type must be retrieved, and text resolution drops from 15/15 to 12/15 while definition lookup reaches 14/15: retrieval is where the server earns its keep. Sound types also sharpen the resolver itself, distinguishing the correct implementation among 8–15 same-named overrides where erased lookup cannot, though in the agent pilot that precision changed no outcome.
 
-**Efficiency: yes, when the span substitutes for reading — and that is the hard part.** Compact definitions cut total tokens 3.5–4.7x against whole-file retrieval across three models, and 1.30x at unchanged 11/11 success against a capable grep-plus-ranged-read interface. The gain is conditional on two agent behaviors. The agent must elect the compact operation, which prompting delivers on capable models and training on a 7B. But election is not enough: a pushed span is reread on 35 of 36 instances across Qwen3.6-27B, Sonnet 4.5, and DeepSeek v3.1, an explicit sufficiency instruction removes only 2 of 36, and even a self-elected, provably-usable span is still reread on every instance the local 27B elected and on roughly half of two frontier API models'. Training does what neither delivery mode nor instruction can: relabel-tuning the 27B on 39 demonstrations removes the reread on 11 of the 11 held-out instances where it occurred and cuts matched-success tokens 1.59x.
+**Efficiency: yes, when the span substitutes for reading — and that is the hard part.** Compact definitions cut total tokens 3.5–4.7x against whole-file retrieval across three models, and 1.30x at unchanged 11/11 success against a capable grep-plus-ranged-read interface. The gain is conditional on two agent behaviors. The agent must elect the compact operation, which prompting delivers on capable models and training on a 7B. But election is not enough: a pushed span is reread on 35 of 36 instances across Qwen3.6-27B, Sonnet 4.5, and DeepSeek v3.1, an explicit sufficiency instruction removes only 2 of 36, and even a self-elected, provably-usable span is still reread on every instance the local 27B elected and on roughly half the elected instances of two further frontier API models. Training does what neither delivery mode nor instruction can: relabel-tuning the 27B on 39 demonstrations removes the reread on 11 of the 11 held-out instances where it occurred and cuts matched-success tokens 1.59x.
 
 **Checking: deliver it late.** On twelve identical seeded defects, checker delivery at revision or at submission raises accepted type-clean and held-out-correct outcomes from 1/12 to 10/12 and 11/12, while after-every-edit delivery changes nothing. The submission gate is the one to build: it rejected 10 of 12 bad submissions and every rejection completed the repair, retest, resubmit, accept cycle, at zero false rejections and zero extra cost on twelve matched clean drafts.
 
@@ -16,7 +16,7 @@ The practitioner defaults follow directly: start with text search and ranged rea
 
 **Finding: for a capable agent, semantic navigation adds almost nothing over text search — because the model reads type information in the visible source and self-localizes. Readable types, not navigation, are the load-bearing input. Default to grep plus ranged reads. Typed resolution earns its keep in one tested regime: when the type is not readable in source the agent already has and must be retrieved.**
 
-A 15-task dispatch suite compares grep/ranged reads with live Pyrefly goto, on tasks where a typed receiver calls one of roughly ten same-named overrides and exactly one is buggy. On the annotated 27B variant, grep, neutral goto, and framed goto solve 15/15, 14/15, and 15/15; matched-success token ratios are 0.972 and 1.041 ([C6](evidence/claim_ledger.md#c6), [C9](evidence/claim_ledger.md#c9)).
+A 15-task dispatch suite compares grep/ranged reads with live Pyrefly goto, on tasks where a typed receiver calls one of roughly ten same-named overrides and exactly one is buggy. On the annotated 27B variant, grep, neutral goto, and framed goto solve 15/15, 14/15, and 15/15; matched-success token ratios are 0.972 and 1.041 ([C8](evidence/claim_ledger.md#c8), [C9](evidence/claim_ledger.md#c9)).
 
 The receiver-type ablation ladder explains why. Moving the type from a call-site annotation (L0) to the test's construction site (L1) to factory indirection (L2) leaves grep-based cost essentially flat — 1,436 → 1,429 → 1,465 mean input tokens at 14–15/15 resolution — and goto stays neutral (0.945–1.065) at every rung, including L2, where only the language server can statically resolve the type. Trajectories show the mechanism directly: the model barely greps, reads the receiver's type where it appears, and opens the one buggy override file first. It is readable type information, not the annotation specifically, that carries resolution: stripping the annotation costs nothing because the type is still readable at the construction site ([C9](evidence/claim_ledger.md#c9), [log](docs/real_repo_progress.md)).
 
@@ -48,7 +48,7 @@ Against whole-file retrieval, on the `effic` and `effic_real2` tasks, every atte
 | Claude Sonnet 4.5 | 3.65x | 11/11 | 3.65 (2.72–5.20) | 44/44 both arms |
 | DeepSeek v3.1 | 4.70x | 10/11 | 6.03 (2.32–10.82) | 44/44 both arms |
 
-Task-level medians are 3.83, 3.01, and 2.70; DeepSeek's distribution is strongly skewed. Seeds are repeated runs within tasks, and intervals resample task means.
+Task-level medians are 3.83, 3.01, and 2.70; DeepSeek's distribution is strongly skewed. Seeds are repeated runs within tasks, and intervals resample task means. The 44 attempts per model span four seeds; the seed-2/3 source shards are not retained, so those cells rebuild from the merged files rather than per-seed originals.
 
 The harder counterfactual keeps grep, ranged reads, and a whole-file fallback available. On the same eleven tasks, pinned Qwen3.5-27B at temperature zero succeeds 11/11 with both interfaces ([C27](evidence/claim_ledger.md#c27)):
 
@@ -70,7 +70,7 @@ The saving is conditional on two agent behaviors:
 | Claude Sonnet 4.5 | 12/12 reread | 12/12 reread |
 | DeepSeek v3.1 | 12/12 reread | 10/12 reread |
 
-The instruction removed the reread on 0 of 12 tasks for the 27B and Sonnet and only 2 of 12 for DeepSeek. *Self-elected* — the identical, mechanically-verified usable span returned only when the model asks for it — substitution is no more reliable: election reduces the reread on the two frontier API models but eliminates it on neither, and the local 27B rereads on every instance it elected ([C34](evidence/claim_ledger.md#c34)).
+The instruction removed the reread on 0 of 12 tasks for the 27B and Sonnet and only 2 of 12 for DeepSeek. *Self-elected* — a separate run (Qwen3.6-27B, GLM-4.6, and GPT-5.6 "Luna") where the identical, mechanically-verified usable span is returned only when the model asks for it — is no more reliable: election reduces the reread on the two API models but eliminates it on neither, and the local 27B rereads on every instance it elected ([C34](evidence/claim_ledger.md#c34)).
 
 | Model | Pushed: reread | Elected: reread (among elected) |
 |---|---:|---:|
@@ -85,13 +85,13 @@ So neither delivery mode nor instruction buys substitution: pushing guarantees a
 | Untrained | 11/12 | 1,157 | 3.42 | 11/12 |
 | Substitution-trained | 0/12 | 748 | 0.08 | 10/12 |
 
-Every reread that occurred was removed (11 of 11; none induced), and on the nine tasks both arms resolve, tokens fall from 1,493 to 938 — a 1.59x saving, about 555 tokens per task. The contrast with instruction is stark on the same behavior and model: prompting removed 0 of 12 and *added* 272 tokens per task. During harvest the redirect fired on 46 of 48 rollouts, replicating the reread on fresh templates before any training. Held-out correctness moves 11/12 to 10/12: localization stays intact (zero wrong-file edits, correct first-edit path 12/12), but two `xor` tasks now pass the visible test and fail the held-out oracle, which reads as partial-spec overfit. At one seed that difference is not distinguishable from noise, though it is the direction to watch — and the training set contained no read-required instances, so "elect the span when sufficient, read when it is not" is untested.
+Every reread that occurred was removed (11 of 11; none induced), and on the nine tasks both arms resolve, tokens fall from 1,493 to 938 — a 1.59x saving, about 555 tokens per task. The contrast with instruction is stark on the same behavior and model: prompting removed 0 of 12 and *added* 294 tokens per task. During harvest the redirect fired on 46 of 48 rollouts, replicating the reread on fresh templates before any training. Held-out correctness moves 11/12 to 10/12: localization stays intact (zero wrong-file edits, correct first-edit path 12/12), but two `xor` tasks now pass the visible test and fail the held-out oracle, which reads as partial-spec overfit. At one seed that difference is not distinguishable from noise, though it is the direction to watch — and the training set contained no read-required instances, so "elect the span when sufficient, read when it is not" is untested.
 
-In the real bash agent, elicited election likewise did not lower per-call input tokens, partly because a capable shell agent almost never takes the whole-file read the big ratios are measured against — 0–3 whole-file reads in 44–60 actions, with retrieval dominated by grep plus ranged `sed` ([C6](evidence/claim_ledger.md#c6), [C24](evidence/claim_ledger.md#c24)).
+In the real bash agent, elicited election likewise did not lower per-call input tokens, partly because a capable shell agent almost never takes the whole-file read the big ratios are measured against — 0–3 whole-file reads in 44–60 actions, with retrieval dominated by grep plus ranged `sed` ([C6](evidence/claim_ledger.md#c6)).
 
 **Strength of evidence.** The efficiency effect holds in the controlled suite against both the whole-file and the efficient text baseline. Election as a policy lever is supported per-model — training for the 7B, prompting for capable models. Failure to substitute is supported across pushed, instructed, and self-elected delivery on a local model plus two frontier API models at n=12 instances each; the local elective contrast is the clean within-instance one, while the API elect arm delivered an identical usable span but records thinner counters. The training fix is supported on held-out instances disjoint in seed and template from the harvest set, at one model and one seed, with the untrained control reproducing the frozen baseline byte-for-byte.
 
-**Practical limits.** Tasks are constructed and the headline uses a static AST resolver; real-repository substitution frequency and live-LSP latency are unmeasured. In real shell agents the whole-file counterfactual barely occurs, so expect the 1.3x regime, not the 3–4x regime.
+**Practical limits.** Tasks are constructed and the headline uses a static AST resolver; real-repository substitution frequency and live-LSP latency are unmeasured. In real shell agents the whole-file counterfactual barely occurs, so the achievable ceiling is the 1.3x regime, not 3–4x — and reaching even that requires the agent to actually substitute, which took a favorable suite or a trained policy.
 
 ## 3. When does checker feedback improve outcomes?
 
@@ -114,11 +114,11 @@ Task-bootstrap effects over all 24 workspaces put revision delivery at +0.375 [+
 
 **The gate is free on clean work; revision delivery is not.** Clean drafts cost 591 tokens under both control and gate, since a passing submission draws only a checker call and about 135 ms of latency. One-shot delivery taxes every clean draft (619 tokens, +233 ms) because it hands over a diagnostic unconditionally. That asymmetry, more than the one-task outcome difference, is the argument for submission-time delivery.
 
-**Why in-loop delivery does nothing here.** The after-every-edit channel barely fired: the checker ran in 1 of 12 defect rows because the model edits in only 1 of 12 before submitting, reading and testing the frozen draft instead (mean edits 0.08 versus 0.17 in control). So this is a null with a largely unexercised mechanism, not a replication of the earlier authoring-suite harm, where volunteered feedback drove a 7B to 6,367 tokens and its worst held-out score ([C11](evidence/claim_ledger.md#c11)).
+**Why in-loop delivery does nothing here.** The after-every-edit channel barely fired: the checker ran in 1 of 12 defect rows because the model edits in only 1 of 12 before submitting, reading and testing the frozen draft instead (mean edits 0.08 versus 0.17 in control). So this is a null with a largely unexercised mechanism, not a replication of the earlier authoring-suite arm in which the 7B reached 6,367 tokens and its worst held-out score under volunteered feedback ([C11](evidence/claim_ledger.md#c11)).
 
 **A type-clean gate is behaviorally blind.** The gate's single miss is instructive: on `auth_shapes_protocol` the model self-repairs, the repair clears the seeded type error, the gate sees no diagnostics and accepts — and the held-out test still fails. A checker gate can only be as behaviorally sound as the checker behind it.
 
-**Opportunity remains the binding constraint.** Capable models rarely leave checker-detectable defects at all: frontier inference and 27B authoring arms sit at ceiling (18/18 and 12/12), 0/3 natural 7B drafts are coherent, and the 2/8 coherent 14B drafts are already type-clean ([C16](evidence/claim_ledger.md#c16), [C22](evidence/claim_ledger.md#c22)). These defects are seeded precisely because the natural rate is low.
+**Opportunity remains the binding constraint.** Capable models rarely leave checker-detectable defects at all: frontier inference and 27B authoring arms sit at ceiling (18/18 and 12/12), 0/3 natural 7B drafts are coherent, and the 2/8 coherent 14B drafts are already type-clean ([C10](evidence/claim_ledger.md#c10), [C16](evidence/claim_ledger.md#c16), [C22](evidence/claim_ledger.md#c22)). These defects are seeded precisely because the natural rate is low.
 
 **Strength of evidence.** The phase gradient is now tested within one design on identical defects at n=12 pairs, one model and one seed, with bootstrap intervals excluding zero for both late arms. Protocol integrity checks pass: 106 completion events all model-origin, 24/24 identical control/gate first-completion prefixes, zero serialization failures. This supersedes the earlier three-pair pilot ([C29](evidence/claim_ledger.md#c29)) and the two-workspace case series that found no outcome effect from revision delivery ([C26](evidence/claim_ledger.md#c26)) — at n=2 that arm was simply underpowered. The in-loop arm is a null whose channel fired once, so it neither confirms nor refutes the authoring-suite harm.
 
@@ -126,9 +126,9 @@ Task-bootstrap effects over all 24 workspaces put revision delivery at +0.375 [+
 
 ## Execution feedback and external validity
 
-Execution feedback is ceilinged in the committed small-task suite: two frontier models, 14 tasks, three seeds, three delivery modes, 252/252 attempts pass. This does not establish equivalence outside small simulable functions.
+Execution feedback is ceilinged in the committed small-task suite: two frontier models, 14 tasks, three seeds, three delivery modes, 252/252 attempts pass ([C12](evidence/claim_ledger.md#c12)). This does not establish equivalence outside small simulable functions.
 
-The bounded real-repository scan found no fully admissible task. One Django case has a working environment and substantial override ambiguity, but leakage and fix-site resolution were not fully audited; both recorded arms pass and the semantic tool is not elected. Constructed tasks therefore provide the causal apparatus here, and population validity remains open. Audit and rejection reasons: [docs/external_validity_recon.md](docs/external_validity_recon.md).
+The bounded real-repository scan found no fully admissible task. One Django case has a working environment and substantial override ambiguity, but leakage and fix-site resolution were not fully audited; both recorded arms pass and the semantic tool is not elected. Constructed tasks therefore provide the causal apparatus here, and population validity remains open ([C17](evidence/claim_ledger.md#c17)). Audit and rejection reasons: [docs/external_validity_recon.md](docs/external_validity_recon.md).
 
 ## Decision checklist
 
@@ -177,12 +177,7 @@ python3 scripts/analysis/reproduce_all.py
 
 The reproducer verifies the manifest, reruns retained analyzers, recomputes task-level effects, and executes the navigation manipulation checks without model or API calls. Model runs are separate; see [evidence/protocols.md](evidence/protocols.md) before using the navigation or checker run scripts.
 
-Cross-cutting limits beyond the per-section notes:
-
-- Static tooling does not address dynamic behavior, incorrect annotations, `Any`-heavy boundaries, environment failures, or logic outside the checker.
-- The substitution-trained policy was never shown a case where the span is insufficient and reading is required, so whether it keeps reading when it should is untested.
-- The real-repository scan found no fully admissible case, so external validity is unresolved.
-- Some retained artifacts contain provenance gaps — unavailable seed shards, incomplete server backend/version records, source-hash mismatches, and invalidated runs. Exclusion reasons and discrepancies are reported in the claim ledger and manifest.
+Beyond the per-section limits, two apply throughout: static tooling does not address dynamic behavior, incorrect annotations, `Any`-heavy boundaries, or logic outside the checker; and some retained artifacts contain provenance gaps — unavailable seed shards, incomplete server backend/version records, source-hash mismatches, and invalidated runs — with exclusion reasons and discrepancies reported in the claim ledger and manifest.
 
 ## Conclusion
 

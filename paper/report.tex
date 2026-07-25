@@ -150,11 +150,11 @@ training on a 7B. But election is not enough: a pushed span is reread on
 35 of 36 instances across Qwen3.6-27B, Sonnet 4.5, and DeepSeek v3.1, an
 explicit sufficiency instruction removes only 2 of 36, and even a
 self-elected, provably-usable span is still reread on every instance the
-local 27B elected and on roughly half of two frontier API models'.
-Training does what neither delivery mode nor instruction can:
-relabel-tuning the 27B on 39 demonstrations removes the reread on 11 of
-the 11 held-out instances where it occurred and cuts matched-success
-tokens 1.59x.
+local 27B elected and on roughly half the elected instances of two
+further frontier API models. Training does what neither delivery mode
+nor instruction can: relabel-tuning the 27B on 39 demonstrations removes
+the reread on 11 of the 11 held-out instances where it occurred and cuts
+matched-success tokens 1.59x.
 
 \textbf{Checking: deliver it late.} On twelve identical seeded defects,
 checker delivery at revision or at submission raises accepted type-clean
@@ -191,7 +191,7 @@ goto, on tasks where a typed receiver calls one of roughly ten
 same-named overrides and exactly one is buggy. On the annotated 27B
 variant, grep, neutral goto, and framed goto solve 15/15, 14/15, and
 15/15; matched-success token ratios are 0.972 and 1.041
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c6}{C6},
+(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c8}{C8},
 \href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c9}{C9}).
 
 The receiver-type ablation ladder explains why. Moving the type from a
@@ -342,7 +342,9 @@ DeepSeek v3.1 & 4.70x & 10/11 & 6.03 (2.32--10.82) & 44/44 both arms \\
 
 Task-level medians are 3.83, 3.01, and 2.70; DeepSeek's distribution is
 strongly skewed. Seeds are repeated runs within tasks, and intervals
-resample task means.
+resample task means. The 44 attempts per model span four seeds; the
+seed-2/3 source shards are not retained, so those cells rebuild from the
+merged files rather than per-seed originals.
 
 The harder counterfactual keeps grep, ranged reads, and a whole-file
 fallback available. On the same eleven tasks, pinned Qwen3.5-27B at
@@ -443,11 +445,12 @@ DeepSeek v3.1 & 12/12 reread & 10/12 reread \\
 }
 
 The instruction removed the reread on 0 of 12 tasks for the 27B and
-Sonnet and only 2 of 12 for DeepSeek. \emph{Self-elected} --- the
-identical, mechanically-verified usable span returned only when the
-model asks for it --- substitution is no more reliable: election reduces
-the reread on the two frontier API models but eliminates it on neither,
-and the local 27B rereads on every instance it elected
+Sonnet and only 2 of 12 for DeepSeek. \emph{Self-elected} --- a separate
+run (Qwen3.6-27B, GLM-4.6, and GPT-5.6 ``Luna'') where the identical,
+mechanically-verified usable span is returned only when the model asks
+for it --- is no more reliable: election reduces the reread on the two
+API models but eliminates it on neither, and the local 27B rereads on
+every instance it elected
 (\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c34}{C34}).
 
 {\def\LTcaptype{none} % do not increment counter
@@ -506,7 +509,7 @@ Every reread that occurred was removed (11 of 11; none induced), and on
 the nine tasks both arms resolve, tokens fall from 1,493 to 938 --- a
 1.59x saving, about 555 tokens per task. The contrast with instruction
 is stark on the same behavior and model: prompting removed 0 of 12 and
-\emph{added} 272 tokens per task. During harvest the redirect fired on
+\emph{added} 294 tokens per task. During harvest the redirect fired on
 46 of 48 rollouts, replicating the reread on fresh templates before any
 training. Held-out correctness moves 11/12 to 10/12: localization stays
 intact (zero wrong-file edits, correct first-edit path 12/12), but two
@@ -521,8 +524,7 @@ per-call input tokens, partly because a capable shell agent almost never
 takes the whole-file read the big ratios are measured against --- 0--3
 whole-file reads in 44--60 actions, with retrieval dominated by grep
 plus ranged \texttt{sed}
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c6}{C6},
-\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c24}{C24}).
+(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c6}{C6}).
 
 \textbf{Strength of evidence.} The efficiency effect holds in the
 controlled suite against both the whole-file and the efficient text
@@ -540,8 +542,9 @@ byte-for-byte.
 \textbf{Practical limits.} Tasks are constructed and the headline uses a
 static AST resolver; real-repository substitution frequency and live-LSP
 latency are unmeasured. In real shell agents the whole-file
-counterfactual barely occurs, so expect the 1.3x regime, not the 3--4x
-regime.
+counterfactual barely occurs, so the achievable ceiling is the 1.3x
+regime, not 3--4x --- and reaching even that requires the agent to
+actually substitute, which took a favorable suite or a trained policy.
 
 \subsection{3. When does checker feedback improve
 outcomes?}\label{when-does-checker-feedback-improve-outcomes}
@@ -623,8 +626,8 @@ channel barely fired: the checker ran in 1 of 12 defect rows because the
 model edits in only 1 of 12 before submitting, reading and testing the
 frozen draft instead (mean edits 0.08 versus 0.17 in control). So this
 is a null with a largely unexercised mechanism, not a replication of the
-earlier authoring-suite harm, where volunteered feedback drove a 7B to
-6,367 tokens and its worst held-out score
+earlier authoring-suite arm in which the 7B reached 6,367 tokens and its
+worst held-out score under volunteered feedback
 (\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c11}{C11}).
 
 \textbf{A type-clean gate is behaviorally blind.} The gate's single miss
@@ -638,7 +641,8 @@ rarely leave checker-detectable defects at all: frontier inference and
 27B authoring arms sit at ceiling (18/18 and 12/12), 0/3 natural 7B
 drafts are coherent, and the 2/8 coherent 14B drafts are already
 type-clean
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c16}{C16},
+(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c10}{C10},
+\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c16}{C16},
 \href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c22}{C22}).
 These defects are seeded precisely because the natural rate is low.
 
@@ -668,15 +672,18 @@ validity}\label{execution-feedback-and-external-validity}
 
 Execution feedback is ceilinged in the committed small-task suite: two
 frontier models, 14 tasks, three seeds, three delivery modes, 252/252
-attempts pass. This does not establish equivalence outside small
-simulable functions.
+attempts pass
+(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c12}{C12}).
+This does not establish equivalence outside small simulable functions.
 
 The bounded real-repository scan found no fully admissible task. One
 Django case has a working environment and substantial override
 ambiguity, but leakage and fix-site resolution were not fully audited;
 both recorded arms pass and the semantic tool is not elected.
 Constructed tasks therefore provide the causal apparatus here, and
-population validity remains open. Audit and rejection reasons:
+population validity remains open
+(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c17}{C17}).
+Audit and rejection reasons:
 \href{https://github.com/ianbarber/lsps-for-llms/blob/main/docs/external_validity_recon.md}{docs/external\_validity\_recon.md}.
 
 \subsection{Decision checklist}\label{decision-checklist}
@@ -854,27 +861,13 @@ checks without model or API calls. Model runs are separate; see
 \href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/protocols.md}{evidence/protocols.md}
 before using the navigation or checker run scripts.
 
-Cross-cutting limits beyond the per-section notes:
-
-\begin{itemize}
-\tightlist
-\item
-  Static tooling does not address dynamic behavior, incorrect
-  annotations, \texttt{Any}-heavy boundaries, environment failures, or
-  logic outside the checker.
-\item
-  The substitution-trained policy was never shown a case where the span
-  is insufficient and reading is required, so whether it keeps reading
-  when it should is untested.
-\item
-  The real-repository scan found no fully admissible case, so external
-  validity is unresolved.
-\item
-  Some retained artifacts contain provenance gaps --- unavailable seed
-  shards, incomplete server backend/version records, source-hash
-  mismatches, and invalidated runs. Exclusion reasons and discrepancies
-  are reported in the claim ledger and manifest.
-\end{itemize}
+Beyond the per-section limits, two apply throughout: static tooling does
+not address dynamic behavior, incorrect annotations, \texttt{Any}-heavy
+boundaries, or logic outside the checker; and some retained artifacts
+contain provenance gaps --- unavailable seed shards, incomplete server
+backend/version records, source-hash mismatches, and invalidated runs
+--- with exclusion reasons and discrepancies reported in the claim
+ledger and manifest.
 
 \subsection{Conclusion}\label{conclusion}
 
