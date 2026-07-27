@@ -2,11 +2,11 @@
 
 *TL;DR*
 
-Agents do well with with cheap text search and ranged reads. Add language-server features when:
+Agents do well with cheap text search and ranged reads. Add language-server features when:
 * bindings are genuinely ambiguous
 * compact definitions can actually replace search and reading
 
-A type-checker gate can catch a defective submissions, but add it at submission time, not after edits.
+A type-checker gate can catch defective submissions, but add it at submission time, not after edits.
 
 When trying it, measure whether the service changes what the agent actually does (in terms of task success or token efficiency), not how often it is called.
 
@@ -16,7 +16,7 @@ When trying it, measure whether the service changes what the agent actually does
 
 The exception is where type-bearing source is hidden, so the type must be *retrieved*. An example would be where there are many overrides with the same signature. Then text resolution falls and framed definition increases, sometimes leading to thrash and failed resolution.
 
-**2. Efficiency: yes, when the span substitutes for reading.** Compact definitions cut total tokens 3.5–4.7x against whole-file retrieval and 1.30x against an efficient grep-plus-ranged-read interface. In order to benefit the agent must *elect* the operation and it then must  *not read the file anyway* Prompting lifts election on capable models, and training lifts a 7B from roughly 0% to 100% use. However most models will automatically re-read the definition after recieving it, hence negating any efficiency gains: across Qwen3.6-27B, Sonnet 4.5, and DeepSeek v3.1 the defining file was reread on 35 of 36 pushed spans, and explicitly instructing the model that the span is sufficient only removed the reread on 2 of 36. Training does work: relabel-tuning Qwen 3.6 27B removed the reread on 11 of the 11 held-out instances where it occurred, cutting matched-success tokens 1.59x and reads per task from 3.42 to 0.08.
+**2. Efficiency: yes, when the span substitutes for reading.** Compact definitions cut total tokens 3.5–4.7x against whole-file retrieval and 1.30x against an efficient grep-plus-ranged-read interface. In order to benefit the agent must *elect* the operation and it then must *not read the file anyway*. Prompting lifts election on capable models, and training lifts a 7B from roughly 0% to 100% use. However most models will automatically re-read the definition after receiving it, hence negating any efficiency gains: across Qwen3.6-27B, Sonnet 4.5, and DeepSeek v3.1 the defining file was reread on 35 of 36 pushed spans, and explicitly instructing the model that the span is sufficient only removed the reread on 2 of 36. Even letting the model elect the span itself did not fix it — the local 27B reread on every instance it elected, and two frontier API models on roughly half. Training does work: relabel-tuning Qwen 3.6 27B removed the reread on 11 of the 11 held-out instances where it occurred, cutting matched-success tokens 1.59x and reads per task from 3.42 to 0.08.
 
 **3. Checking: deliver it late, and prefer a submission gate.** On twelve identical seeded defects, checker delivery at revision or at submission lifts accepted type-clean and held-out-correct outcomes from 1/12 to 10/12 and 11/12; after-every-edit delivery changes nothing. Type-check as a gate: it rejected 10 of 12 bad submissions with every rejection completing the repair-retest-resubmit-accept cycle, at 0/12 false rejections, and it is basically free on clean work (591 tokens, same as no checker). More regular calls tax every passing draft.
 
@@ -29,7 +29,7 @@ The exception is where type-bearing source is hidden, so the type must be *retri
 | Typed semantic resolution picks the right target | **Mechanism supported** — resolver precision gain shown; agent-level benefit not shown |
 | Compact definitions cut tokens vs. efficient text retrieval | **Supported in a controlled suite** — 1.30x fewer total tokens at equal success across 11 tasks; 3.5–4.7x vs. whole-file reads |
 | Election is policy-shapeable | **Supported per-model** — prompting lifts capable models; training lifts a 7B from ~0% to 100% |
-| Pushed spans get reread rather than substituted | **Supported across three models** — 35/36 rereads; an explicit sufficiency instruction removed 2/36 |
+| Spans get reread whether pushed or self-elected | **Supported across models** — 35/36 pushed rereads; instruction removed 2/36; a self-elected usable span still reread 9/9 (local 27B), 4/9 and 7/12 (API) |
 | Training removes the reread and recovers the saving | **Supported on held-out instances** — 11/12 to 0/12 reread on the 27B, 1.59x fewer tokens; one model, one seed, held-out pass 11/12 to 10/12 |
 | Late checker delivery (revision or submission) improves outcomes | **Supported at n=12 pairs** — 10/12 and 11/12 accepted-correct vs. 1/12 control, bootstrap intervals exclude zero |
 | Submission gates recover checker-detectable bad completions | **Supported at n=12 pairs** — 10/12 rejected and 10/10 repaired, resubmitted, accepted; 0/12 clean drafts falsely rejected |
@@ -40,10 +40,10 @@ The exception is where type-bearing source is hidden, so the type must be *retri
 1. **Start with text search and ranged reads.** A capable agent self-localizes by reading type information in visible source; navigation adds latency.
 2. **Add typed semantic resolution where the type is not readable in source the agent already sees.** Retrieved-type situations and genuinely ambiguous bindings (overloads, inheritance, re-exports, factories) are the candidates. Expect the payoff in resolution rate, not tokens, and verify it prevents wrong-target work rather than just getting called.
 3. **Use compact definitions when they replace search and reading.** Against grep plus ranged reads, definitions cut mean total tokens assuming zero defining-file rereads. Check for rereads: a span the agent reads *past* is pure overhead.
-4. **Prompt for election; train for substitution.** Strong system framing lifted a frontier model's use of the definition tool where mild advertisement did not, and relabel training took a 7B from ~0% to 100% use. But telling a model to trust a pushed span did not stop it rereading the file, while relabel training removed that reread outright and cut tokens 1.59x. If you cannot train the policy, let the agent elect the call rather than pushing it.
+4. **Prompt for election; train for substitution.** Strong system framing lifted a frontier model's use of the definition tool where mild advertisement did not, and relabel training took a 7B from ~0% to 100% use. But getting the tool called is not the same as getting the read skipped: neither a "trust the span" instruction nor even self-election reliably stopped the reread, while relabel training removed it outright and cut tokens 1.59x. If you cannot train the policy, treat a delivered span as additive context, not an automatic saving.
 5. **Run the checker as a gate at submission, with an explicit repair-and-resubmit loop.** Do not stream diagnostics into authoring. A gate adds tokens only on defective submissions, while unconditional revision diagnostics tax every clean draft. Measure false rejections, resubmission, accepted-correct yield, and total cost on your own workload before trusting it.
 
-## Caveats:
+## Caveats
 
 - Agent-level outcome gains from typed resolution: the tasks we used here were just not hard enough to give signal.
 - Natural prevalence of gate opportunities and population rejection precision: the benefit will depend on how many bugs are in the codebase as a whole

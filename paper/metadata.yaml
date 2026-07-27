@@ -1,0 +1,20 @@
+---
+# paper/metadata.yaml — document metadata for the arXiv build.
+#
+# The title is taken automatically from REPORT.md's H1 by report-filters.lua
+# (kept DRY). To override, uncomment the line below.
+# title: "When Do Language Servers Help Coding Agents?"
+
+author:
+  - |
+    Ian Barber\
+    Streams Project (affiliation placeholder)
+
+date: "July 2026"
+
+# Make hyperlinks colored rather than boxed, and keep PDF metadata tidy.
+colorlinks: true
+linkcolor: blue
+citecolor: blue
+urlcolor: blue
+---
