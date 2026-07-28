@@ -2,187 +2,128 @@
 
 ## Abstract
 
-Three questions organize the experiments: does a language server help a coding agent resolve the **correct** target, does it make the agent more **efficient**, and when does **checker feedback** improve outcomes?
+We tested three services a language server offers a coding agent against a text-capable baseline: resolving a symbol to its definition, returning a compact definition span instead of a whole file, and timing a type diagnostic.
 
-**Resolution: little, as long as types are readable in source — which is where the value actually sits.** A capable model resolves dispatch-ambiguous targets by reading the receiver's type wherever it appears in visible source, then opens the right file directly; live go-to-definition is token-neutral (ratios 0.94–1.07) across an ablation ladder that moves the type from annotation to construction site to factory indirection. Hide the type-bearing source so the type must be retrieved, and text resolution drops from 15/15 to 12/15 while definition lookup reaches 14/15: retrieval is where the server earns its keep. Sound types also sharpen the resolver itself, distinguishing the correct implementation among 8–15 same-named overrides where erased lookup cannot, though in the agent pilot that precision changed no outcome.
+Semantic navigation was near-neutral because the model reads the receiver's type in visible source and self-localizes. It helped only in a constructed regime that withheld that source, and only when the agent was framed to use it: framed lookup resolved every rollout there against 70/75 for text, while merely making the operation available changed nothing. The compact span came from a static definition-span tool, not a live server. It cut total tokens 3.3–4.1x against whole-file retrieval and less against a competent grep-plus-ranged-read interface, but only where it replaced the read; pushing, instructing and self-election did not produce that replacement, and training did. On twelve seeded defects, a checker at the submission boundary moved accepted-correct outcomes from 1/12 to 11/12; the same checker after every edit changed nothing on a channel that fired in one of twelve.
 
-**Efficiency: yes, when the span substitutes for reading — and that is the hard part.** Compact definitions cut total tokens 3.5–4.7x against whole-file retrieval across three models, and 1.30x at unchanged 11/11 success against a capable grep-plus-ranged-read interface. The gain is conditional on two agent behaviors. The agent must elect the compact operation, which prompting delivers on capable models and training on a 7B. But election is not enough: a pushed span is reread on 35 of 36 instances across Qwen3.6-27B, Sonnet 4.5, and DeepSeek v3.1, an explicit sufficiency instruction removes only 2 of 36, and even a self-elected, provably-usable span is still reread on every instance the local 27B elected and on roughly half the elected instances of two further frontier API models. Training does what neither delivery mode nor instruction can: relabel-tuning the 27B on 39 demonstrations removes the reread on 11 of the 11 held-out instances where it occurred and cuts matched-success tokens 1.59x.
+## 1. What we were investigating
 
-**Checking: deliver it late.** On twelve identical seeded defects, checker delivery at revision or at submission raises accepted type-clean and held-out-correct outcomes from 1/12 to 10/12 and 11/12, while after-every-edit delivery changes nothing. The submission gate is the one to build: it rejected 10 of 12 bad submissions and every rejection completed the repair, retest, resubmit, accept cycle, at zero false rejections and zero extra cost on twelve matched clean drafts.
+A coding agent already has grep, ranged reads and a shell, so the useful question is not whether a language server can answer questions about code but whether it answers ones the agent cannot cheaply answer for itself, in a cheaper form, or at a better moment.
 
-The practitioner defaults follow directly: start with text search and ranged reads; add typed resolution where the type must be retrieved rather than read; prompt for span election but train for substitution, and verify the span actually replaces the read; run the checker as a submission gate with a repair loop. Each section below states the finding, the evidence, its strength, and its practical limits. The [claim ledger](evidence/claim_ledger.md) maps every material claim to artifacts and status; the [manifest](evidence/manifest.json) records hashes, configurations, and provenance warnings.
+IF: whether delivering the semantic information changes what the agent finds. A yes is the semantic arm resolving targets the text arm misses; a no is both arms resolving the same tasks at the same cost.
 
-## 1. Can a language server improve correct resolution?
+FORM: whether a compact span costs less than reading the file. A yes is total tokens falling at unchanged success; a no is the span arriving as context on top of the reads it was meant to replace.
 
-**Finding: for a capable agent, semantic navigation adds almost nothing over text search — because the model reads type information in the visible source and self-localizes. Readable types, not navigation, are the load-bearing input. Default to grep plus ranged reads. Typed resolution earns its keep in one tested regime: when the type is not readable in source the agent already has and must be retrieved.**
+WHEN: whether the moment a diagnostic arrives changes the outcome. A yes is the same diagnostic changing the accepted result depending only on when it fires; a no is the outcome flat across delivery phases.
 
-A 15-task dispatch suite compares grep/ranged reads with live Pyrefly goto, on tasks where a typed receiver calls one of roughly ten same-named overrides and exactly one is buggy. On the annotated 27B variant, grep, neutral goto, and framed goto solve 15/15, 14/15, and 15/15; matched-success token ratios are 0.972 and 1.041 ([C8](evidence/claim_ledger.md#c8), [C9](evidence/claim_ledger.md#c9)).
+Each of the three is a claim that tool builders make. [Typed Holes](https://arxiv.org/abs/2409.00921) and [LSPRAG](https://arxiv.org/abs/2510.22210) push types and definitions into the context on the premise that the information is missing, which the first question puts to test; [STALL+](https://arxiv.org/abs/2406.10018) reports static-analysis value varying with integration phase, which the third question tests. Neither line reports a counterfactual that already reads code well, so the baseline here is a capable text agent.
 
-The receiver-type ablation ladder explains why. Moving the type from a call-site annotation (L0) to the test's construction site (L1) to factory indirection (L2) leaves grep-based cost essentially flat — 1,436 → 1,429 → 1,465 mean input tokens at 14–15/15 resolution — and goto stays neutral (0.945–1.065) at every rung, including L2, where only the language server can statically resolve the type. Trajectories show the mechanism directly: the model barely greps, reads the receiver's type where it appears, and opens the one buggy override file first. It is readable type information, not the annotation specifically, that carries resolution: stripping the annotation costs nothing because the type is still readable at the construction site ([C9](evidence/claim_ledger.md#c9), [log](docs/real_repo_progress.md)).
+## 2. How it was tested
 
-The typed/erased navigation pilot isolates the resolver mechanism. Typed and erased repositories are byte-identical except one stub: sound per-key `Literal` overloads versus a base return type. Each task has 8–15 same-named overrides and neither prompt nor failure names the target. Mechanical checks confirm typed lookup reaches the gold override, erased lookup returns a non-discriminating base result, widening the key removes the discrimination, and both variants are type-clean ([C15](evidence/claim_ledger.md#c15)). So the precision gain is real at the resolver level. At the agent level it bought nothing in the two-task pilot: all 12 task-condition runs pass (correctness at ceiling), the typed automatic/textual token ratio is 1.037 (task bootstrap 0.988–1.093), every automatic result is followed by a target-file read, and composed lookup adds about six seconds per task ([C24](evidence/claim_ledger.md#c24)).
+Every result but one comes from a purpose-built harness: a model drives a fixed loop of six actions — grep, ranged read, whole-file read, line edit, run tests, submit — over a Python workspace, with one semantic operation added or withheld per arm; the exception is an out-of-harness probe in an off-the-shelf bash agent on real repositories. Nothing ran through an MCP server, a skill or an editor plugin.
 
-**Hide the type and text resolution starts to fail.** Every ladder rung above still showed the type-bearing source in the prompt, testing type *location* within readable source rather than the cost of *retrieving* a type. A fourth rung closes that gap: app.py and the test source are hidden, the receiver construction is redacted, and only the use-site line and column remain, so the agent must fetch the type itself. Here the language server improves resolution:
+Dispatch: fifteen tasks where a typed receiver calls one of about ten same-named overrides, one buggy, across a visibility ladder (L0 call-site annotation, L1 test construction site, L2 factory indirection) and a hidden rung withholding `app.py` and the test source, receiver construction redacted. `effic` and `effic_real2`: retrieval-cost tasks, `effic_real2` constructed misuse over vendored real library source (toolz 1.1.0, more-itertools 11.1.0). navigation-v2: mechanically validated definition-span instances. checker-gate-v3: twelve seeded defect/clean pairs, each defect coherent, visible-passing and held-out-failing with one target-scoped semantic diagnostic, each clean control its validated gold. The other suites, `effic` included, are constructed from scratch: the real-repository scan cleared no admissible candidate ([C17](evidence/claim_ledger.md#c17)).
 
-| Hidden-type arm | Resolved | Mean input tokens (resolved) | Greps | Definition calls | Whole-file reads |
-|---|---:|---:|---:|---:|---:|
-| Grep plus ranged reads | 12/15 | 1,390 | 2.9 | 0.0 | 2.1 |
-| Definition available | 13/15 | 1,454 | 1.7 | 0.4 | 2.0 |
-| Definition framed | 14/15 | 1,349 | 0.7 | 1.0 | 0.9 |
+The efficiency thread's definition operation is a static AST resolver (`skip_pyrefly=True`, `ast.parse`), not a live language server; live Pyrefly ran only in dispatch goto arms and one 7B run.
 
-Text resolution falls from 15/15 in the visible regime to 12/15, and the action mix flips from reading the type once to a genuine hunt: greps rise from 0.3 to 2.9. Two tasks are outright localization rescues — on `record_to_dict` grep thrashes to failure at 2,775 tokens while one definition call resolves it at 1,256, and `resource_cost` fails under grep but resolves under both definition arms. The cost of hiding the type lands on *resolution, not tokens*: matched-success ratios stay near one (1.009 and 1.051) and cost on tasks solved in both regimes is flat (hidden/visible 1.016). One task (`job_priority`) fails in all three arms from an edit error after correct localization, and the available-definition arm loses one task to thrash.
+The dispatch ladder, navigation-v2, the paired retrieval run and checker-gate-v3 ran at temperature 0, one rollout per cell; the hidden rung and its visible control ran at 0.7 over five seeds per task, 450 rollouts; the whole-file contrast, election and execution-feedback runs at 0.7 over repeated seeds (four behind the 44-attempt cells); the substitution harvest at 0.7 with its held-out retest at 0. Models: Qwen2.5-Coder-7B, Qwen3.5-27B, Qwen3.6-27B locally; Sonnet 4.5, DeepSeek v3.1, GLM-4.6, GPT-5.6 "Luna" via API. Unit of analysis: the task, with task-level bootstrap intervals.
 
-**Strength of evidence.** Navigation's near-neutrality holds descriptively across the dispatch suite and three ladder rungs; the resolver-precision mechanism is mechanically verified. The hidden-type advantage rests on one 15-task grid at a single seed with arms separated by one to two tasks, so read it as a direction with two concrete rescues behind it rather than a powered estimate. The automatic-delivery pilot showed no agent-level gain from typed resolution.
+Per-claim configuration and artifacts: [ledger](evidence/claim_ledger.md), [manifest](evidence/manifest.json), [protocols](evidence/protocols.md).
 
-**Practical limits.** Incorrect annotations, `Any`-heavy boundaries, and dynamic dispatch are outside the tested conditions. The hidden regime withholds source a real agent could usually open, so it marks where value appears rather than a typical operating point.
+## 3. Results
 
-## 2. Can a language server make an agent more efficient?
+### 3.1 Does delivering the semantic information change what the agent finds?
 
-**Finding: compact definition spans are cheaper than reading — 3.5–4.7x against whole-file retrieval and 1.30x against an efficient grep-plus-ranged-read interface at equal success. The saving exists only when the span substitutes for the read, and substitution is the hard part. Electing the operation is necessary but not sufficient: across a local 27B and two frontier API models, a pushed span is reread almost universally, an explicit "the span is sufficient" instruction barely helps, and even a self-elected, provably-usable span is read past most of the time. The one reliable lever is training — a relabel run removes the reread outright.**
+On the dispatch suite's annotated rung, grep and ranged reads resolved 15/15, neutral go-to-definition 14/15 and framed 15/15, at matched-success ratios 0.972 and 1.041 ([C9](evidence/claim_ledger.md#c9)). Across rungs L0, L1 and L2, mean input tokens on resolved tasks were 1,436, 1,429 and 1,465 at 14–15/15, goto ratios 0.945–1.065 at every rung including L2, where only the server statically resolves the type. Trajectory counters: about 0.3 greps per task, the receiver's type read where it appeared, the buggy override opened first.
 
-Against whole-file retrieval, on the `effic` and `effic_real2` tasks, every attempt in both arms succeeds and compact definitions win by a wide margin ([C1](evidence/claim_ledger.md#c1)):
+The hidden rung was run at five seeds per task, temperature 0.7, against a matched visible control ([C30](evidence/claim_ledger.md#c30)):
 
-| Model | Pooled input-token ratio | Tasks cheaper with definition | Mean task ratio (95% bootstrap CI) | Success |
-|---|---:|---:|---:|---:|
-| Qwen3.6-27B | 3.50x | 11/11 | 4.02 (2.85–5.30) | 44/44 both arms |
-| Claude Sonnet 4.5 | 3.65x | 11/11 | 3.65 (2.72–5.20) | 44/44 both arms |
-| DeepSeek v3.1 | 4.70x | 10/11 | 6.03 (2.32–10.82) | 44/44 both arms |
+| Arm | Hidden | Paired difference vs grep | Greps | Whole-file reads | Visible |
+|---|---:|---|---:|---:|---:|
+| grep_base | 70/75 | — | 1.52 | 2.17 | 75/75 |
+| defn_avail | 71/75 | +0.013 [−0.040, +0.067] | 1.47 | 2.04 | 75/75 |
+| defn_prompt | 75/75 | +0.067 [+0.013, +0.133] | 0.36 | 0.68 | 75/75 |
 
-Task-level medians are 3.83, 3.01, and 2.70; DeepSeek's distribution is strongly skewed. Seeds are repeated runs within tasks, and intervals resample task means. The 44 attempts per model span four seeds; the seed-2/3 source shards are not retained, so those cells rebuild from the merged files rather than per-seed originals.
+Differences are per-task resolution rates over five seeds, with a 95% task bootstrap interval over the fifteen tasks. Framed lookup improved four tasks (`codec_serialize`, `job_priority`, `resource_cost`, `row_format_row`) and worsened none; making the same operation merely available improved three and worsened two. In the visible control every arm resolved every rollout, so the paired difference there is exactly zero and the effect appears only where the type was withheld. Cost landed on resolution rather than tokens: matched-success input-token ratios were 0.983 framed and 1.005 available. The constructed hidden regime withholds source a real agent could usually open. An earlier single-seed pass at temperature 0 resolved 12/15, 13/15 and 14/15 on the same tasks; its text arm was the one that moved most under sampling, so the temperature-0 figures overstate the gap.
 
-The harder counterfactual keeps grep, ranged reads, and a whole-file fallback available. On the same eleven tasks, pinned Qwen3.5-27B at temperature zero succeeds 11/11 with both interfaces ([C27](evidence/claim_ledger.md#c27)):
+In the typed/erased pilot, typed lookup mechanically reached the exact gold override among 8–15 same-named overrides where erased lookup returned a non-discriminating base, both variants type-clean ([C15](evidence/claim_ledger.md#c15)). Its two-task agent arm passed all 12 task-condition cells at a typed automatic/baseline total-token ratio of 1.037 (0.988–1.093), too wide to establish equivalence; every automatic result was followed by a target-file read, and composed lookup added about six seconds per task ([C24](evidence/claim_ledger.md#c24)).
 
-| Interface | Mean total tokens | Mean retrieval characters | Whole-file reads | Success |
-|---|---:|---:|---:|---:|
-| Grep plus ranged reads | 1,602 | 1,640 | 4 | 11/11 |
-| Compact definition plus text fallback | 1,235 | 1,264 | 0 | 11/11 |
+### 3.2 Does a compact span cost less than reading the file?
 
-The paired ratio is 1.297 text/definition (task-bootstrap 95% CI 1.093–1.527); definitions are cheaper on 10/11 tasks (the exception, `reduceby`, costs 1,670 text versus 1,959 definition — a favorable default, not per-task dominance). A three-task whole-file pilot under the same model produces a 5.67 ratio (2.97–8.96), showing why whole-file-only comparisons overstate the advantage relevant to capable shell agents. A live-first Pyrefly suite reduces mean input from 2,894 to 689 tokens and raises success from 14/24 to 24/24, but the rows do not record which backend answered, so the estimate applies to the composed integration ([C4](evidence/claim_ledger.md#c4)).
+Against whole-file retrieval on the retrieval-cost tasks, compact definition spans cut total tokens 3.35x, 3.49x and 4.12x for Qwen3.6-27B, Sonnet 4.5 and DeepSeek v3.1, at 44/44 resolved in every arm ([C1](evidence/claim_ledger.md#c1)).
 
-The saving is conditional on two agent behaviors:
+Against a grep-plus-ranged-read interface with whole-file fallback, eleven `effic_real2` tasks with Qwen3.5-27B cost 1,602 mean total tokens with text against 1,235 with definitions, a paired ratio of 1.297 (task bootstrap 1.093–1.527), cheaper on 10/11 at 11/11 success in both arms, the one suite and model where the span replaced the read: 0 of 11 definitions were followed by a reread ([C27](evidence/claim_ledger.md#c27)).
 
-- **Election — the agent must choose the compact operation.** The wild 7B elects it near 0%; relabel training raises use to 100% and cost-reward training reaches 86% with 36/36 success, while mean input falls from 3,191 to 684 tokens ([C2](evidence/claim_ledger.md#c2)). Capable models need no training: the 27B elects the definition when offered, and in a real bash agent (mini-swe-agent, Claude Sonnet 4.5) strong system-prompt framing raised codenav use from 0 to 7 and 0 to 5 calls on two of three tasks where mild advertisement did not (one seed, third task noisy) ([C3](evidence/claim_ledger.md#c3), [C6](evidence/claim_ledger.md#c6), [log](docs/real_repo_progress.md)).
-- **Substitution — the agent must not read the file anyway.** In one elective retrieval suite the model followed 0 of 11 definitions with a reread, which is where the 1.30x comes from — but that clean substitution is specific to that suite and model, not a general property. Substitution fails across every delivery mode tested. *Pushed automatically*, a 12-instance replication across a local 27B, Claude Sonnet 4.5, and DeepSeek v3.1 rereads the span almost everywhere, and an explicit "the span is the complete definition, do not open the file" instruction barely helps:
+Untrained, the 7B elected the definition operation in 1 of 48 rollouts; relabel-trained, in 48 of 48 with no file reads at all, at mean input 3,086 to 687 and resolution 31/48 to 48/48 ([C2](evidence/claim_ledger.md#c2)). Framing raised codenav use on two of three real-repository tasks at one seed ([C3](evidence/claim_ledger.md#c3), [C6](evidence/claim_ledger.md#c6)).
 
-| Model | Neutral prompt | Plus explicit "the span is sufficient, do not open the file" |
+With `lsp_defn` on in both `effic` arms, the untrained 7B invoked the definition tool 0/24 and the trained arm 24/24, at mean input 2,894 to 689 and success 14/24 to 24/24. The adapter is the election mechanism, and a live-first Pyrefly backend with historical AST fallback reproduces the saving once the policy elects, its per-row backend unrecorded. No arm held the policy fixed while varying the backend, so this is not a measurement of a language-server token effect ([C4](evidence/claim_ledger.md#c4)).
+
+Pushed spans were reread 35/36, and 34/36 with an explicit sufficiency instruction, which removed 2/36 and added 294 mean tokens for the 27B ([C31](evidence/claim_ledger.md#c31)).
+
+| Model | Reread, pushed span | Reread, plus sufficiency instruction |
 |---|---:|---:|
-| Qwen3.6-27B | 11/12 reread | 12/12 reread (+294 mean tokens) |
-| Claude Sonnet 4.5 | 12/12 reread | 12/12 reread |
-| DeepSeek v3.1 | 12/12 reread | 10/12 reread |
+| Qwen3.6-27B | 11/12 | 12/12 |
+| Sonnet 4.5 | 12/12 | 12/12 |
+| DeepSeek v3.1 | 12/12 | 10/12 |
 
-The instruction removed the reread on 0 of 12 tasks for the 27B and Sonnet and only 2 of 12 for DeepSeek. *Self-elected* — a separate run (Qwen3.6-27B, GLM-4.6, and GPT-5.6 "Luna") where the identical, mechanically-verified usable span is returned only when the model asks for it — is no more reliable: election reduces the reread on the two API models but eliminates it on neither, and the local 27B rereads on every instance it elected ([C34](evidence/claim_ledger.md#c34)).
+A separate run with Qwen3.6-27B, GLM-4.6 and GPT-5.6 Luna reproduced the pushed reread at 35/36. Among the instances each model elected, reread was 9/9, 4/9 and 7/12; GLM-4.6 solved only 5–6/12 of these tasks, and reread is counted independently of success ([C34](evidence/claim_ledger.md#c34)).
 
-| Model | Pushed: reread | Elected: reread (among elected) |
-|---|---:|---:|
-| Qwen3.6-27B | 11/12 | 9/9 |
-| GLM-4.6 | 12/12 | 4/9 |
-| GPT-5.6 "Luna" | 12/12 | 7/12 |
+In a bash agent (mini-swe-agent, Sonnet 4.5) on real repositories, roughly 16 of 18 `codenav defn` calls were followed by a read of the file just resolved, sympy's `str.py` among them at 22 `sed` invocations, on three tasks at one seed under a 60-step cap, from committed summaries. That agent took 0–3 whole-file reads in 44–60 actions ([C6](evidence/claim_ledger.md#c6), [log](docs/real_repo_progress.md)).
 
-So neither delivery mode nor instruction buys substitution: pushing guarantees a reread, and even a self-elected, provably-usable span is read past most of the time. Training is the lever that works. A DAgger-style relabel run on the 27B, harvesting 39 demonstrations in which the model's own post-span action is redirected from the reread to the edit, then LoRA-tuning on them, removes the behavior on held-out instances drawn from disjoint seeds *and* disjoint templates ([C33](evidence/claim_ledger.md#c33)):
+A DAgger-style relabel run on 39 demonstrations, none read-required, moved the post-span reread 11/12 to 0/12 on held-out instances disjoint in seed and template, with mean input 1,157 to 748 and a matched-success saving of 1.59x; held-out pass moved 11/12 to 10/12, one rescue against two `xor` losses that pass visible and fail held-out, not distinguishable from noise at n=12 and one seed ([C33](evidence/claim_ledger.md#c33)).
 
-| Qwen3.6-27B, 12 held-out instances | Reread after span | Mean input tokens | Reads per task | Held-out pass |
+### 3.3 Does the moment the diagnostic arrives change the outcome?
+
+Accepted type-clean and held-out-correct outcomes were 1/12 under control, 10/12 with one-shot diagnostics at revision and 11/12 behind a submission gate, for task-bootstrap effects against control of +0.375 [+0.250, +0.500] and +0.417 [+0.292, +0.500]; after-every-edit stayed at 1/12 and +0.000 [−0.125, +0.125], on a channel that fired in 1 of 12 defect rows because the model edited before submitting in only 1 of 12 ([C32](evidence/claim_ledger.md#c32)).
+
+| Twelve seeded defect/clean pairs | Control | After every edit | One-shot | Gate |
 |---|---:|---:|---:|---:|
-| Untrained | 11/12 | 1,157 | 3.42 | 11/12 |
-| Substitution-trained | 0/12 | 748 | 0.08 | 10/12 |
-
-Every reread that occurred was removed (11 of 11; none induced), and on the nine tasks both arms resolve, tokens fall from 1,493 to 938 — a 1.59x saving, about 555 tokens per task. The contrast with instruction is stark on the same behavior and model: prompting removed 0 of 12 and *added* 294 tokens per task. During harvest the redirect fired on 46 of 48 rollouts, replicating the reread on fresh templates before any training. Held-out correctness moves 11/12 to 10/12: localization stays intact (zero wrong-file edits, correct first-edit path 12/12), but two `xor` tasks now pass the visible test and fail the held-out oracle, which reads as partial-spec overfit. At one seed that difference is not distinguishable from noise, though it is the direction to watch — and the training set contained no read-required instances, so "elect the span when sufficient, read when it is not" is untested.
-
-In the real bash agent, elicited election likewise did not lower per-call input tokens, partly because a capable shell agent almost never takes the whole-file read the big ratios are measured against — 0–3 whole-file reads in 44–60 actions, with retrieval dominated by grep plus ranged `sed` ([C6](evidence/claim_ledger.md#c6)).
-
-**Strength of evidence.** The efficiency effect holds in the controlled suite against both the whole-file and the efficient text baseline. Election as a policy lever is supported per-model — training for the 7B, prompting for capable models. Failure to substitute is supported across pushed, instructed, and self-elected delivery on a local model plus two frontier API models at n=12 instances each; the local elective contrast is the clean within-instance one, while the API elect arm delivered an identical usable span but records thinner counters. The training fix is supported on held-out instances disjoint in seed and template from the harvest set, at one model and one seed, with the untrained control reproducing the frozen baseline byte-for-byte.
-
-**Practical limits.** Tasks are constructed and the headline uses a static AST resolver; real-repository substitution frequency and live-LSP latency are unmeasured. In real shell agents the whole-file counterfactual barely occurs, so the achievable ceiling is the 1.3x regime, not 3–4x — and reaching even that requires the agent to actually substitute, which took a favorable suite or a trained policy.
-
-## 3. When does checker feedback improve outcomes?
-
-**Finding: deliver the checker late. On identical seeded defects, checker delivery at revision or at submission lifts accepted-correct outcomes from 1/12 to 10/12 and 11/12; after-every-edit delivery changes nothing. Prefer the submission gate: it is the only arm that costs nothing on clean work, because it delivers a diagnostic only when a submission is actually defective.**
-
-A four-arm grid ([C32](evidence/claim_ledger.md#c32)) runs the same twelve seeded defect/clean pairs — eight defect families, each defect coherent, visible-passing, held-out-failing, with exactly one target-scoped semantic diagnostic — through control (no checker), after-every-edit feedback, one-shot diagnostics at revision, and a v6 submission gate. Control and gate share identical model-generated prefixes through the first completion. Qwen3.5-27B, temperature zero, one rollout per cell:
-
-| Defect cohort (n=12) | Control | After every edit | One-shot at revision | Submission gate |
-|---|---:|---:|---:|---:|
-| Accepted type-clean and held-out-correct | 1/12 | 1/12 | 10/12 | 11/12 |
 | Bad completion accepted | 11/12 | 11/12 | 2/12 | 1/12 |
-| Rejected → repaired → retested → resubmitted → accepted | — | — | — | 10/10 |
-| Mean revision tokens | 787 | 754 | 1,210 | 1,380 |
-| Mean revision tokens, matched clean cohort | 591 | 651 | 619 | 591 |
-| False rejections on clean drafts | — | — | — | 0/12 |
+| Defect-cohort revision tokens | 787 | 754 | 1,210 | 1,380 |
+| Defect-cohort wall time (s) | 27.8 | 14.5 | 68.3 | 62.7 |
+| Clean-cohort revision tokens | 591 | — | 619 | 591 |
+| Clean-cohort wall time (s) | 9.4 | 9.9 | 9.6 | 9.5 |
 
-Task-bootstrap effects over all 24 workspaces put revision delivery at +0.375 [+0.250, +0.500] and the gate at +0.417 [+0.292, +0.500] against control, with after-every-edit at +0.000 [−0.125, +0.125].
+*After-every-edit fired in 1 of 12 defect rows; mean edits 0.08 against 0.17 in control.*
 
-**The gradient is a step, not a slope.** Both late arms land at 10–11/12 and both early arms at 1/12. The gate's one-task edge over revision delivery comes from refusal, not information: on `auth_pipeline_handler` the model receives the diagnostic and submits anyway with zero edits, and only the gate's rejection produces a repair. Where a rejection occurred, recovery was complete — 10 of 10 rejections ran the full repair, retest, resubmit, accept cycle, and the remaining two defects self-repaired before submission.
+On clean work the gate matched control in both tokens and wall time, and on defective work it spent about 2.2x control's wall time, turning 11/12 accepted bad completions into 1/12. The gate rejected 10 of 12 submissions, all 10 completing repair, retest and resubmission, and 2 of 12 self-repaired beforehand; on `auth_pipeline_handler` the model received the diagnostic and submitted anyway with zero edits, so the gate's one-task edge over revision came from refusal rather than information. Its single miss, `auth_shapes_protocol`, was type-clean after self-repair and failed held-out. The 0/12 false rejections are an apparatus check, since each clean control is that defect's validated gold and the checker is deterministic; population false-rejection rate is unmeasured. Fresh calibration produced no usable natural checker-detectable defect: frontier inference sat at 18/18 and a descriptive 27B authoring arm at 12/12, 0/3 natural 7B drafts were coherent, and 2/8 coherent 14B drafts were already type-clean, so these twelve defects were seeded ([C10](evidence/claim_ledger.md#c10), [C11](evidence/claim_ledger.md#c11), [C16](evidence/claim_ledger.md#c16), [C22](evidence/claim_ledger.md#c22)). A separate execution-feedback grid (two frontier models, 14 tasks, three seeds, three delivery modes) passed 252/252 ([C12](evidence/claim_ledger.md#c12)).
 
-**The gate is free on clean work; revision delivery is not.** Clean drafts cost 591 tokens under both control and gate, since a passing submission draws only a checker call and about 135 ms of latency. One-shot delivery taxes every clean draft (619 tokens, +233 ms) because it hands over a diagnostic unconditionally. That asymmetry, more than the one-task outcome difference, is the argument for submission-time delivery.
+## 4. Findings
 
-**Why in-loop delivery does nothing here.** The after-every-edit channel barely fired: the checker ran in 1 of 12 defect rows because the model edits in only 1 of 12 before submitting, reading and testing the frozen draft instead (mean edits 0.08 versus 0.17 in control). So this is a null with a largely unexercised mechanism, not a replication of the earlier authoring-suite arm in which the 7B reached 6,367 tokens and its worst held-out score under volunteered feedback ([C11](evidence/claim_ledger.md#c11)).
+### 4.1 Delivery
 
-**A type-clean gate is behaviorally blind.** The gate's single miss is instructive: on `auth_shapes_protocol` the model self-repairs, the repair clears the seeded type error, the gate sees no diagnostics and accepts — and the held-out test still fails. A checker gate can only be as behaviorally sound as the checker behind it.
+On a fifteen-task constructed dispatch suite at a single seed, one rollout per cell, semantic navigation added little over grep and ranged reads: a capable model resolves a dispatch-ambiguous target by reading the receiver's type wherever it is visible and opening the right file directly, so the lookup delivers information the agent already holds. Cost stayed flat as the type moved from a call-site annotation to the test's construction site to factory indirection, so resolution tracked the type wherever it remained readable. The load-bearing input is correct types in the source, rather than the server that queries them. The exception is a constructed regime that withheld the type-bearing source, where framed lookup resolved every rollout and text did not, over fifteen tasks at five seeds; the same operation left merely available changed nothing there. So delivery is not one lever but two, and the second is the one that matters: what a language server adds in this regime is contingent on the agent electing to use it, which is the same condition the retrieval results turn on. Sound types also sharpen the resolver mechanically, but that precision bought no agent-level outcome in a two-task pilot.
 
-**Opportunity remains the binding constraint.** Capable models rarely leave checker-detectable defects at all: frontier inference and 27B authoring arms sit at ceiling (18/18 and 12/12), 0/3 natural 7B drafts are coherent, and the 2/8 coherent 14B drafts are already type-clean ([C10](evidence/claim_ledger.md#c10), [C16](evidence/claim_ledger.md#c16), [C22](evidence/claim_ledger.md#c22)). These defects are seeded precisely because the natural rate is low.
+### 4.2 Form
 
-**Strength of evidence.** The phase gradient is now tested within one design on identical defects at n=12 pairs, one model and one seed, with bootstrap intervals excluding zero for both late arms. Protocol integrity checks pass: 106 completion events all model-origin, 24/24 identical control/gate first-completion prefixes, zero serialization failures. This supersedes the earlier three-pair pilot ([C29](evidence/claim_ledger.md#c29)) and the two-workspace case series that found no outcome effect from revision delivery ([C26](evidence/claim_ledger.md#c26)) — at n=2 that arm was simply underpowered. The in-loop arm is a null whose channel fired once, so it neither confirms nor refutes the authoring-suite harm.
+A compact span is cheaper than a read only when it replaces the read, and whether it does is a property of the agent's policy, not of the tool. The span is cheaper by a wide margin against whole-file retrieval and by a narrower one against a competent grep-plus-ranged-read interface. Election is separable: framing changed which operation the capable models called, and training changed it on a 7B. Substitution did not follow: on twelve instances per model at one seed, a pushed span was reread by a local 27B and, in two independent runs, by four frontier API models, and neither a sufficiency instruction nor self-election removed it. In a three-task, single-seed probe with a frontier model on sympy, astropy and sphinx, definition calls sat on top of reads, and the whole-file read that the largest ratios are measured against was rare, so the achievable regime there is the smaller one. Relabel training removed the reread where instruction and election could not, on one model at one seed; what it trained is blanket suppression of the post-span read, untested where the span is insufficient.
 
-**Practical limits.** Defects are constructed and one per workspace, so natural prevalence, population false-rejection rate, and draft-plus-revision cost remain unmeasured. Implement the gate where submission already has a boundary — a completion hook — and measure false rejections, resubmission, accepted-correct yield, and total cost on your own workload.
+### 4.3 Timing
 
-## Execution feedback and external validity
+On twelve seeded defect/clean pairs, one model, one seed, a checker at the submission boundary converted accepted bad completions into repaired ones and one-shot delivery at revision performed comparably, while delivering the same checker after every edit changed nothing, on a channel that fired in one of twelve defect rows. Late delivery works; early delivery is unmeasured. The submission gate is preferable to delivery at revision because it charges its cost only to defective submissions: clean work cost no more than control in tokens or wall time, and the price fell on wall time when a submission was defective. A type-clean gate is only as behaviorally sound as its checker. Natural prevalence is unmeasured, and the same ceiling that forced seeding left execution feedback nothing to move on the tested small-task suite.
 
-Execution feedback is ceilinged in the committed small-task suite: two frontier models, 14 tasks, three seeds, three delivery modes, 252/252 attempts pass ([C12](evidence/claim_ledger.md#c12)). This does not establish equivalence outside small simulable functions.
+## 5. If you use a coding agent
 
-The bounded real-repository scan found no fully admissible task. One Django case has a working environment and substantial override ambiguity, but leakage and fix-site resolution were not fully audited; both recorded arms pass and the semantic tool is not elected. Constructed tasks therefore provide the causal apparatus here, and population validity remains open ([C17](evidence/claim_ledger.md#c17)). Audit and rejection reasons: [docs/external_validity_recon.md](docs/external_validity_recon.md).
+On a typed Python codebase, the clearest return is a type check at the submission boundary with a repair-and-resubmit loop.
 
-## Decision checklist
+| Lever | Do this | Changes if |
+|---|---|---|
+| Do nothing | Add no semantic navigation tool over typed source the agent already opens ([C9](evidence/claim_ledger.md#c9), [C30](evidence/claim_ledger.md#c30)) | Your source hides receiver types |
+| Add a tool or MCP server | Add one only where the receiver's type is unreadable in source the agent opens: generated stubs, vendored or compiled boundaries. Installing it is not the intervention — an available but unframed operation changed nothing ([C30](evidence/claim_ledger.md#c30), [C27](evidence/claim_ledger.md#c27)) | You measure targets the agent misses |
+| Skill or prompt change | Tell the agent to use the operation and when; framing is what moved resolution where the tool helped at all. Expect a change in tool choice, and verify post-span reads before budgeting a saving ([C3](evidence/claim_ledger.md#c3), [C30](evidence/claim_ledger.md#c30), [C31](evidence/claim_ledger.md#c31), [C34](evidence/claim_ledger.md#c34)) | A prompt removes the post-span read |
+| Wire a hook | Gate submission on the checker, requiring repair and retest before acceptance; after-every-edit firing is untested ([C32](evidence/claim_ledger.md#c32)) | Your checker covers behavior, or your model edits repeatedly |
+| Fine-tune | Fine-tune only with weights you control, ruling out a hosted agent; it buys blanket suppression of the post-span read, not a conditional policy ([C33](evidence/claim_ledger.md#c33)) | Read-required boundaries are trained |
 
-Before adding a language-server integration, check:
+Keep type annotations correct and present; the text baseline exploited exactly that. On your own workload, measure wrong-file edits, post-span reads of the defining file and spurious gate rejections; the clean-work cost here came from workspaces guaranteed clean. No result here ranks MCP servers, skill files and project instructions as delivery surfaces.
 
-1. **Is there a concrete bottleneck the server removes?** Ambiguous binding, broad retrieval, or repairable static error.
-2. **Does the integration change what the agent does?** Fewer reads, correct target, or repaired defect.
-3. **Is the outcome better or cheaper?** Held-out tests pass, total tokens fall, or wall time drops.
-4. **Have you measured the full failure path?** Gates need rejection, repair, and resubmission events; diagnostics need coherent, repairable drafts.
+## 6. Future work
 
-## Practitioner guide
+Every estimate rests on constructed workspaces: the closest real-repository candidate, one Django case with a working environment and genuine override ambiguity, was never audited for leakage or fix-site resolution ([C17](evidence/claim_ledger.md#c17)).
 
-| When you see… | Then default to… | Evidence in this report | Verify by measuring… | Do not use when… |
-|---|---|---|---|---|
-| The binding is local, visible, and unique | Text search plus ranged reads | Navigation is near token-neutral when readable source exposes the type ([C6](evidence/claim_ledger.md#c6), [C9](evidence/claim_ledger.md#c9)) | Wrong-file edits, target reads avoided, total tokens | The prompt already names the target file and line |
-| The receiver's type is not readable in available source and must be retrieved | Typed semantic resolution | Text resolution falls to 12/15 while framed definition lookup reaches 14/15, with two outright localization rescues ([C30](evidence/claim_ledger.md#c30)) | Resolution rate first, tokens second — the gain is correctness, not cost | The type is visible somewhere the agent already reads |
-| Overloads, inheritance, factories, or re-exports make the target ambiguous | Typed semantic resolution | Sound types improve resolver precision; agent-level benefit remains open ([C15](evidence/claim_ledger.md#c15), [C24](evidence/claim_ledger.md#c24)) | Wrong-target work prevented, retrieval reduced, not just tool calls | Text already identifies the exact target |
-| A compact result can replace search and reading | Definition or enclosing-method span | 1.30x fewer total tokens vs. grep plus ranged reads at 11/11 success, zero rereads ([C27](evidence/claim_ledger.md#c27)); whole-file contrasts are 3.5–4.7x ([C1](evidence/claim_ledger.md#c1)) | Retrieval-response bytes, total tokens, and post-definition rereads | The agent still performs the same search and reads after receiving the span |
-| The agent rereads the file after receiving a span | Train the substitution; election and instruction do not fix it | Rereads occurred on 35/36 pushed spans and instruction removed 2/36; a self-elected usable span was still reread 9/9 (local 27B) and 4/9, 7/12 (API models); relabel training removed 11/11 and cut tokens 1.59x ([C31](evidence/claim_ledger.md#c31), [C33](evidence/claim_ledger.md#c33), [C34](evidence/claim_ledger.md#c34)) | Post-span reads of the defining file, and net tokens after the span cost | You cannot train the policy — then expect the span to be additive context, not a saving |
-| A useful service is available but rarely chosen | Improve tool description or policy; train small models | Prompting lifts election on capable models; training lifts a 7B from ~0% to 100% ([C2](evidence/claim_ledger.md#c2), [C3](evidence/claim_ledger.md#c3)) | Higher election retains correctness and lowers total cost | The service has not first shown value when available |
-| A coherent patch contains checker-detectable errors | Deliver the checker late — at revision, or better at completion with a repair loop | Late delivery lifts accepted-correct from 1/12 to 10–11/12; after-every-edit delivery moves nothing ([C32](evidence/claim_ledger.md#c32)) | Diagnosed-location edits, held-out pass, and diagnostic cost on clean drafts as well as defective ones | The draft is incoherent or the error is not repairable |
-| Bad submission prevention | Staged acceptance gate with explicit repair and resubmit | 10/12 bad submissions rejected and 10/10 repaired, resubmitted, accepted; 0/12 false rejections, and no token cost on clean drafts ([C32](evidence/claim_ledger.md#c32)) | False rejections, resubmission, accepted-correct yield, total cost | Abstention is unacceptable or rejection precision is unknown |
+The hidden-type effect is one apparatus at one model: fifteen constructed tasks whose type is withheld by redaction rather than by the ordinary reasons real code hides a type, so whether it transfers to generated stubs, vendored packages or compiled boundaries is untested. A read-required boundary case, absent from the training set, would show whether blanket suppression can be made conditional. An in-loop design with repeated edits would exercise the after-every-edit channel. Rejection precision needs a gate run over drafts that are not the defect's own gold.
 
-## Related work
+Real-repository substitution frequency and live-server latency are unmeasured. Six four-seed files lack their seed-2/3 shards and no artifact records a server version. Static tooling does not reach dynamic behavior, incorrect annotations, `Any`-heavy boundaries or logic outside the checker. The resolution answer holds only while the agent can read the type-bearing source cheaply, and every workspace tested was small enough that it could.
 
-Prior work studies missing context, automatic delivery, coherent drafts, and generation constraints — different points on the same resolve-compress-validate chain.
+## 7. Conclusion
 
-| Work | Relevant lesson |
-|---|---|
-| [Typed Holes](https://arxiv.org/abs/2409.00921) and [LSPRAG](https://arxiv.org/abs/2510.22210) | Push types, definitions, or references when context is missing; automatic delivery removes election failure. |
-| [STALL+](https://arxiv.org/abs/2406.10018) | Static analysis effects vary by language and integration phase; retrieval and semantic analysis can complement each other. |
-| [CoCoGen](https://arxiv.org/abs/2403.16792) | Check a coherent draft, then retrieve context to repair project/API mismatches. This is the opportunity-conditioned regime absent from after-every-edit feedback. |
-| [CodeStruct](https://arxiv.org/abs/2604.05407) | Structured reads, edits, and syntax validation improve actionability through program structure rather than type information. |
-| [CompCoder](https://arxiv.org/abs/2203.05132), [type-constrained generation](https://arxiv.org/abs/2504.09246), and [RLCSF v2](https://arxiv.org/abs/2510.22907) | Compiler and server signals can rank, constrain, or train candidates even when repair-time feedback is not useful. |
-
-Across this report and prior work, static tooling helps when it supplies missing, correct, compact, actionable information at the phase where the model can use it. The common failure modes are duplicate information, no checker opportunity, ignored or noisy delivery, and cost that exceeds the work saved.
-
-## Reproducibility and limits
-
-From a clean clone:
-
-```bash
-python3 -m pip install -e '.[dev,analysis]'
-python3 scripts/analysis/reproduce_all.py
-```
-
-The reproducer verifies the manifest, reruns retained analyzers, recomputes task-level effects, and executes the navigation manipulation checks without model or API calls. Model runs are separate; see [evidence/protocols.md](evidence/protocols.md) before using the navigation or checker run scripts.
-
-Beyond the per-section limits, two apply throughout: static tooling does not address dynamic behavior, incorrect annotations, `Any`-heavy boundaries, or logic outside the checker; and some retained artifacts contain provenance gaps — unavailable seed shards, incomplete server backend/version records, source-hash mismatches, and invalidated runs — with exclusion reasons and discrepancies reported in the claim ledger and manifest.
-
-## Conclusion
-
-For a capable coding agent, the language server's commonly assumed benefits mostly do not survive contact with a text-capable baseline: the model resolves targets by reading types in source, and it retrieves cheaply with grep and ranged reads. What survives is specific, and each piece is conditional. Semantic resolution earns its keep where the type must be retrieved rather than read — hide the type-bearing source and text resolution degrades while typed lookup holds. Compact spans save real tokens when they substitute for reading, and substitution turns out to be a policy you train rather than one you request: models given a pushed span read the file anyway, an explicit instruction does not stop them, even a self-elected span is usually reread, and only relabel training does. Sound types sharpen resolution mechanically, with agent-level value still unproven. And the checker pays off when it arrives late — at revision or, better, as a submission gate with a repair loop, which charges its cost only to defective submissions — rather than as commentary during authoring.
-
-A theme runs through all three: the value is in the *types being present and correct in the source*, more than in the server that queries them. That is what lets the model self-localize, and keeping it true is the job a checker gate does.
-
-The deployment standard is the same for each service: identify a real opportunity, verify that the semantic signal changes the agent's action, and measure whether that change lowers cost or improves correctness. Availability and invocation are not outcomes. The useful integration is the smallest targeted operation that removes work or prevents an error the agent would otherwise carry forward.
+Semantic navigation added little for a capable agent on the dispatch suite tested, because the receiver's type was readable in the source the agent opened; where the type was withheld it helped, but only once the agent was framed to reach for it. A compact definition span costs less than a read only when it displaces one; only training produced that displacement, and pushing, instructing and self-election did not. A type check at the submission boundary, with an explicit repair-and-resubmit loop, converted accepted bad completions into repaired ones on twelve seeded defect pairs.
