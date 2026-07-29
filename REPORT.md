@@ -46,7 +46,7 @@ The hidden rung, against a matched visible control ([C30](evidence/claim_ledger.
 
 *Per-task resolution rates over five seeds at temperature 0.7, 95% task bootstrap intervals over the fifteen tasks; every arm resolved every rollout in the visible control, so the effect appears only where the type was withheld.*
 
-Framed lookup improved four tasks (`codec_serialize`, `job_priority`, `resource_cost`, `row_format_row`) and worsened none; the same operation merely available improved three and worsened two. Cost landed on resolution, not tokens: matched-success input-token ratios were 0.983 framed and 1.005 available. The constructed hidden regime withholds source a real agent could usually open. An earlier single-seed pass at temperature 0 resolved 12/15, 13/15 and 14/15; its text arm gained most under sampling, so those figures overstate the gap.
+Framed lookup improved four tasks (`codec_serialize`, `job_priority`, `resource_cost`, `row_format_row`) and worsened none; the same operation merely available improved three and worsened two. Cost landed on resolution, not tokens: matched-success input-token ratios were 0.983 framed and 1.005 available. The constructed hidden regime withholds source a real agent could usually open.
 
 Typed lookup mechanically reached the exact gold override among 8–15 same-named overrides where erased lookup returned a non-discriminating base, both variants type-clean ([C15](evidence/claim_ledger.md#c15)). The two-task agent arm passed all 12 task-condition cells at a typed automatic/baseline total-token ratio of 1.037 (0.988–1.093), too wide for equivalence; every automatic result was followed by a target-file read, and composed lookup added about six seconds per task ([C24](evidence/claim_ledger.md#c24)).
 
