@@ -6,7 +6,7 @@
 ]{article}
 \usepackage{xcolor}
 \usepackage{amsmath,amssymb}
-\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\setcounter{secnumdepth}{5}
 \usepackage{iftex}
 \ifPDFTeX
   \usepackage[T1]{fontenc}
@@ -126,8 +126,8 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-Coding agents are increasingly given language-server tooling ---
-go-to-definition, compact definition spans, type diagnostics --- on the
+Coding agents are increasingly given language-server tooling, such as
+go-to-definition, compact definition spans and type diagnostics, on the
 assumption that better code intelligence makes a better agent. We tested
 that against a capable text baseline of grep, ranged reads and a shell,
 using seven models over constructed dispatch and seeded-defect suites,
@@ -138,8 +138,8 @@ Availability alone rarely paid. Go-to-definition was token-neutral
 wherever the receiver's type was readable in source the agent already
 opens, because the model reads the type and localizes itself; it lifted
 resolution only where the type was withheld, and then only when the
-agent was prompted to use it. A compact span --- from a static
-definition tool, not a live server --- cut total tokens 3.3--4.1x
+agent was prompted to use it. A compact span, produced by a static
+definition tool rather than a live server, cut total tokens 3.3--4.1x
 against whole-file retrieval, and 1.3x against grep plus ranged reads in
 the one suite where it genuinely replaced the read; elsewhere models
 read the file anyway, on 35 of 36 pushed spans. A type checker lifted
@@ -154,96 +154,123 @@ blanket: where the span genuinely lacked the defect it went looking
 every time. Installing the server is not the intervention.
 \end{abstract}
 
-\subsection{1. Introduction}\label{introduction}
+\section{Introduction}\label{introduction}
 
 A language server answers questions about code. So does a coding agent
 holding grep, ranged reads and a shell, and it answers most of them for
 itself. What the server adds therefore turns on three narrower
 questions: whether it answers something the agent cannot, whether it
 answers in a cheaper form, and whether it answers at a better moment.
+Prior work on each rarely reports that counterfactual, so it is the
+baseline used throughout.
 
 IF: whether delivering the semantic information changes what the agent
-finds. A yes is the semantic arm resolving targets the text arm misses;
-a no is both arms resolving the same tasks at the same cost.
+finds. Typed Holes~\citep{blinn2024typedholes} and
+LSPRAG~\citep{go2025lsprag} push types and definitions into the context
+on the premise that the information is missing, which is the premise
+this question tests. A yes is the semantic arm resolving targets the
+text arm misses; a no is both arms resolving the same tasks at the same
+cost.
 
-FORM: whether a compact span costs less than reading the file. A yes is
-total tokens falling at unchanged success; a no is the span arriving as
-context on top of the reads it was meant to replace.
+FORM: whether a compact span costs less than reading the file.
+CodeStruct~\citep{kim2026codestruct} makes the neighbouring case that
+structured reads and edits beat whole-file handling by exposing program
+structure. A yes is total tokens falling at unchanged success; a no is
+the span arriving as context on top of the reads it was meant to
+replace.
 
-WHEN: whether the moment a diagnostic arrives changes the outcome. A yes
-is the same diagnostic changing the accepted result depending only on
-when it fires; a no is the outcome flat across delivery phases.
+WHEN: whether the moment a diagnostic arrives changes the outcome.
+STALL+~\citep{liu2024stallplus} finds static-analysis value varying with
+integration phase, and CoCoGen~\citep{bi2024cocogen} checks a coherent
+draft before retrieving context to repair it. A yes is the same
+diagnostic changing the accepted result depending only on when it fires;
+a no is the outcome flat across delivery phases.
 
-Each is a claim tool builders make. Typed
-Holes~\citep{blinn2024typedholes} and LSPRAG~\citep{go2025lsprag} push
-types and definitions into the context on the premise that the
-information is missing; the first question tests that premise.
-STALL+~\citep{liu2024stallplus} reports static-analysis value varying
-with integration phase; the third tests that. Neither line reports a
-counterfactual that already reads code well, so the baseline here is a
-capable text agent.
+\section{Method}\label{method}
 
-\subsection{2. How it was tested}\label{how-it-was-tested}
+We evaluated in two settings. The first is a purpose-built harness in
+which a model drives a fixed loop of six actions over a Python
+workspace: grep, ranged read, whole-file read, line edit, run tests, and
+submit. Each arm adds or withholds exactly one semantic operation and
+holds the rest constant, which is what makes the comparisons causal. The
+second is an off-the-shelf shell agent, mini-swe-agent driving Claude
+Sonnet 4.5 with ordinary shell primitives, run on three SWE-bench tasks
+in sympy, astropy and sphinx with an AST-backed definition command
+available, one seed and a 60-step cap. That setting sacrifices control
+for realism and we treat it as a case study throughout. Nothing was
+tested through an MCP server, a skill or an editor plugin, so these
+experiments can say which operation helps but cannot rank delivery
+surfaces against each other.
 
-Every result but one comes from a purpose-built harness: a model drives
-a fixed six-action loop --- grep, ranged read, whole-file read, line
-edit, run tests, submit --- over a Python workspace, with one semantic
-operation added or withheld per arm; the exception is one out-of-harness
-probe on real repositories. Nothing ran through an MCP server, a skill
-or an editor plugin.
+We created four task suites. The dispatch suite has fifteen synthetic
+tasks in which a typed receiver calls one of roughly ten identically
+named overrides, exactly one of which is buggy. It runs across a ladder
+that moves the receiver's type progressively further from the call site,
+from a call-site annotation to the test's construction site to factory
+indirection, and a fourth rung that hides the type altogether by
+withholding the application and test source and redacting the receiver
+construction. Two suites measure retrieval cost: one is fully synthetic,
+and the other builds constructed misuse tasks over vendored library
+source from toolz 1.1.0 and more-itertools 11.1.0. A fourth suite
+supplies mechanically validated definition-span instances for the
+substitution experiments. The checker suite has twelve pairs of seeded
+defects and clean controls, where each defect is coherent, passes the
+visible test, fails a held-out test, and carries exactly one semantic
+diagnostic in the target file, and each clean control is that defect's
+own validated gold. We built tasks rather than harvesting them because a
+bounded scan of real repositories produced no candidate that cleared
+environment, leakage, ambiguity and discriminating-lookup checks
+together.
 
-Dispatch: fifteen tasks where a typed receiver calls one of about ten
-same-named overrides, one buggy, across a visibility ladder (L0
-call-site annotation, L1 test construction site, L2 factory indirection)
-and a hidden rung withholding \texttt{app.py} and the test source,
-receiver construction redacted. \texttt{effic} and
-\texttt{effic\_real2}: retrieval-cost tasks, \texttt{effic\_real2}
-constructed misuse over vendored real library source (toolz 1.1.0,
-more-itertools 11.1.0). navigation-v2: mechanically validated
-definition-span instances. checker-gate-v3: twelve seeded defect/clean
-pairs, each defect coherent, visible-passing and held-out-failing with
-one target-scoped semantic diagnostic, each clean control its validated
-gold. The other suites, \texttt{effic} included, are constructed from
-scratch: the real-repository scan cleared no admissible candidate
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c17}{C17}).
+The definition operation in the retrieval experiments is a static AST
+resolver rather than a live language server. Live Pyrefly served the
+dispatch lookup arms and one 7B run.
 
-The efficiency thread's definition operation is a static AST resolver
-(\texttt{skip\_pyrefly=True}, \texttt{ast.parse}), not a live language
-server; live Pyrefly ran only in dispatch goto arms and one 7B run.
+The dispatch ladder, the definition-span instances, the paired retrieval
+comparison and the checker grid ran at temperature 0 with a single
+rollout per cell. The hidden rung and its matched visible control ran at
+temperature 0.7 over five seeds per task, 450 rollouts in all.
+Temperature 0.7 with repeated seeds also covers the whole-file contrast,
+the election and execution-feedback runs, and the training harvest,
+whose held-out retest ran at temperature 0. We ran Qwen2.5-Coder-7B,
+Qwen3.5-27B and Qwen3.6-27B locally, and Claude Sonnet 4.5, DeepSeek
+v3.1, GLM-4.6 and GPT-5.6 ``Luna'' through an API.
 
-Temperature 0, one rollout per cell: the dispatch ladder, navigation-v2,
-the paired retrieval run and checker-gate-v3. Temperature 0.7, repeated
-seeds: the hidden rung and its visible control (five seeds per task, 450
-rollouts), the whole-file contrast, the election and execution-feedback
-runs (four seeds behind the 44-attempt cells), and the substitution
-harvest, with its held-out retest at 0. Models: Qwen2.5-Coder-7B,
-Qwen3.5-27B, Qwen3.6-27B locally; Sonnet 4.5, DeepSeek v3.1, GLM-4.6,
-GPT-5.6 ``Luna'' via API. Unit of analysis: the task, with task-level
-bootstrap intervals.
+We report five measures. Resolution is whether the agent fixed the
+intended target and passed a held-out test written against the
+specification rather than the visible one. Cost is total tokens, input
+plus output, over the whole trajectory. Election counts how often the
+agent chose a semantic operation when one was offered. Substitution
+counts reads of the defining file after a definition span had already
+been delivered, which is the behaviour that decides whether a span saves
+anything. For the checker experiments we also report wall time, since a
+diagnostic that prevents a bad submission trades latency for a repair.
+The unit of analysis is the task, and intervals are task-level
+bootstraps.
 
-Per-claim configuration and artifacts:
-\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md}{ledger},
-\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/manifest.json}{manifest},
-\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/protocols.md}{protocols}.
+\section{Results}\label{results}
 
-\subsection{3. Results}\label{results}
-
-\subsubsection{3.1 Does delivering the semantic information change what
-the agent
+\subsection{Does delivering the semantic information change what the
+agent
 finds?}\label{does-delivering-the-semantic-information-change-what-the-agent-finds}
 
-On the annotated rung, grep and ranged reads resolved 15/15, neutral
-goto 14/15 and framed goto 15/15, at matched-success ratios 0.972 and
-1.041
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c9}{C9}).
-Across L0, L1 and L2, mean input tokens on resolved tasks were 1,436,
-1,429 and 1,465 at 14--15/15, goto ratios 0.945--1.065 at every rung
-including L2, where only the server statically resolves the type.
-Trajectory counters: about 0.3 greps per task, the receiver's type read
-where it appeared, the buggy override opened first.
+Where the receiver's type was visible in the source, semantic lookup
+made no difference. Text search resolved all fifteen dispatch tasks, and
+go-to-definition resolved fourteen unprompted and fifteen when the agent
+was told to use it, at matched-success token ratios of 0.972 and 1.041.
+Moving the type further from the call site did not change that. Mean
+input tokens on resolved tasks were 1,436, 1,429 and 1,465 across the
+three ladder rungs, resolution stayed at fourteen or fifteen, and lookup
+cost between 0.945 and 1.065 times text search at every rung, including
+the factory-indirection rung where only a type-aware server can resolve
+the receiver statically. The trajectories explain the flatness: the
+agent grepped about 0.3 times per task, read the receiver's type
+wherever it happened to appear, and opened the buggy override first.
 
-The hidden rung, against a matched visible control
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c30}{C30}):
+Hiding the type changed the answer. The fourth rung withholds the source
+that carries the type, so the agent has to retrieve it rather than read
+it, and we ran it at five seeds per task against a matched visible
+control:
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -284,61 +311,66 @@ task bootstrap intervals over the fifteen tasks; every arm resolved
 every rollout in the visible control, so the effect appears only where
 the type was withheld.}
 
-Framed lookup improved four tasks (\texttt{codec\_serialize},
-\texttt{job\_priority}, \texttt{resource\_cost},
-\texttt{row\_format\_row}) and worsened none; the same operation merely
-available improved three and worsened two. Cost landed on resolution,
-not tokens: matched-success input-token ratios were 0.983 framed and
-1.005 available. The constructed hidden regime withholds source a real
-agent could usually open.
+Prompting the agent to use lookup improved four tasks and worsened none.
+Offering the same operation without prompting improved three and
+worsened two, which leaves it indistinguishable from text search. Every
+arm solved every rollout in the visible control, so the paired
+difference there is exactly zero and the effect exists only where the
+type was withheld. The cost of hiding the type fell on resolution rather
+than on tokens: among tasks both arms solved, lookup cost 0.983 times
+text search when prompted and 1.005 when merely available. This rung is
+constructed, and it withholds source a real agent could usually open.
 
-Typed lookup mechanically reached the exact gold override among 8--15
-same-named overrides where erased lookup returned a non-discriminating
-base, both variants type-clean
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c15}{C15}).
-The two-task agent arm passed all 12 task-condition cells at a typed
-automatic/baseline total-token ratio of 1.037 (0.988--1.093), too wide
-for equivalence; every automatic result was followed by a target-file
-read, and composed lookup added about six seconds per task
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c24}{C24}).
+A separate pilot tested the resolver rather than the agent, on
+repositories that are byte-identical apart from one stub. Typed lookup
+reached the exact intended override among eight to fifteen identically
+named candidates, where the erased variant returned a base result that
+cannot discriminate between them, and both variants type-check cleanly.
+That precision bought nothing at the agent level. All twelve
+task-condition cells passed, the typed automatic arm cost 1.037 times
+the textual arm with an interval from 0.988 to 1.093 that is too wide to
+call equivalence, every automatic result was still followed by a read of
+the target file, and composing the lookup added about six seconds per
+task.
 
-\subsubsection{3.2 Does a compact span cost less than reading the
+\subsection{Does a compact span cost less than reading the
 file?}\label{does-a-compact-span-cost-less-than-reading-the-file}
 
-On the retrieval-cost tasks, compact spans cut total tokens 3.35x, 3.49x
-and 4.12x against whole-file retrieval for Qwen3.6-27B, Sonnet 4.5 and
-DeepSeek v3.1, 44/44 resolved in every arm
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c1}{C1}).
+Against a whole-file read the span is much cheaper. It cut total tokens
+by 3.35x for Qwen3.6-27B, 3.49x for Sonnet 4.5 and 4.12x for DeepSeek
+v3.1, and no attempt failed under either interface for any model.
 
-Against grep plus ranged reads with whole-file fallback, eleven
-\texttt{effic\_real2} tasks with Qwen3.5-27B cost 1,602 mean total
-tokens with text against 1,235 with definitions, a paired ratio of 1.297
-(task bootstrap 1.093--1.527), cheaper on 10/11 at 11/11 success in both
-arms, the one suite and model where the span replaced the read, with 0
-of 11 definitions followed by a reread
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c27}{C27}).
+That comparison flatters the span, because a capable agent rarely reads
+a whole file. The harder test gives the text arm grep, ranged reads and
+a whole-file fallback. On eleven tasks over real library source,
+Qwen3.5-27B spent 1,602 mean total tokens with text retrieval and 1,235
+with definitions, a paired ratio of 1.297 with a bootstrap interval from
+1.093 to 1.527, and definitions were cheaper on ten of the eleven. Both
+arms solved everything. This is also the one suite and model where the
+span genuinely replaced the read, with none of the eleven results
+followed by a reread, and that turns out to be the exception rather than
+the rule.
 
-Untrained, the 7B elected the definition operation in 1 of 48 rollouts;
-relabel-trained, 48 of 48 with no file reads, mean input 3,086 to 687,
-resolution 31/48 to 48/48
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c2}{C2}).
-Framing raised codenav use on two of three real-repository tasks at one
-seed
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c3}{C3},
-\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c6}{C6}).
+The saving therefore depends on two agent behaviours. The first is
+election, choosing the operation at all, and it is the tractable one. An
+untrained 7B invoked the definition operation in 1 of 48 rollouts; after
+relabel training it invoked it in all 48, stopped reading files
+entirely, and moved from 3,086 to 687 mean input tokens while resolution
+rose from 31 to 48. Prompt framing raised use of the equivalent command
+on two of three tasks in the shell-agent case study. A second pair of
+runs isolates policy from backend: with the tool enabled in both arms,
+the untrained 7B never invoked it across 24 rollouts and the trained
+model invoked it every time, moving mean input from 2,894 to 689 tokens
+and success from 14 to 24. A live Pyrefly backend reproduces the saving
+once the policy elects, but no arm held the policy fixed while varying
+the backend, so this measures the policy and not the server.
 
-With \texttt{lsp\_defn} on in both \texttt{effic} arms, the untrained 7B
-invoked the definition tool 0/24 and the trained arm 24/24, mean input
-2,894 to 689, success 14/24 to 24/24. The adapter is the election
-mechanism. A live-first Pyrefly backend with historical AST fallback
-reproduces the saving once the policy elects, backend unrecorded per
-row. No arm held the policy fixed while varying the backend, so this is
-not a measurement of a language-server token effect
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c4}{C4}).
-
-Pushed spans were reread 35/36, and 34/36 with an explicit sufficiency
-instruction that removed 2/36 and added 294 mean tokens for the 27B
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c31}{C31}).
+The second behaviour is substitution, actually using the span instead of
+the file, and it fails almost everywhere. When the span was pushed into
+the context unsolicited, models opened the defining file anyway on 35 of
+36 instances. Telling them explicitly that the span was complete and the
+file should not be opened removed two of those and cost the 27B 294
+extra tokens per task.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}lrr@{}}
@@ -354,42 +386,44 @@ DeepSeek v3.1 & 12/12 & 10/12 \\
 \end{longtable}
 }
 
-A separate run with Qwen3.6-27B, GLM-4.6 and GPT-5.6 Luna reproduced the
-pushed reread at 35/36. Among instances each model elected, reread was
-9/9, 4/9 and 7/12; GLM-4.6 solved only 5--6/12 of these tasks, and
-reread counted independently of success
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c34}{C34}).
+Letting the model ask for the span rather than pushing it does not fix
+this. A separate run with Qwen3.6-27B, GLM-4.6 and GPT-5.6 ``Luna''
+reproduced the pushed reread at 35 of 36, and among the instances each
+model chose to request the span, it still reread on 9 of 9, 4 of 9 and 7
+of 12. GLM-4.6 solved only five or six of these twelve tasks, and the
+reread was counted independently of whether the task succeeded.
 
-In a bash agent (mini-swe-agent, Sonnet 4.5) on real repositories,
-roughly 16 of 18 \texttt{codenav\ defn} calls were followed by a read of
-the file just resolved, sympy's \texttt{str.py} at 22 \texttt{sed}
-invocations. Three tasks, one seed, 60-step cap, from committed
-summaries. That agent took 0--3 whole-file reads in 44--60 actions
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c6}{C6},
-\href{https://github.com/ianbarber/lsps-for-llms/blob/main/docs/real_repo_progress.md}{log}).
+The behaviour is not an artifact of the constructed apparatus. In the
+shell-agent case study, roughly 16 of 18 definition calls were followed
+by a read of the file just resolved, in one case 22 ranged reads of the
+same sympy module. The same agent took between 0 and 3 whole-file reads
+in 44 to 60 actions, which is why the large whole-file ratios above do
+not describe its situation.
 
-A DAgger-style relabel~\citep{ross2011dagger} run on 39 demonstrations,
-none read-required, cut the post-span reread 11/12 to 0/12 on held-out
-instances disjoint in seed and template, mean input 1,157 to 748, a
-matched-success saving of 1.59x. Held-out pass moved 11/12 to 10/12: one
-rescue against two \texttt{xor} losses that pass visible and fail
-held-out, not distinguishable from noise at n=12 and one seed
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c33}{C33}).
-A pre-registered confirmation on twelve reserved instances, disjoint
-from the harvest in both seeds and templates and never run before,
-reproduced it: reread 12/12 untrained against 1/12 trained (11 removed,
-1 persisted, 0 induced), mean input 1,223 to 729, a matched-success
-saving of 1.725x, and held-out pass 12/12 to 11/12
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c35}{C35}).
+Training is the only lever that worked. A DAgger-style relabel
+run~\citep{ross2011dagger} harvested 39 demonstrations, none of which
+required a read, and cut the reread from 11 of 12 to none on held-out
+instances built from different seeds and different templates, moving
+mean input from 1,157 to 748 tokens for a saving of 1.59x on tasks both
+arms solved. Held-out pass moved from 11 to 10 of 12, one rescue against
+two losses that pass the visible test and fail the specification, which
+at twelve instances and one seed is not distinguishable from noise. We
+then spent a reserved set of twelve instances, disjoint from the harvest
+in both seeds and templates and never run before, as a pre-registered
+confirmation. It reproduced the effect: the reread fell from 12 of 12 to
+1 of 12, with eleven removed, one persisting and none induced, mean
+input fell from 1,223 to 729 tokens for a saving of 1.725x, and held-out
+pass moved from 12 to 11.
 
-What the training produced is a conditional policy, not suppression.
-Twelve further instances hoist each override's arithmetic into a
-module-level helper, so the span live Pyrefly returns for the call site
-is the complete definition of the method that binds and the bug sits
-outside it; a byte-paired twin differing in one line restores
-sufficiency, and a third arm leaves the repo identical and delivers a
-second genuine lookup at the helper
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c36}{C36}):
+Because every training example had a span that already contained the
+defect, this leaves open whether the model learned to judge sufficiency
+or simply to stop reading. To separate those, we built twelve instances
+that hoist each override's arithmetic into a module-level helper, so the
+span the server returns for the call site is still the complete
+definition of the method that binds but the defect now sits outside it.
+A twin repository differing in exactly one line restores sufficiency,
+and a third arm leaves the repository byte-identical while delivering a
+second genuine lookup at the helper.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -416,26 +450,35 @@ Trained & 12/12 & 2/12 & 0/12 \\
 \end{longtable}
 }
 
-Both conditions repaired 12/12 in every arm, visible and held-out, so
-this is retrieval behaviour at fixed correctness. Where reading was
-required the trained model read a mean of 1.00 times against the
-untrained model's 3.42, and where it was not, 0.17 and 0.00 against 1.58
-and 1.75; input tokens were lower in every arm. Two apparatus gates
-matter: an adversary over seventeen one-parameter repair forms reached
-held-out on none, and the harness's post-edit file view was redacted,
-since it would otherwise have delivered the hidden line with no read.
+The trained model went looking every time the span lacked the defect,
+and largely stopped when it did not. The untrained model read in all
+three situations, so it never made the distinction at all. Both
+conditions repaired every instance in every arm, on the visible and the
+held-out test, which means the manipulation moved retrieval behaviour
+without moving outcomes. Where reading was necessary the trained model
+read once on average against the untrained model's 3.42 times, and where
+it was unnecessary, 0.17 and 0.00 times against 1.58 and 1.75. Input
+tokens were lower in every arm. Two apparatus checks matter for reading
+this result. An adversary over seventeen one-parameter repair forms
+found none that reached the held-out test without retrieval, so the
+instances cannot be solved by guessing. The harness re-shows any file
+the agent has edited, which would have delivered the hidden line without
+a read, so that view is redacted while deliberate reads and grep remain
+available.
 
-\subsubsection{3.3 Does the moment the diagnostic arrives change the
+\subsection{Does the moment the diagnostic arrives change the
 outcome?}\label{does-the-moment-the-diagnostic-arrives-change-the-outcome}
 
-Accepted type-clean and held-out-correct outcomes were 1/12 under
-control, 10/12 with one-shot diagnostics at revision and 11/12 behind a
-submission gate, for task-bootstrap effects against control of +0.375
-{[}+0.250, +0.500{]} and +0.417 {[}+0.292, +0.500{]}. After-every-edit
-stayed at 1/12, +0.000 {[}−0.125, +0.125{]}, on a channel that fired in
-1 of 12 defect rows because the model edited before submitting in only 1
-of 12
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c32}{C32}).
+We compared three delivery points against a no-checker control: a
+diagnostic after every edit, a single diagnostic at revision, and a gate
+at submission that rejects a defective draft and asks for a repair.
+Accepted submissions that were both type-clean and correct against the
+held-out test rose from 1 of 12 with no checker to 10 of 12 at revision
+and 11 of 12 behind the gate, effects of +0.375 {[}+0.250, +0.500{]} and
++0.417 {[}+0.292, +0.500{]}. Delivery after every edit stayed at 1 of
+12, an effect of +0.000 {[}−0.125, +0.125{]}, but that arm hardly ran:
+the model edited before submitting on only 1 of 12 defects, so the
+checker fired once. It is unexercised rather than refuted.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -471,141 +514,153 @@ Wall time, clean (s) & 9.4 & 9.9 & 9.6 & 9.5 \\
 \emph{After-every-edit fired in 1 of 12 defect rows; mean edits 0.08
 against 0.17 in control.}
 
-The gate matched control on clean work in tokens and wall time, and
-spent about 2.2x control's wall time on defective work. It rejected 10
-of 12 submissions, all 10 repairing, retesting and resubmitting, and 2
-of 12 self-repaired beforehand; on \texttt{auth\_pipeline\_handler} the
-model received the diagnostic and submitted anyway with zero edits, so
-the gate's one-task edge over revision came from refusal, not
-information. Its single miss, \texttt{auth\_shapes\_protocol}, was
-type-clean after self-repair and failed held-out. The 0/12 false
-rejections are an apparatus check, since each clean control is that
-defect's validated gold and the checker is deterministic; population
-false-rejection rate is unmeasured. Calibration produced no usable
-natural checker-detectable defect: frontier inference sat at 18/18 and a
-descriptive 27B authoring arm at 12/12, 0/3 natural 7B drafts were
-coherent, and 2/8 coherent 14B drafts were already type-clean, so these
-twelve defects were seeded
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c10}{C10},
-\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c11}{C11},
-\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c16}{C16},
-\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c22}{C22}).
-A separate execution-feedback grid (two frontier models, 14 tasks, three
-seeds, three delivery modes) passed 252/252
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c12}{C12}).
+Cost tracks how often the checker speaks. On the clean drafts, which
+needed no diagnostic at all, the after-every-edit arm cost 651 tokens
+and the revision arm 619, against 591 for both the control and the gate.
+No arm produced a false rejection and all twelve clean drafts were
+accepted everywhere, so this is unconditional cost rather than spurious
+complaint: the two earlier arms hand over a diagnostic whether or not
+the draft needs one, while the gate speaks only when the submission is
+actually defective. On clean work the gate therefore matched control in
+both tokens and wall time, and it spent about 2.2 times control's wall
+time on defective work. It rejected 10 of 12 submissions, and every
+rejection ran the full repair, retest and resubmit cycle; the remaining
+two defects were repaired before the model submitted. Its one-task
+advantage over revision delivery came from refusal rather than
+information: on one task the model received the diagnostic, made no
+edits, and submitted anyway, and only the gate's rejection forced a
+repair. Its single miss is instructive in the other direction, since the
+model self-repaired into a state that was type-clean and still failed
+the held-out test, which is the limit of any gate built on a type
+checker.
 
-\subsection{4. Findings}\label{findings}
+Two caveats bound this. The zero false rejections on clean drafts are an
+apparatus check rather than a measurement, because each clean control is
+that defect's own validated gold and the checker is deterministic, so it
+could not have rejected them; the rate on real work is unmeasured. And
+the defects had to be seeded because capable models rarely leave
+checker-detectable ones: frontier inference sat at ceiling, no natural
+7B draft was coherent enough to use, and the coherent 14B drafts were
+already type-clean. A separate grid on execution feedback, covering two
+frontier models, fourteen tasks, three seeds and three delivery modes,
+passed every one of its 252 attempts.
 
-\subsubsection{4.1 Delivery}\label{delivery}
+\section{Discussion}\label{discussion}
 
-On a fifteen-task constructed dispatch suite at a single seed, one
-rollout per cell, semantic navigation added little over grep and ranged
-reads: a capable model reads the receiver's type wherever it is visible
-and opens the right file itself, so the lookup delivers what the agent
-already holds. Cost stayed flat as the type moved from a call-site
-annotation to the test's construction site to factory indirection: what
-carries resolution is correct types in the source, not the server that
-queries them. The exception is a constructed regime withholding the
-type-bearing source, where framed lookup resolved every rollout over
-fifteen tasks at five seeds and text did not; the same operation merely
-available changed nothing, so what the server adds is contingent on
-election. Sound types also sharpen the resolver mechanically, but that
-precision bought no agent-level outcome in a two-task pilot.
+\subsection{Delivery}\label{delivery}
 
-\subsubsection{4.2 Form}\label{form}
+In most cases semantic navigation added little over grep and ranged
+reads. A capable model reads the receiver's type wherever it appears in
+the code it already has open, works out which override binds, and goes
+to the right file on its own, so the lookup returns something the agent
+could already derive. Moving the type further from the call site did not
+change that. What carries resolution is the type being present and
+correct in the source, not the server that queries it.
+
+Navigation helps when the type is not in the code the agent can see:
+when it lives in a generated stub, behind a compiled extension, inside a
+vendored package, or on an object constructed somewhere the agent has
+not opened. The agent then has to fetch the type rather than read it,
+and lookup resolved tasks that text search could not. Even there, making
+the operation available was not enough. The agent had to be told to use
+it, and the arm that merely offered it performed like text search. Sound
+types also sharpen the resolver itself, distinguishing the right
+override among many identically named ones, but that precision produced
+no gain at the agent level.
+
+\subsection{Form}\label{form}
 
 A compact span is cheaper than a read only when it replaces the read,
-and whether it does is a property of the agent's policy, not the tool.
-The span is cheaper by a wide margin against whole-file retrieval and by
-a narrower one against competent grep plus ranged reads. Election is
-separable: framing changed which operation the capable models called,
-and training changed it on a 7B. Substitution did not follow: on twelve
-instances per model at one seed, a pushed span was reread by a local 27B
-and by four frontier API models in two independent runs, and neither a
-sufficiency instruction nor self-election removed it. In a three-task,
-single-seed probe with a frontier model on sympy, astropy and sphinx,
-definition calls sat on top of reads; the whole-file read the largest
-ratios are measured against was rare there, so the achievable regime is
-the smaller one. Relabel training removed the reread where instruction
-and election could not, on one model at one seed and again on a
-pre-registered confirmation set built from templates the training never
-saw. What it trained is conditional rather than blanket. Where the
-delivered span was genuine but did not contain the defect the trained
-model read every time, and once rather than the untrained model's three
-times; where the span sufficed it read twice in twelve, and where the
-missing definition was itself delivered, never. Correctness sat at
-ceiling throughout, so training changed when the agent retrieves rather
-than whether it succeeds, and it learned the distinction from
-demonstrations none of which required a read.
+and whether it does is a property of the agent's policy rather than of
+the tool. Against a whole-file read the span wins by a wide margin.
+Against competent grep and ranged reads the margin is narrow, and that
+is the margin a real coding agent is working with, because it rarely
+reads a whole file in the first place.
 
-\subsubsection{4.3 Timing}\label{timing}
+Two behaviours sit between the operation and the saving, and they proved
+very different. Election, choosing the operation at all, moves easily:
+prompt framing shifted it on capable models and training shifted it on a
+small one. Substitution, using the span instead of opening the file,
+resisted everything we tried. Models reread the file when the span was
+pushed at them, when they were told it was complete and not to open the
+file, and when they had asked for it themselves. The same behaviour
+appeared in a shell agent working on real repositories, so it is not a
+quirk of the constructed tasks.
 
-On twelve seeded defect/clean pairs, one model, one seed, a checker at
-the submission boundary converted accepted bad completions into repaired
-ones and one-shot delivery at revision performed comparably, while
-delivering the same checker after every edit changed nothing, on a
-channel that fired in one of twelve defect rows. Late delivery works;
-early delivery is unmeasured. The submission gate is preferable to
-delivery at revision because it charges its cost only to defective
-submissions: clean work cost no more than control in tokens or wall
-time, and the price fell on wall time when a submission was defective. A
-type-clean gate is only as behaviorally sound as its checker. Natural
-prevalence is unmeasured, and the same ceiling that forced seeding left
-execution feedback nothing to move on the tested small-task suite.
+Training moved substitution where nothing else did, and what it produced
+is a judgment rather than a reflex. Given a span that was genuine but
+did not contain the defect, the trained model went looking every time,
+and went once where the untrained model went three times. Given a span
+that sufficed it mostly stopped, and given the missing definition as
+well it stopped entirely. Correctness did not change in any of these
+conditions, so what training bought is an agent that retrieves when
+retrieval is warranted and not otherwise. It learned that distinction
+from demonstrations in which reading was never the right move.
 
-\subsection{5. If you use a coding
-agent}\label{if-you-use-a-coding-agent}
+\subsection{Timing}\label{timing}
 
-On a typed Python codebase, the clearest return is a type check at the
-submission boundary with a repair-and-resubmit loop.
+With the type checkers we have today, the end of the turn is the right
+place to run one. At the submission boundary the checker turned accepted
+bad completions into repaired ones, and a single diagnostic at revision
+did nearly as well. Delivering the same checker after every edit changed
+nothing, though the model so rarely edited before submitting that the
+channel barely ran, so that arm is unexercised rather than refuted.
 
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Lever
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Do this
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Changes if
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-Do nothing & Add no semantic navigation tool over typed source the agent
-already opens
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c9}{C9},
-\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c30}{C30})
-& Your source hides receiver types \\
-Add a tool or MCP server & Add one only where source the agent opens
-hides the receiver's type --- generated stubs, vendored or compiled
-boundaries --- and frame its use
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c30}{C30},
-\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c27}{C27})
-& You measure targets the agent misses \\
-Skill or prompt change & Tell the agent which operation to use and when,
-and verify post-span reads before budgeting a saving
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c3}{C3},
-\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c30}{C30},
-\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c31}{C31},
-\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c34}{C34})
-& A prompt removes the post-span read \\
-Wire a hook & Gate submission on the checker, requiring repair and
-retest before acceptance; after-every-edit firing is untested
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c32}{C32})
-& Your checker covers behavior, or your model edits repeatedly \\
-Fine-tune & Fine-tune only with weights you control; it buys a
-conditional policy --- the trained model still read every time the span
-did not contain the defect, and once rather than three times
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c33}{C33},
-\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c36}{C36})
-& Your insufficiency looks unlike a delegation \\
-\end{longtable}
-}
+Of the two late options the gate is the better deal, because it charges
+only defective work. Diagnostics at revision arrive whether or not the
+draft needs them, so every clean draft pays; the gate speaks only when a
+submission is actually broken, and clean work costs exactly what it did
+without a checker. Its ceiling is the checker behind it, since a
+submission can clear a type check and still be wrong, which is what
+happened on the one defect the gate let through. The opportunity is
+scarce in any case, because capable models rarely leave a
+checker-detectable defect at all.
+
+That conclusion is about today's checkers rather than about timing in
+principle. A type checker is built to report on every change because it
+was designed for a human in an editor, so an agent can only choose
+between taking all of its output or taking it at one chosen moment. A
+checker designed for an agent could instead decide when a diagnostic is
+worth interrupting for, and the interesting question is not when to run
+the checker but whether the checker can learn when to speak.
+
+\section{If you use a coding agent}\label{if-you-use-a-coding-agent}
+
+\textbf{Run your type checker at the end of the agent's turn and make it
+blocking.} This is the clearest return in the report and the cheapest to
+wire, because most harnesses expose a hook at exactly that point. It
+costs nothing when the agent's work is already clean, since a passing
+check produces no output and no repair. To see whether it is earning
+anything on your codebase, count how often it blocks and how often the
+resulting repair passes.
+
+\textbf{Do not add a navigation tool if your types are already written
+where the agent reads.} The test is one you can run by eye: open a file
+your agent works in and ask whether you could tell what type a variable
+holds from what is on the screen. If you can, so can the model, and it
+will find the right definition without help.
+
+\textbf{Consider one where you cannot.} The cases that matter are the
+ones where you personally would have to jump elsewhere to answer that
+question: types that live only in a generated stub, behind a compiled
+extension, inside a vendored package, or on an object assembled
+somewhere else. Installing the tool is not sufficient on its own. In our
+tests the arm that merely made the operation available performed like
+plain text search, and only the arm that told the agent to use it
+improved anything, so put that instruction in your project instructions
+or the tool description.
+
+\textbf{Do not assume a definition tool saves tokens until you have
+checked that the agent stops reading.} This is the single most reliable
+way to be disappointed. Count reads of the defining file that happen
+after the tool has already returned it; if that number is not near zero,
+the tool is adding context rather than replacing it, and your token bill
+will go up.
+
+\textbf{Fine-tuning works, but only if you own the weights.} That rules
+it out for a hosted agent. Where it is available it buys a genuine
+judgment rather than a blunt rule, since the trained model still went
+looking every time what it had been handed was insufficient.
 
 Keep type annotations correct and present; the text baseline exploited
 exactly that. On your own workload, measure wrong-file edits, post-span
@@ -613,13 +668,13 @@ reads of the defining file and spurious gate rejections; the clean-work
 cost here came from workspaces guaranteed clean. No result here ranks
 MCP servers, skill files and project instructions as delivery surfaces.
 
-\subsection{6. Future work}\label{future-work}
+\section{Future work}\label{future-work}
 
 The line most worth following is retrieval calibration. Thirty-nine
 demonstrations, none of which required a read, produced a model that
-goes looking when what it holds is inadequate and stops when it is not
---- a judgment about the sufficiency of retrieved context, learned from
-examples that never exercised it. Nothing in that is specific to
+goes looking when what it holds is inadequate and stops when it is not.
+That is a judgment about the sufficiency of retrieved context, learned
+from examples that never exercised it. Nothing in that is specific to
 definition spans. Agents retrieve constantly and mostly
 indiscriminately: grep hits, file chunks, documentation, search results,
 the output of other tools. If ``do I have enough?'' is trainable rather
@@ -632,17 +687,31 @@ hold at other scales, outside a task-specific adapter, and on a real
 codebase, where sufficiency is a matter of degree rather than a
 constructed fact?
 
-Three narrower lines follow. Population validity is open: the causal
-estimates rest on constructed workspaces, and the closest
-real-repository candidate went unaudited for leakage and fix-site
-resolution
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c17}{C17}).
-The hidden-type effect redacts a type rather than hiding it the way real
-code does, so transfer to generated stubs, vendored packages and
-compiled boundaries needs testing. The checker gate needs a
-rejection-precision run over drafts that are not the defect's own gold,
-and a design with repeated in-loop edits to exercise the
-after-every-edit channel.
+The second line is co-designing the tool with the agent. Every tool
+tested here was built for a human in an editor. A type checker reports
+on every change because a person can glance at a squiggle and ignore it,
+and a language server answers the question it was asked because a person
+chose to ask. An agent inherits both defaults and can only take all of
+the output or take it at one moment it picks, which is why the best
+available option was to run the checker once at the end of the turn. A
+checker built for an agent could decide when a diagnostic is worth
+interrupting for, suppressing what the agent is already about to fix and
+speaking up when it is heading somewhere expensive; a server built for
+an agent could return what the caller will need next rather than what it
+literally asked for. The question is not only when the agent should
+consult the tool, but whether the tool can learn when to speak. Nothing
+here tests that, and the gate result is the ceiling of what the
+human-facing version can do.
+
+Three narrower lines follow. The causal estimates all rest on
+constructed workspaces, so the results need reproducing on real
+repositories where the ambiguity and the defects arise on their own. The
+hidden-type rung redacts a type rather than hiding it the way real code
+does, so whether that result transfers to generated stubs, vendored
+packages and compiled boundaries is untested. And the gate's rejection
+precision is unknown, because every clean draft it saw was known-good by
+construction; measuring it needs drafts that might legitimately be
+refused.
 
 Standing scope: static tooling does not reach dynamic behavior,
 incorrect annotations, \texttt{Any}-heavy boundaries or logic outside
@@ -651,18 +720,21 @@ cheaply read the type-bearing source. Real-repository substitution
 frequency and live-server latency are unmeasured, six four-seed files
 lack their seed-2/3 shards, and no artifact records a server version.
 
-\subsection{7. Conclusion}\label{conclusion}
+\section{Conclusion}\label{conclusion}
 
-Semantic navigation added little on the dispatch suite tested, because
-the receiver's type was readable in the source the agent opened; where
-that type was withheld, lookup helped, but only once the agent was
-framed to use it. A compact definition span costs less than a read only
-when it displaces one; pushing, instructing and self-election did not
-produce that displacement, and training did --- producing a policy that
-goes looking when what it holds is inadequate and stops when it is not.
-A type check at the submission boundary, with a repair-and-resubmit
-loop, converted accepted bad completions into repaired ones on twelve
-seeded defect pairs.
+Go-to-definition added little, because the agent could already read the
+types it needed in the code in front of it. Where those types were not
+in that code, lookup did help, but only when the agent was told to use
+it rather than merely given it. A compact definition span costs less
+than reading the file only when it replaces the read, and models handed
+a span opened the file anyway. Prompting did not change that and
+training did: the trained model went looking when what it held was not
+enough, and stopped when it was. A type check at the moment of
+submission, with a repair-and-resubmit loop, turned bad submissions into
+repaired ones and cost nothing on clean work.
+
+In every case the tool was not the intervention. What moved the outcome
+was a change in what the agent did with it.
 
 %% paper/references.tex
 %% Included after the document body (pandoc --include-after-body).
