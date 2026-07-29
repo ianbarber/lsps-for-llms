@@ -64,6 +64,12 @@
 % style). Vendored as paper/arxiv.sty so the build needs no network for it.
 \usepackage{arxiv}
 
+% arxiv.sty stamps "A Preprint" under the title and in the running header.
+% Drop both: this is a technical report, not a preprint of a submission.
+% \undertitle is emptied rather than removed so \maketitle's spacing still works.
+\renewcommand{\undertitle}{}
+\renewcommand{\headeright}{}
+
 % --- Bibliography engine -----------------------------------------------------
 % natbib (numeric) is wired in. report-filters.lua turns the 8 related-work
 % arXiv links into \citep{...} while keeping the visible work name, and attaches
@@ -120,33 +126,41 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-We tested three language-server services against a text-capable
-baseline: symbol-to-definition resolution, a compact definition span in
-place of a whole file, and type-diagnostic timing.
+Coding agents are increasingly given language-server tooling ---
+go-to-definition, compact definition spans, type diagnostics --- on the
+assumption that better code intelligence makes a better agent. We tested
+that against a capable text baseline of grep, ranged reads and a shell,
+using seven models over constructed dispatch and seeded-defect suites,
+retrieval tasks built on real library source, and a shell agent on real
+repositories.
 
-Semantic navigation was near-neutral because the model reads the
-receiver's type in visible source and self-localizes. It helped only in
-a constructed regime that withheld that source, and only where the agent
-was framed to use it; merely making the operation available changed
-nothing. The compact span came from a static definition-span tool, not a
-live server. It cut total tokens 3.3--4.1x against whole-file retrieval
-and less against competent grep plus ranged reads, but only where it
-replaced the read. Pushing, instructing and self-election did not
-produce that replacement; training did, and produced a conditional
-policy rather than a blanket one --- the trained model still read every
-time the span did not contain the defect. On twelve seeded defects, a
-submission-boundary checker moved accepted-correct outcomes from 1/12 to
-11/12; the same checker after every edit changed nothing, on a channel
-that fired in one of twelve.
+Availability alone rarely paid. Go-to-definition was token-neutral
+wherever the receiver's type was readable in source the agent already
+opens, because the model reads the type and localizes itself; it lifted
+resolution only where the type was withheld, and then only when the
+agent was prompted to use it. A compact span --- from a static
+definition tool, not a live server --- cut total tokens 3.3--4.1x
+against whole-file retrieval, and 1.3x against grep plus ranged reads in
+the one suite where it genuinely replaced the read; elsewhere models
+read the file anyway, on 35 of 36 pushed spans. A type checker lifted
+accepted correct outcomes from 1/12 to 11/12 at the submission boundary
+and changed nothing during editing, on a channel the model exercised
+once in twelve.
+
+What moved outcomes in every thread was a change in the agent's policy,
+not the presence of the tool. Thirty-nine demonstrations taught a 27B to
+stop rereading, and the learned policy proved conditional rather than
+blanket: where the span genuinely lacked the defect it went looking
+every time. Installing the server is not the intervention.
 \end{abstract}
 
-\subsection{1. What we were
-investigating}\label{what-we-were-investigating}
+\subsection{1. Introduction}\label{introduction}
 
-A coding agent already has grep, ranged reads and a shell, so the useful
-question is not whether a language server can answer questions about
-code but whether it answers ones the agent cannot cheaply answer itself,
-in a cheaper form, or at a better moment.
+A language server answers questions about code. So does a coding agent
+holding grep, ranged reads and a shell, and it answers most of them for
+itself. What the server adds therefore turns on three narrower
+questions: whether it answers something the agent cannot, whether it
+answers in a cheaper form, and whether it answers at a better moment.
 
 IF: whether delivering the semantic information changes what the agent
 finds. A yes is the semantic arm resolving targets the text arm misses;
@@ -403,14 +417,13 @@ Trained & 12/12 & 2/12 & 0/12 \\
 }
 
 Both conditions repaired 12/12 in every arm, visible and held-out, so
-this is retrieval behaviour at fixed correctness. The trained model read
-a mean of 1.00 times where reading was required against the untrained
-model's 3.42, and 0.17 and 0.00 times where it was not against 1.58 and
-1.75; mean input tokens were lower in every arm (1,224 against 1,490;
-924 against 1,158; 950 against 1,181). An adversary over seventeen
-one-parameter repair forms found none that reached held-out without
-retrieval, and the harness's post-edit file view was redacted because it
-would otherwise have handed over the hidden line with no read.
+this is retrieval behaviour at fixed correctness. Where reading was
+required the trained model read a mean of 1.00 times against the
+untrained model's 3.42, and where it was not, 0.17 and 0.00 against 1.58
+and 1.75; input tokens were lower in every arm. Two apparatus gates
+matter: an adversary over seventeen one-parameter repair forms reached
+held-out on none, and the harness's post-edit file view was redacted,
+since it would otherwise have delivered the hidden line with no read.
 
 \subsubsection{3.3 Does the moment the diagnostic arrives change the
 outcome?}\label{does-the-moment-the-diagnostic-arrives-change-the-outcome}
@@ -516,14 +529,14 @@ ratios are measured against was rare there, so the achievable regime is
 the smaller one. Relabel training removed the reread where instruction
 and election could not, on one model at one seed and again on a
 pre-registered confirmation set built from templates the training never
-saw. What it trained is conditional rather than blanket: on twelve
-instances whose delivered span is genuine but does not contain the
-defect, the trained model read every time, and once rather than the
-untrained model's three times, while reading on two of twelve when the
-span sufficed and none of twelve when the missing definition was itself
-delivered. Correctness sat at ceiling in all six cells, so what training
-changed is when the agent retrieves, not whether it succeeds --- and it
-learned that from demonstrations none of which required a read.
+saw. What it trained is conditional rather than blanket. Where the
+delivered span was genuine but did not contain the defect the trained
+model read every time, and once rather than the untrained model's three
+times; where the span sufficed it read twice in twelve, and where the
+missing definition was itself delivered, never. Correctness sat at
+ceiling throughout, so training changed when the agent retrieves rather
+than whether it succeeds, and it learned the distinction from
+demonstrations none of which required a read.
 
 \subsubsection{4.3 Timing}\label{timing}
 
@@ -602,31 +615,41 @@ MCP servers, skill files and project instructions as delivery surfaces.
 
 \subsection{6. Future work}\label{future-work}
 
-Every estimate rests on constructed workspaces; the closest
-real-repository candidate, a Django case with a working environment and
-genuine override ambiguity, went unaudited for leakage and fix-site
+The line most worth following is retrieval calibration. Thirty-nine
+demonstrations, none of which required a read, produced a model that
+goes looking when what it holds is inadequate and stops when it is not
+--- a judgment about the sufficiency of retrieved context, learned from
+examples that never exercised it. Nothing in that is specific to
+definition spans. Agents retrieve constantly and mostly
+indiscriminately: grep hits, file chunks, documentation, search results,
+the output of other tools. If ``do I have enough?'' is trainable rather
+than a property of one tool, it is a general lever on agent cost, and
+the open questions are general ones. Does the judgment transfer across
+retrieval channels, or was it learned about one? Does it survive forms
+of inadequacy structurally unlike the delegation tested here, or is the
+model reading a surface cue rather than testing sufficiency? Does it
+hold at other scales, outside a task-specific adapter, and on a real
+codebase, where sufficiency is a matter of degree rather than a
+constructed fact?
+
+Three narrower lines follow. Population validity is open: the causal
+estimates rest on constructed workspaces, and the closest
+real-repository candidate went unaudited for leakage and fix-site
 resolution
 (\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c17}{C17}).
+The hidden-type effect redacts a type rather than hiding it the way real
+code does, so transfer to generated stubs, vendored packages and
+compiled boundaries needs testing. The checker gate needs a
+rejection-precision run over drafts that are not the defect's own gold,
+and a design with repeated in-loop edits to exercise the
+after-every-edit channel.
 
-The hidden-type effect is one apparatus at one model: fifteen
-constructed tasks whose type is redacted rather than hidden as real code
-hides types, so transfer to generated stubs, vendored packages or
-compiled boundaries is untested. The conditional retrieval policy is
-established against one form of insufficiency, a delegation to a hoisted
-helper in the same module; whether it holds when the missing information
-sits behind an import, a base class or a generated stub is untested, and
-a policy that keys on the span's shape rather than on its sufficiency
-would fail there. Repeated in-loop edits would exercise the
-after-every-edit channel. Rejection precision needs a gate run over
-drafts other than the defect's own gold.
-
-Real-repository substitution frequency and live-server latency are
-unmeasured; six four-seed files lack their seed-2/3 shards and no
-artifact records a server version. Static tooling does not reach dynamic
-behavior, incorrect annotations, \texttt{Any}-heavy boundaries or logic
-outside the checker. The resolution answer holds only while the agent
-can cheaply read the type-bearing source, and every workspace tested was
-small enough that it could.
+Standing scope: static tooling does not reach dynamic behavior,
+incorrect annotations, \texttt{Any}-heavy boundaries or logic outside
+the checker, and the resolution answer holds only while the agent can
+cheaply read the type-bearing source. Real-repository substitution
+frequency and live-server latency are unmeasured, six four-seed files
+lack their seed-2/3 shards, and no artifact records a server version.
 
 \subsection{7. Conclusion}\label{conclusion}
 
@@ -635,9 +658,11 @@ the receiver's type was readable in the source the agent opened; where
 that type was withheld, lookup helped, but only once the agent was
 framed to use it. A compact definition span costs less than a read only
 when it displaces one; pushing, instructing and self-election did not
-produce that displacement, and training did. A type check at the
-submission boundary, with a repair-and-resubmit loop, converted accepted
-bad completions into repaired ones on twelve seeded defect pairs.
+produce that displacement, and training did --- producing a policy that
+goes looking when what it holds is inadequate and stops when it is not.
+A type check at the submission boundary, with a repair-and-resubmit
+loop, converted accepted bad completions into repaired ones on twelve
+seeded defect pairs.
 
 %% paper/references.tex
 %% Included after the document body (pandoc --include-after-body).

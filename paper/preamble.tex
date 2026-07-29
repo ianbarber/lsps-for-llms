@@ -9,6 +9,12 @@
 % style). Vendored as paper/arxiv.sty so the build needs no network for it.
 \usepackage{arxiv}
 
+% arxiv.sty stamps "A Preprint" under the title and in the running header.
+% Drop both: this is a technical report, not a preprint of a submission.
+% \undertitle is emptied rather than removed so \maketitle's spacing still works.
+\renewcommand{\undertitle}{}
+\renewcommand{\headeright}{}
+
 % --- Bibliography engine -----------------------------------------------------
 % natbib (numeric) is wired in. report-filters.lua turns the 8 related-work
 % arXiv links into \citep{...} while keeping the visible work name, and attaches
