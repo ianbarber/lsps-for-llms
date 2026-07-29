@@ -1,0 +1,4905 @@
+{
+  "protocol": "navigation-v2",
+  "experiment": "read-required-substitution",
+  "claim": "C36",
+  "split": "readreq_pilot",
+  "generator": "scripts/experiments/navigation_readreq_tasks.py",
+  "seeds": [
+    67001,
+    67003,
+    67009,
+    67012,
+    67014,
+    67017
+  ],
+  "templates": [
+    "delegate_scale_offset",
+    "delegate_scale_sub",
+    "delegate_xor_offset"
+  ],
+  "flavours": [
+    "hoisted",
+    "inline"
+  ],
+  "disjoint_from": {
+    "pilot": [
+      17011,
+      17027,
+      17033,
+      17041
+    ],
+    "apparatus": [
+      29009,
+      29017,
+      29021,
+      29023,
+      29027,
+      29033,
+      29059,
+      29063,
+      29077,
+      29083,
+      29089,
+      29101
+    ],
+    "confirmation": [
+      41011,
+      41017,
+      41023,
+      41039,
+      41047,
+      41051,
+      41057,
+      41077,
+      41081,
+      41083,
+      41099,
+      41113
+    ],
+    "substrain_training": [
+      53003,
+      53017,
+      53023,
+      53029,
+      53047,
+      53051,
+      53063,
+      53069,
+      53077,
+      53087,
+      53093,
+      53101
+    ],
+    "spent_templates": [
+      "add",
+      "affine",
+      "modulo",
+      "multiply",
+      "negate_offset",
+      "square_offset",
+      "subtract",
+      "xor"
+    ]
+  },
+  "split_note": "Fresh read-required split. The delivered span is the genuine live-LSP definition of the method that binds at the visible call site, complete and untruncated, but the arithmetic it used to contain has been HOISTED into a module-level private helper in the same file, so the span no longer holds the constants the fix needs. The injected fault is a seed-keyed perturbation of the helper's MULTIPLIER (|delta| >= 2), so the residual between the buggy and the gold function is value-dependent and no constant correction applied to the delegation line can repair it. Every helper carries a trailing `# spec: <intended expression>` comment -- identical to the code on every non-target helper, differing in the multiplier on the target -- so one read of the defining file determines the correct repair outright. The `inline` flavour is the byte-paired sufficient twin: the same repository with the target class's body inlined and the helper left as dead code, differing in exactly one file and one line (the span's own second line). navigation_tasks.py is NOT modified; the hoist and the two splits are injected at runtime and asserted restored.",
+  "superseded_design_note": "The first version of this split inherited the frozen generator's `+1 on the offset` fault. That made the residual a CONSTANT, so rewriting the single line the model is handed as `helper(value) - 1` (or `+ 1` for the subtracting family) was an exact, fully generalizing repair with zero reads: measured live, 12/12 visible-pass, held-out-pass and generalization-pass on the candidate split. A blanket-suppressed adapter would have passed. Those instances were discarded before any GPU time; the seeds are re-derived under the added gates and the escape is now both proved impossible arithmetically (`no_read_adversary`) and re-tested live per instance (`live_constant_delta_repair_fails_heldout`).",
+  "insufficiency_bound": {
+    "definition": "F = every (A', B') in the declared support, minus every sibling class's A and B values, satisfying the single visible equation f(input) == expected. Each member yields a repository with byte-identical visible bytes and a different held_expected, so a deterministic non-reading policy is correct on at most max_multiplicity(held answers) / |F|.",
+    "min_distinct_heldout": 12,
+    "max_blind_guess_ceiling": 0.1,
+    "per_instance_ceilings": [
+      0.05,
+      0.071429,
+      0.093023,
+      0.055556,
+      0.05,
+      0.090909
+    ],
+    "expected_lucky_passes_heldout": 0.4109,
+    "expected_lucky_passes_exact_function": 0.2805
+  },
+  "no_read_adversary_bound": {
+    "definition": "A scripted zero-read policy that may see the prompt and the span, may run the VISIBLE test without limit, and may never read or grep the defining file. Every one-free-parameter expression it can write at the span's own line -- including every wrapper of the visible `helper(value)` call -- is enumerated over c in [-500, 500]; the visible test pins c; the gate requires EVERY visible-passing candidate to fail held-out. Two-free-parameter wrappers (`helper(value) + c1*value + c2`) are not pinned by one equation and are bounded by a ceiling instead.",
+    "forms": [
+      "c",
+      "c - g(value)",
+      "c - value",
+      "g(value) % c",
+      "g(value) * c",
+      "g(value) * c + value",
+      "g(value) + c",
+      "g(value) + c*value",
+      "g(value) - c",
+      "g(value) - c*value",
+      "g(value) // c",
+      "g(value) ^ c",
+      "value * c",
+      "value * value + c",
+      "value + c",
+      "value - c",
+      "value ^ c"
+    ],
+    "c_range": [
+      -500,
+      500
+    ],
+    "n_escapes_total": 0,
+    "heldout_only_note": "Separately counted and NOT an escape: rewrites that hit the held-out point while FAILING the visible test. They cannot solve the task -- the model's own <test/> rejects them -- but they would be a spurious held_out_pass if a rollout ended on one, and for the xor family such a c always exists, so they cannot be designed away. Neutralised by scoring `repair_correct` = visible_pass AND held_out_pass, which is what the C36 validity gates and decision rule key on; the raw held_out_pass is still published for numerical comparability with C33/C35.",
+    "per_instance_heldout_only_candidates": [
+      3,
+      10,
+      10,
+      10,
+      10,
+      10
+    ],
+    "per_instance_visible_passing": [
+      10,
+      11,
+      10,
+      11,
+      12,
+      10
+    ],
+    "per_instance_wrapper_ceiling": [
+      0.04,
+      0.04,
+      0.04,
+      0.04,
+      0.04,
+      0.04
+    ],
+    "per_instance_multiplier_delta": [
+      [
+        -7,
+        -1
+      ],
+      [
+        -6,
+        4
+      ],
+      [
+        -9,
+        4
+      ],
+      [
+        2,
+        -8
+      ],
+      [
+        -9,
+        -3
+      ],
+      [
+        6,
+        -1
+      ]
+    ]
+  },
+  "apparatus_deviations": {
+    "heldout_oracle_guard": "env.read_file is not glob-restricted, so a model-issued <read path=\"test_heldout.py\"/> returns the second equation and, combined with the visible pair, determines the function uniquely for the linear families -- a total solve with zero reads of the defining file. A guard denies model-issued reads of held-out paths, installed identically in every arm and both model conditions, with n_heldout_read_attempts published. The denial text is a bare refusal with no pointer to where to look instead. Across all existing run artifacts there are zero reads of any held-out path, so it denies a channel no rollout has used.",
+    "post_edit_view_redaction": "StreamAgent.deliver_turn re-shows the FULL numbered view of every file edited since the last turn, and the unit module is ~30 lines, far under the 250-line truncation. Since the task forces an edit in that file, the un-redacted scaffold hands a non-reading model the helper's `return <buggy>  # spec: <gold>` line for free on the turn after its first edit -- verified open per instance (`instr_post_edit_view_leaks_without_redactor`). That would make the instances not read-required at all and would put the BLANKET outcome out of reach, so the channel is CLOSED rather than merely detected: on that channel only, and only while the line is still pristine, it is replaced by a marked same-count placeholder that names the read which would reveal it. Deliberate <read>, <read lines=a-b>, <grep> and the agent's own edit-normalisation read are untouched and each is asserted to still deliver the line. Line numbering is preserved and the gold edit still applies through a redacted view. Installed identically in every arm and both model conditions; n_post_edit_redactions is published per row.",
+    "pycache_purge": "CPython invalidates .pyc on (source mtime seconds, size). The gold fix preserves byte length, so an edit inside the previous compile's mtime second reuses a stale .pyc and records a CORRECT repair as a FAILURE -- manufacturing the blanket signature. __pycache__ is purged before every scoring run AND before every test the model itself issues (`install_test_purge`), so the model's own feedback loop cannot be poisoned either; the driver also records held_out_pass_unpurged and flags stale_bytecode_suspected when they differ."
+  },
+  "grep_substitution_note": "Measured, not assumed (gate family `instr_*`): <grep> DOES scan the defining file, but a grep for the helper NAME returns only its def line and its call site -- the constants live on the NEXT line and grep has no context lines. Grep substitutes for <read> only with a pattern aimed at the arithmetic itself; the gate runs `return .*\\d` and verifies it returns the hidden line. (`return value` would NOT do: it misses the delegate_xor_offset family, whose helper line is `return (value ^ A) + B`.) Grep is therefore scored as SEEKING regardless, while actual delivery is established separately by a needle search over the rollout stream (`hidden_line_in_context`).",
+  "seed_selection": {
+    "pilot_seeds": [
+      67001,
+      67003,
+      67009,
+      67012,
+      67014,
+      67017
+    ],
+    "pilot_templates": [
+      "delegate_scale_offset",
+      "delegate_scale_sub",
+      "delegate_xor_offset",
+      "delegate_scale_offset",
+      "delegate_scale_sub",
+      "delegate_xor_offset"
+    ],
+    "main_seeds": [
+      71005,
+      71012,
+      71053,
+      71057,
+      71060,
+      71116,
+      71121,
+      71124,
+      71175,
+      71191,
+      71195,
+      71262
+    ],
+    "main_templates": [
+      "delegate_scale_offset",
+      "delegate_scale_sub",
+      "delegate_xor_offset",
+      "delegate_scale_offset",
+      "delegate_scale_sub",
+      "delegate_xor_offset",
+      "delegate_scale_offset",
+      "delegate_scale_sub",
+      "delegate_xor_offset",
+      "delegate_scale_offset",
+      "delegate_scale_sub",
+      "delegate_xor_offset"
+    ],
+    "pilot_matches": true,
+    "main_matches": true,
+    "ceiling_sum_heldout": 0.844,
+    "ceiling_sum_exact_function": 0.6351
+  },
+  "protocol_source_sha256": {
+    "scripts/experiments/navigation_tasks.py": "f860fd07fdeb2d4f78d89a047c6804d79cc3babd60fab7e0a06e839679692d97",
+    "scripts/experiments/run_navigation.py": "319743150b0b49a86e8c52d5264f5736d887a396e89bb5bfa7280fdce4ea72b8",
+    "scripts/analysis/analyze_navigation.py": "c48d2c7b696244107665c0b07f2cd6c4fc2febb7b6f6d67b931ea02cc9be5a77",
+    "scripts/run_navigation_pilot.sh": "727d6780ae7d3fbac35b88e02ddbe554b3a6687293e329a1f11d05a62f2adb77",
+    "scripts/run_navigation_confirmation.sh": "af48c93caf45c9047828d5a7b76eed7977419290ad6863917a1df88fa50a1d56",
+    "scaffold/stream_agent.py": "0267afa17a22c5f0eea77bce82927b5d25890dea0500312163d2a1e2e1f40b79",
+    "scaffold/real_env.py": "a1b38f3d228d659a37329eb9088a80de20422f07712de9bdd9b3c7ad694ae70b",
+    "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
+    "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
+    "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
+  },
+  "readreq_source_sha256": {
+    "scripts/experiments/navigation_readreq_tasks.py": "103a0689ed34453b0b8e31381da06564b4bd70a6f2baea2efbbab586488da06f",
+    "scripts/experiments/run_navigation_readreq.py": "c8ca9fc0ac77e53c47d3399c168e521ed436217b83649354b1d0d09b4dae7681",
+    "scripts/experiments/run_navigation_reread.py": "960b491e4b0c7eef20b6a6847e0308c963d0d52a6efeea278c801ff9df7e8336",
+    "scripts/analysis/analyze_navigation_readreq.py": "2b0dfdc8e9ce4e97b952c46e3f411699b27643563474fe800f7feb973d918bb7",
+    "scripts/run_navigation_readreq.sh": "8352381c0b4e6815690c80fa8fd3b8833b3aeea516ed804251c00724cb02717b"
+  },
+  "frozen_restored": {
+    "sources_restored": true,
+    "expression_restored": true,
+    "evaluate_restored": true,
+    "scripts/experiments/navigation_tasks.py_unmodified": true,
+    "scaffold/stream_agent.py_unmodified": true
+  },
+  "split_checks": {
+    "split_disjoint": true,
+    "seed_selection_reproducible": true,
+    "frozen_module_restored": true,
+    "all_instances_passed": true,
+    "instance_count": true,
+    "templates_balanced": true
+  },
+  "pyrefly": {
+    "path": "/home/ianbarber/Projects/Streams/.venv-streams/bin/pyrefly",
+    "version": "pyrefly 1.0.0"
+  },
+  "rows": [
+    {
+      "task": "nav_readreq_pilot_67001",
+      "split": "readreq_pilot",
+      "seed": 67001,
+      "template": "delegate_scale_offset",
+      "flavours": [
+        "hoisted",
+        "inline"
+      ],
+      "n_overrides": 9,
+      "target_path": "pkg/units/ugblmf.py",
+      "target_class": "Cotiwchx",
+      "helper": {
+        "name": "_hmwggea",
+        "def_line": 13,
+        "return_line": 14,
+        "return_text": "    return value * 50 + 46  # spec: value * 57 + 47",
+        "source": "def _hmwggea(value: int) -> int:\n    return value * 50 + 46  # spec: value * 57 + 47",
+        "multiplier": 57,
+        "buggy_multiplier": 50,
+        "offset": 47,
+        "buggy_offset": 46,
+        "delta": -7,
+        "offset_delta": -1,
+        "call_line": 19,
+        "flavour": "hoisted",
+        "gold_expression": "value * 57 + 47",
+        "buggy_expression": "value * 50 + 46",
+        "spec_comment": "  # spec: value * 57 + 47",
+        "inline_repair": {
+          "path": "pkg/units/ugblmf.py",
+          "start": 19,
+          "end": 19,
+          "new_text": "        return value * 57 + 47"
+        }
+      },
+      "span": {
+        "start": 18,
+        "end": 19,
+        "source": "    def mirfhhpi(self, value: int) -> int:\n        return _hmwggea(value)",
+        "delivered": "# pkg/units/ugblmf.py:18-19\n  18|     def mirfhhpi(self, value: int) -> int:\n  19|         return _hmwggea(value)",
+        "delivered_sha256": "0b96244f5fc5fecbc1434bd4e9c1bd6a5463c58b6220a64cb7260970e443dbf2",
+        "inline_delivered_sha256": "1c70341ea11893597ab7be6e290ab15983580d9ec3a652cf74afe6f03642888f"
+      },
+      "gold": {
+        "hoisted": {
+          "path": "pkg/units/ugblmf.py",
+          "start": 14,
+          "end": 14,
+          "new_text": "    return value * 57 + 47"
+        },
+        "inline": {
+          "path": "pkg/units/ugblmf.py",
+          "start": 19,
+          "end": 19,
+          "new_text": "        return value * 57 + 47"
+        }
+      },
+      "ambiguity": {
+        "input": 2,
+        "expected": 161,
+        "held_input": 9,
+        "held_expected": 560,
+        "truth": {
+          "a": 57,
+          "b": 47
+        },
+        "n_members": 20,
+        "n_distinct_heldout": 20,
+        "blind_guess_ceiling": 0.05,
+        "exact_function_ceiling": 0.05,
+        "truth_in_set": true,
+        "members": [
+          {
+            "a": 36,
+            "b": 89,
+            "held": 413
+          },
+          {
+            "a": 37,
+            "b": 87,
+            "held": 420
+          },
+          {
+            "a": 38,
+            "b": 85,
+            "held": 427
+          },
+          {
+            "a": 39,
+            "b": 83,
+            "held": 434
+          },
+          {
+            "a": 40,
+            "b": 81,
+            "held": 441
+          },
+          {
+            "a": 41,
+            "b": 79,
+            "held": 448
+          },
+          {
+            "a": 42,
+            "b": 77,
+            "held": 455
+          },
+          {
+            "a": 44,
+            "b": 73,
+            "held": 469
+          },
+          {
+            "a": 45,
+            "b": 71,
+            "held": 476
+          },
+          {
+            "a": 46,
+            "b": 69,
+            "held": 483
+          },
+          {
+            "a": 48,
+            "b": 65,
+            "held": 497
+          },
+          {
+            "a": 50,
+            "b": 61,
+            "held": 511
+          },
+          {
+            "a": 52,
+            "b": 57,
+            "held": 525
+          },
+          {
+            "a": 53,
+            "b": 55,
+            "held": 532
+          },
+          {
+            "a": 54,
+            "b": 53,
+            "held": 539
+          },
+          {
+            "a": 55,
+            "b": 51,
+            "held": 546
+          },
+          {
+            "a": 56,
+            "b": 49,
+            "held": 553
+          },
+          {
+            "a": 57,
+            "b": 47,
+            "held": 560
+          },
+          {
+            "a": 58,
+            "b": 45,
+            "held": 567
+          },
+          {
+            "a": 60,
+            "b": 41,
+            "held": 581
+          }
+        ],
+        "distinct_heldout": [
+          413,
+          420,
+          427,
+          434,
+          441,
+          448,
+          455,
+          469,
+          476,
+          483,
+          497,
+          511,
+          525,
+          532,
+          539,
+          546,
+          553,
+          560,
+          567,
+          581
+        ]
+      },
+      "adversary": {
+        "n_one_param_forms": 17,
+        "c_range": [
+          -500,
+          500
+        ],
+        "n_visible_passing_one_param": 10,
+        "escapes": [],
+        "no_escape": true,
+        "n_heldout_only_candidates": 3,
+        "heldout_only_candidates": [
+          {
+            "form": "g(value) - c",
+            "c": -64
+          },
+          {
+            "form": "g(value) + c",
+            "c": 64
+          },
+          {
+            "form": "value * value + c",
+            "c": 479
+          }
+        ],
+        "buggy_multiplier": 50,
+        "buggy_offset": 46,
+        "delta": [
+          -7,
+          -1
+        ],
+        "code_offset_route_multipliers": [],
+        "code_offset_route_passes_heldout": false,
+        "wrapper_family": "g(value) + c1*value + c2",
+        "wrapper_slope_range": [
+          -12,
+          12
+        ],
+        "wrapper_n_visible_passing": 25,
+        "wrapper_n_heldout_passing": 1,
+        "wrapper_blind_guess_ceiling": 0.04
+      },
+      "twin": {
+        "twin_member": {
+          "a": 37,
+          "b": 87,
+          "held": 420
+        },
+        "twin_byte_identity": true,
+        "twin_heldout_differs": true,
+        "twin_visible_identical_files": true,
+        "twin_target_module_diff_lines": [
+          14
+        ],
+        "twin_held_expected": [
+          560,
+          420
+        ],
+        "twin_expected": [
+          161,
+          161
+        ],
+        "twin_prompt_identical": true,
+        "twin_span_identical": true,
+        "twin_heldout_file_differs": true
+      },
+      "repair": {
+        "read_only_oracle": {
+          "ok": true,
+          "reason": "ok",
+          "path": "pkg/units/ugblmf.py",
+          "helper": "_hmwggea",
+          "line": 14,
+          "new_text": "    return value * 57 + 47",
+          "spec_expression": "value * 57 + 47",
+          "code_expression": "value * 50 + 46",
+          "equation_multipliers": [],
+          "equation_expression": null,
+          "spec_route_verifies_visible_fact": true,
+          "equation_route_agrees": false
+        },
+        "wrapper_probe": [
+          {
+            "c": -1,
+            "new_text": "        return _hmwggea(value) - 1",
+            "applied": true,
+            "visible": false,
+            "held": false
+          },
+          {
+            "c": 1,
+            "new_text": "        return _hmwggea(value) + 1",
+            "applied": true,
+            "visible": false,
+            "held": false
+          },
+          {
+            "c": 15,
+            "new_text": "        return _hmwggea(value) + 15",
+            "applied": true,
+            "visible": true,
+            "held": false
+          }
+        ],
+        "gold_route": {
+          "applied": true,
+          "visible": true,
+          "held": true,
+          "edit": {
+            "path": "pkg/units/ugblmf.py",
+            "start": 14,
+            "end": 14,
+            "new_text": "    return value * 57 + 47"
+          }
+        },
+        "in_span_route": {
+          "applied": true,
+          "visible": true,
+          "held": true,
+          "edit": {
+            "path": "pkg/units/ugblmf.py",
+            "start": 19,
+            "end": 19,
+            "new_text": "        return value * 57 + 47"
+          }
+        },
+        "hardcode_route": {
+          "applied": true,
+          "visible": true,
+          "held": false,
+          "edit": {
+            "path": "pkg/units/ugblmf.py",
+            "start": 19,
+            "end": 19,
+            "new_text": "        return 161"
+          }
+        },
+        "bytecode_probe": {
+          "applied": true,
+          "held_out_pass_unpurged": true,
+          "held_out_pass_purged": true,
+          "stale_bytecode_reproduced": false
+        }
+      },
+      "instrumentation": {
+        "checks": {
+          "ledger_sees_model_whole_read": true,
+          "ledger_sees_model_ranged_read": true,
+          "ledger_sees_post_edit_view": true,
+          "ledger_sees_grep_scan": true,
+          "ledger_sees_edit_normalisation": true,
+          "whole_read_delivers_hidden_line": true,
+          "ranged_read_delivers_hidden_line": true,
+          "edit_normalisation_sees_true_source": true,
+          "post_edit_view_leaks_without_redactor": true,
+          "post_edit_view_omits_hidden_line": true,
+          "post_edit_view_omits_gold_expression": true,
+          "post_edit_view_marks_elision": true,
+          "post_edit_view_preserves_line_count": true,
+          "redaction_counted": true,
+          "deliberate_read_still_delivers_after_redactor": true,
+          "ranged_read_still_delivers_after_redactor": true,
+          "grep_reaches_target_file": true,
+          "grep_on_name_returns_def_and_call": true,
+          "grep_on_name_omits_constant": true,
+          "grep_on_arithmetic_delivers_hidden_line": true,
+          "heldout_view_denied": true,
+          "heldout_denial_gives_no_pointer": true,
+          "heldout_grep_denied": true,
+          "heldout_attempts_counted": true,
+          "model_tests_are_purged": true,
+          "target_module_under_view_truncation": true
+        },
+        "channels": [
+          "model_read_whole",
+          "model_read_ranged",
+          "edit_normalisation",
+          "post_edit_view",
+          "post_edit_view",
+          "model_read_whole",
+          "model_read_ranged",
+          "edit_normalisation",
+          "grep_scan",
+          "grep_scan"
+        ],
+        "n_heldout_attempts": 3,
+        "n_post_edit_redactions": 1,
+        "n_test_purges": 1
+      },
+      "lsp": {
+        "raw_enclosing_sha256": "e9a2fc882e748b1686dd611c72f049ba8a33921f148cae68c2df0a6eeb654f07",
+        "raw_enclosing_path": "pkg/units/ugblmf.py",
+        "delivered_span_sha256": "0b96244f5fc5fecbc1434bd4e9c1bd6a5463c58b6220a64cb7260970e443dbf2",
+        "chained_span_path": "pkg/units/ugblmf.py",
+        "chained_span_sha256": "edb01f75f4c4e861b90bc335e050cf514a3b2ca58bcc569f750ee1436cf199e7",
+        "chained_span": "def _hmwggea(value: int) -> int:\n    return value * 50 + 46  # spec: value * 57 + 47",
+        "errors": []
+      },
+      "frozen_validation": {
+        "hoisted": {
+          "task": "nav_readreq_pilot_67001",
+          "split": "readreq_pilot",
+          "template": "delegate_scale_offset",
+          "n_overrides": 9,
+          "checks": {
+            "typed_base_fails": true,
+            "typed_heldout_base_fails": true,
+            "typed_gold_passes": true,
+            "typed_heldout_gold_passes": true,
+            "erased_base_fails": true,
+            "erased_heldout_base_fails": true,
+            "erased_gold_passes": true,
+            "erased_heldout_gold_passes": true,
+            "runtime_files_identical": true,
+            "runtime_outputs_identical": true,
+            "factory_implementation_identical": true,
+            "all_declared_returns_match_runtime": true,
+            "specific_overloads_precede_fallback": true,
+            "variants_type_clean": true,
+            "gold_identical": true,
+            "override_count_valid": true,
+            "registry_trace_unique": true,
+            "typed_lsp_discriminates": true,
+            "typed_lsp_span_matches_pristine_target": true,
+            "erased_lsp_nondiscriminating": true,
+            "literal_widening_removes_discrimination": true,
+            "lsp_server_healthy": true,
+            "lsp_no_errors": true,
+            "prompt_has_no_target_leak": true,
+            "positive_control_materialized": true
+          },
+          "lsp": {
+            "typed": {
+              "path": "pkg/units/ugblmf.py",
+              "span_hash": "e9a2fc882e748b1686dd611c72f049ba8a33921f148cae68c2df0a6eeb654f07",
+              "latency_ms": 6021.0,
+              "health_path": "pkg/units/ugblmf.py",
+              "resolved_class": "Cotiwchx",
+              "resolved_method_span_hash": "94cc2efd0a86bd1e38a097de2a394546fbfdc52b7b8b4b6254447b97dcc8e23c"
+            },
+            "typed_widened": {
+              "path": "pkg/base.py",
+              "span_hash": "af9426f543d6211eb482bf930378256b02279691846263aad04d69bccca25164",
+              "resolved_class": "Bfxmbaqx"
+            },
+            "erased": {
+              "path": "pkg/base.py",
+              "span_hash": "af9426f543d6211eb482bf930378256b02279691846263aad04d69bccca25164",
+              "latency_ms": 6020.0,
+              "health_path": "pkg/base.py",
+              "resolved_class": "Bfxmbaqx",
+              "resolved_method_span_hash": "e50a2f37f001f4f390c9dc1189478a6c6dca28ad43c5b0715cb43b2332eeaeb4"
+            }
+          },
+          "lsp_errors": [],
+          "runtime_factory_classes": {
+            "typed": {
+              "kbekro": "Cotiwchx",
+              "kdukzo": "Cjbidpup",
+              "kfsdvj": "Cmtdipsp",
+              "kjfklh": "Cnjleviv",
+              "kjqwiz": "Caluprrs",
+              "kphtkv": "Cppggvxe",
+              "kpszll": "Cwiobkrk",
+              "ksyknz": "Czwnzlyl",
+              "kvairk": "Cwiowtho"
+            },
+            "erased": {
+              "kbekro": "Cotiwchx",
+              "kdukzo": "Cjbidpup",
+              "kfsdvj": "Cmtdipsp",
+              "kjfklh": "Cnjleviv",
+              "kjqwiz": "Caluprrs",
+              "kphtkv": "Cppggvxe",
+              "kpszll": "Cwiobkrk",
+              "ksyknz": "Czwnzlyl",
+              "kvairk": "Cwiowtho"
+            }
+          },
+          "declared_registry_contract": {
+            "kjqwiz": "Caluprrs",
+            "kdukzo": "Cjbidpup",
+            "kjfklh": "Cnjleviv",
+            "kphtkv": "Cppggvxe",
+            "kpszll": "Cwiobkrk",
+            "kbekro": "Cotiwchx",
+            "kfsdvj": "Cmtdipsp",
+            "kvairk": "Cwiowtho",
+            "ksyknz": "Czwnzlyl"
+          },
+          "parsed_typed_stub_contract": {
+            "kjqwiz": "Caluprrs",
+            "kdukzo": "Cjbidpup",
+            "kjfklh": "Cnjleviv",
+            "kphtkv": "Cppggvxe",
+            "kpszll": "Cwiobkrk",
+            "kbekro": "Cotiwchx",
+            "kfsdvj": "Cmtdipsp",
+            "kvairk": "Cwiowtho",
+            "ksyknz": "Czwnzlyl"
+          },
+          "type_errors": {
+            "typed": [],
+            "erased": []
+          },
+          "leakage": [],
+          "passed": true
+        },
+        "inline": {
+          "task": "nav_readreq_pilot_67001",
+          "split": "readreq_pilot",
+          "template": "delegate_scale_offset",
+          "n_overrides": 9,
+          "checks": {
+            "typed_base_fails": true,
+            "typed_heldout_base_fails": true,
+            "typed_gold_passes": true,
+            "typed_heldout_gold_passes": true,
+            "erased_base_fails": true,
+            "erased_heldout_base_fails": true,
+            "erased_gold_passes": true,
+            "erased_heldout_gold_passes": true,
+            "runtime_files_identical": true,
+            "runtime_outputs_identical": true,
+            "factory_implementation_identical": true,
+            "all_declared_returns_match_runtime": true,
+            "specific_overloads_precede_fallback": true,
+            "variants_type_clean": true,
+            "gold_identical": true,
+            "override_count_valid": true,
+            "registry_trace_unique": true,
+            "typed_lsp_discriminates": true,
+            "typed_lsp_span_matches_pristine_target": true,
+            "erased_lsp_nondiscriminating": true,
+            "literal_widening_removes_discrimination": true,
+            "lsp_server_healthy": true,
+            "lsp_no_errors": true,
+            "prompt_has_no_target_leak": true,
+            "positive_control_materialized": true
+          },
+          "lsp": {
+            "typed": {
+              "path": "pkg/units/ugblmf.py",
+              "span_hash": "2851ea25592398f984166cc4b67e469f3f3888ac055426f6073ca4e2a4a7cdbd",
+              "latency_ms": 6020.7,
+              "health_path": "pkg/units/ugblmf.py",
+              "resolved_class": "Cotiwchx",
+              "resolved_method_span_hash": "a4b6870d99fc3acbc9bbdb69e4e15693425e74f2bfad0c22f816217a8018d728"
+            },
+            "typed_widened": {
+              "path": "pkg/base.py",
+              "span_hash": "af9426f543d6211eb482bf930378256b02279691846263aad04d69bccca25164",
+              "resolved_class": "Bfxmbaqx"
+            },
+            "erased": {
+              "path": "pkg/base.py",
+              "span_hash": "af9426f543d6211eb482bf930378256b02279691846263aad04d69bccca25164",
+              "latency_ms": 6020.1,
+              "health_path": "pkg/base.py",
+              "resolved_class": "Bfxmbaqx",
+              "resolved_method_span_hash": "e50a2f37f001f4f390c9dc1189478a6c6dca28ad43c5b0715cb43b2332eeaeb4"
+            }
+          },
+          "lsp_errors": [],
+          "runtime_factory_classes": {
+            "typed": {
+              "kbekro": "Cotiwchx",
+              "kdukzo": "Cjbidpup",
+              "kfsdvj": "Cmtdipsp",
+              "kjfklh": "Cnjleviv",
+              "kjqwiz": "Caluprrs",
+              "kphtkv": "Cppggvxe",
+              "kpszll": "Cwiobkrk",
+              "ksyknz": "Czwnzlyl",
+              "kvairk": "Cwiowtho"
+            },
+            "erased": {
+              "kbekro": "Cotiwchx",
+              "kdukzo": "Cjbidpup",
+              "kfsdvj": "Cmtdipsp",
+              "kjfklh": "Cnjleviv",
+              "kjqwiz": "Caluprrs",
+              "kphtkv": "Cppggvxe",
+              "kpszll": "Cwiobkrk",
+              "ksyknz": "Czwnzlyl",
+              "kvairk": "Cwiowtho"
+            }
+          },
+          "declared_registry_contract": {
+            "kjqwiz": "Caluprrs",
+            "kdukzo": "Cjbidpup",
+            "kjfklh": "Cnjleviv",
+            "kphtkv": "Cppggvxe",
+            "kpszll": "Cwiobkrk",
+            "kbekro": "Cotiwchx",
+            "kfsdvj": "Cmtdipsp",
+            "kvairk": "Cwiowtho",
+            "ksyknz": "Czwnzlyl"
+          },
+          "parsed_typed_stub_contract": {
+            "kjqwiz": "Caluprrs",
+            "kdukzo": "Cjbidpup",
+            "kjfklh": "Cnjleviv",
+            "kphtkv": "Cppggvxe",
+            "kpszll": "Cwiobkrk",
+            "kbekro": "Cotiwchx",
+            "kfsdvj": "Cmtdipsp",
+            "kvairk": "Cwiowtho",
+            "ksyknz": "Czwnzlyl"
+          },
+          "type_errors": {
+            "typed": [],
+            "erased": []
+          },
+          "leakage": [],
+          "passed": true
+        }
+      },
+      "checks": {
+        "frozen_validator_hoisted": true,
+        "frozen_validator_inline": true,
+        "span_meta_path_is_target": true,
+        "span_lsp_path_is_target": true,
+        "span_lsp_span_equals_metadata": true,
+        "span_no_lsp_errors": true,
+        "span_gold_not_in_span": true,
+        "span_span_has_numbered_lines": true,
+        "span_span_names_target_path": true,
+        "inline_span_usable": true,
+        "narrowing_hides_nothing": true,
+        "single_lsp_candidate": true,
+        "live_span_equals_delivered": true,
+        "chained_span_is_pristine_helper": true,
+        "no_lsp_errors_genuineness": true,
+        "span_excludes_helper_def": true,
+        "span_names_helper_call": true,
+        "helper_lines_outside_span": true,
+        "inline_span_carries_the_information": true,
+        "ambiguity_set_large_enough": true,
+        "blind_guess_ceiling_within_bound": true,
+        "truth_in_ambiguity_set": true,
+        "heldout_varies_over_ambiguity_set": true,
+        "ambiguity_matches_task_metadata": true,
+        "table_key_unique": true,
+        "positive_outputs": true,
+        "twin_byte_identity": true,
+        "twin_heldout_differs": true,
+        "no_read_adversary_fails_heldout": true,
+        "wrapper_family_ceiling_within_bound": true,
+        "bug_is_value_dependent": true,
+        "constant_delta_repair_excluded": true,
+        "slope_wrapper_repair_excluded": true,
+        "spec_comment_is_load_bearing": true,
+        "heldout_oracle_guarded": true,
+        "heldout_not_greppable": true,
+        "guard_leaves_source_readable": true,
+        "instr_ledger_sees_model_whole_read": true,
+        "instr_ledger_sees_model_ranged_read": true,
+        "instr_ledger_sees_post_edit_view": true,
+        "instr_ledger_sees_grep_scan": true,
+        "instr_ledger_sees_edit_normalisation": true,
+        "instr_whole_read_delivers_hidden_line": true,
+        "instr_ranged_read_delivers_hidden_line": true,
+        "instr_edit_normalisation_sees_true_source": true,
+        "instr_post_edit_view_leaks_without_redactor": true,
+        "instr_post_edit_view_omits_hidden_line": true,
+        "instr_post_edit_view_omits_gold_expression": true,
+        "instr_post_edit_view_marks_elision": true,
+        "instr_post_edit_view_preserves_line_count": true,
+        "instr_redaction_counted": true,
+        "instr_deliberate_read_still_delivers_after_redactor": true,
+        "instr_ranged_read_still_delivers_after_redactor": true,
+        "instr_grep_reaches_target_file": true,
+        "instr_grep_on_name_returns_def_and_call": true,
+        "instr_grep_on_name_omits_constant": true,
+        "instr_grep_on_arithmetic_delivers_hidden_line": true,
+        "instr_heldout_view_denied": true,
+        "instr_heldout_denial_gives_no_pointer": true,
+        "instr_heldout_grep_denied": true,
+        "instr_heldout_attempts_counted": true,
+        "instr_model_tests_are_purged": true,
+        "instr_target_module_under_view_truncation": true,
+        "read_only_oracle_solves": true,
+        "oracle_spec_route_verifies_visible_fact": true,
+        "live_constant_delta_repair_fails_heldout": true,
+        "both_repair_routes_pass": true,
+        "hardcode_fails_heldout": true,
+        "gold_passes_after_purge": true,
+        "hoist_wellformed": true,
+        "helper_bodies_delegate": true,
+        "rendered_constants_match_table": true,
+        "spec_comments_uniform": true,
+        "exactly_one_spec_mismatch": true,
+        "identifiers_unique": true,
+        "hoist_behaviour_preserving": true,
+        "twin_runtime_identical": true,
+        "twin_differs_by_one_line": true,
+        "twin_prompt_identical": true,
+        "twin_tests_identical": true,
+        "twin_expected_identical": true,
+        "flavours_share_gold_file": true,
+        "pycache_purged": true,
+        "selection_gates_reproduce": true
+      },
+      "failing": [],
+      "passed": true
+    },
+    {
+      "task": "nav_readreq_pilot_67003",
+      "split": "readreq_pilot",
+      "seed": 67003,
+      "template": "delegate_scale_sub",
+      "flavours": [
+        "hoisted",
+        "inline"
+      ],
+      "n_overrides": 13,
+      "target_path": "pkg/units/ulmpbn.py",
+      "target_class": "Cvmhidzn",
+      "helper": {
+        "name": "_hchruuk",
+        "def_line": 13,
+        "return_line": 14,
+        "return_text": "    return value * 5 - 47  # spec: value * 11 - 43",
+        "source": "def _hchruuk(value: int) -> int:\n    return value * 5 - 47  # spec: value * 11 - 43",
+        "multiplier": 11,
+        "buggy_multiplier": 5,
+        "offset": 43,
+        "buggy_offset": 47,
+        "delta": -6,
+        "offset_delta": 4,
+        "call_line": 19,
+        "flavour": "hoisted",
+        "gold_expression": "value * 11 - 43",
+        "buggy_expression": "value * 5 - 47",
+        "spec_comment": "  # spec: value * 11 - 43",
+        "inline_repair": {
+          "path": "pkg/units/ulmpbn.py",
+          "start": 19,
+          "end": 19,
+          "new_text": "        return value * 11 - 43"
+        }
+      },
+      "span": {
+        "start": 18,
+        "end": 19,
+        "source": "    def mqshvrue(self, value: int) -> int:\n        return _hchruuk(value)",
+        "delivered": "# pkg/units/ulmpbn.py:18-19\n  18|     def mqshvrue(self, value: int) -> int:\n  19|         return _hchruuk(value)",
+        "delivered_sha256": "150559d65f255dd1806e88b7d7b42e5826b0e5f999de9925d507d07836b0c408",
+        "inline_delivered_sha256": "9dc135f8034682af03cbec84760929bde616fe0b78cc0c77e3e57bdd2d19c4ce"
+      },
+      "gold": {
+        "hoisted": {
+          "path": "pkg/units/ulmpbn.py",
+          "start": 14,
+          "end": 14,
+          "new_text": "    return value * 11 - 43"
+        },
+        "inline": {
+          "path": "pkg/units/ulmpbn.py",
+          "start": 19,
+          "end": 19,
+          "new_text": "        return value * 11 - 43"
+        }
+      },
+      "ambiguity": {
+        "input": 5,
+        "expected": 12,
+        "held_input": 12,
+        "held_expected": 89,
+        "truth": {
+          "a": 11,
+          "b": 43
+        },
+        "n_members": 14,
+        "n_distinct_heldout": 14,
+        "blind_guess_ceiling": 0.071429,
+        "exact_function_ceiling": 0.071429,
+        "truth_in_set": true,
+        "members": [
+          {
+            "a": 5,
+            "b": 13,
+            "held": 47
+          },
+          {
+            "a": 6,
+            "b": 18,
+            "held": 54
+          },
+          {
+            "a": 7,
+            "b": 23,
+            "held": 61
+          },
+          {
+            "a": 8,
+            "b": 28,
+            "held": 68
+          },
+          {
+            "a": 10,
+            "b": 38,
+            "held": 82
+          },
+          {
+            "a": 11,
+            "b": 43,
+            "held": 89
+          },
+          {
+            "a": 12,
+            "b": 48,
+            "held": 96
+          },
+          {
+            "a": 14,
+            "b": 58,
+            "held": 110
+          },
+          {
+            "a": 15,
+            "b": 63,
+            "held": 117
+          },
+          {
+            "a": 16,
+            "b": 68,
+            "held": 124
+          },
+          {
+            "a": 17,
+            "b": 73,
+            "held": 131
+          },
+          {
+            "a": 18,
+            "b": 78,
+            "held": 138
+          },
+          {
+            "a": 19,
+            "b": 83,
+            "held": 145
+          },
+          {
+            "a": 20,
+            "b": 88,
+            "held": 152
+          }
+        ],
+        "distinct_heldout": [
+          47,
+          54,
+          61,
+          68,
+          82,
+          89,
+          96,
+          110,
+          117,
+          124,
+          131,
+          138,
+          145,
+          152
+        ]
+      },
+      "adversary": {
+        "n_one_param_forms": 17,
+        "c_range": [
+          -500,
+          500
+        ],
+        "n_visible_passing_one_param": 11,
+        "escapes": [],
+        "no_escape": true,
+        "n_heldout_only_candidates": 10,
+        "heldout_only_candidates": [
+          {
+            "form": "value - c",
+            "c": -77
+          },
+          {
+            "form": "g(value) - c",
+            "c": -76
+          },
+          {
+            "form": "value * value + c",
+            "c": -55
+          },
+          {
+            "form": "g(value) + c",
+            "c": 76
+          },
+          {
+            "form": "value + c",
+            "c": 77
+          },
+          {
+            "form": "g(value) ^ c",
+            "c": 84
+          },
+          {
+            "form": "value ^ c",
+            "c": 85
+          },
+          {
+            "form": "c",
+            "c": 89
+          },
+          {
+            "form": "c - value",
+            "c": 101
+          },
+          {
+            "form": "c - g(value)",
+            "c": 102
+          }
+        ],
+        "buggy_multiplier": 5,
+        "buggy_offset": 47,
+        "delta": [
+          -6,
+          4
+        ],
+        "code_offset_route_multipliers": [],
+        "code_offset_route_passes_heldout": false,
+        "wrapper_family": "g(value) + c1*value + c2",
+        "wrapper_slope_range": [
+          -12,
+          12
+        ],
+        "wrapper_n_visible_passing": 25,
+        "wrapper_n_heldout_passing": 1,
+        "wrapper_blind_guess_ceiling": 0.04
+      },
+      "twin": {
+        "twin_member": {
+          "a": 6,
+          "b": 18,
+          "held": 54
+        },
+        "twin_byte_identity": true,
+        "twin_heldout_differs": true,
+        "twin_visible_identical_files": true,
+        "twin_target_module_diff_lines": [
+          14
+        ],
+        "twin_held_expected": [
+          89,
+          54
+        ],
+        "twin_expected": [
+          12,
+          12
+        ],
+        "twin_prompt_identical": true,
+        "twin_span_identical": true,
+        "twin_heldout_file_differs": true
+      },
+      "repair": {
+        "read_only_oracle": {
+          "ok": true,
+          "reason": "ok",
+          "path": "pkg/units/ulmpbn.py",
+          "helper": "_hchruuk",
+          "line": 14,
+          "new_text": "    return value * 11 - 43",
+          "spec_expression": "value * 11 - 43",
+          "code_expression": "value * 5 - 47",
+          "equation_multipliers": [],
+          "equation_expression": null,
+          "spec_route_verifies_visible_fact": true,
+          "equation_route_agrees": false
+        },
+        "wrapper_probe": [
+          {
+            "c": -1,
+            "new_text": "        return _hchruuk(value) - 1",
+            "applied": true,
+            "visible": false,
+            "held": false
+          },
+          {
+            "c": 1,
+            "new_text": "        return _hchruuk(value) + 1",
+            "applied": true,
+            "visible": false,
+            "held": false
+          },
+          {
+            "c": 34,
+            "new_text": "        return _hchruuk(value) + 34",
+            "applied": true,
+            "visible": true,
+            "held": false
+          }
+        ],
+        "gold_route": {
+          "applied": true,
+          "visible": true,
+          "held": true,
+          "edit": {
+            "path": "pkg/units/ulmpbn.py",
+            "start": 14,
+            "end": 14,
+            "new_text": "    return value * 11 - 43"
+          }
+        },
+        "in_span_route": {
+          "applied": true,
+          "visible": true,
+          "held": true,
+          "edit": {
+            "path": "pkg/units/ulmpbn.py",
+            "start": 19,
+            "end": 19,
+            "new_text": "        return value * 11 - 43"
+          }
+        },
+        "hardcode_route": {
+          "applied": true,
+          "visible": true,
+          "held": false,
+          "edit": {
+            "path": "pkg/units/ulmpbn.py",
+            "start": 19,
+            "end": 19,
+            "new_text": "        return 12"
+          }
+        },
+        "bytecode_probe": {
+          "applied": true,
+          "held_out_pass_unpurged": true,
+          "held_out_pass_purged": true,
+          "stale_bytecode_reproduced": false
+        }
+      },
+      "instrumentation": {
+        "checks": {
+          "ledger_sees_model_whole_read": true,
+          "ledger_sees_model_ranged_read": true,
+          "ledger_sees_post_edit_view": true,
+          "ledger_sees_grep_scan": true,
+          "ledger_sees_edit_normalisation": true,
+          "whole_read_delivers_hidden_line": true,
+          "ranged_read_delivers_hidden_line": true,
+          "edit_normalisation_sees_true_source": true,
+          "post_edit_view_leaks_without_redactor": true,
+          "post_edit_view_omits_hidden_line": true,
+          "post_edit_view_omits_gold_expression": true,
+          "post_edit_view_marks_elision": true,
+          "post_edit_view_preserves_line_count": true,
+          "redaction_counted": true,
+          "deliberate_read_still_delivers_after_redactor": true,
+          "ranged_read_still_delivers_after_redactor": true,
+          "grep_reaches_target_file": true,
+          "grep_on_name_returns_def_and_call": true,
+          "grep_on_name_omits_constant": true,
+          "grep_on_arithmetic_delivers_hidden_line": true,
+          "heldout_view_denied": true,
+          "heldout_denial_gives_no_pointer": true,
+          "heldout_grep_denied": true,
+          "heldout_attempts_counted": true,
+          "model_tests_are_purged": true,
+          "target_module_under_view_truncation": true
+        },
+        "channels": [
+          "model_read_whole",
+          "model_read_ranged",
+          "edit_normalisation",
+          "post_edit_view",
+          "post_edit_view",
+          "model_read_whole",
+          "model_read_ranged",
+          "edit_normalisation",
+          "grep_scan",
+          "grep_scan"
+        ],
+        "n_heldout_attempts": 3,
+        "n_post_edit_redactions": 1,
+        "n_test_purges": 1
+      },
+      "lsp": {
+        "raw_enclosing_sha256": "38303cf35233635e5f404e3f5a71631a1fa042a179ff01d1b6c2ad8ee5fec5b5",
+        "raw_enclosing_path": "pkg/units/ulmpbn.py",
+        "delivered_span_sha256": "150559d65f255dd1806e88b7d7b42e5826b0e5f999de9925d507d07836b0c408",
+        "chained_span_path": "pkg/units/ulmpbn.py",
+        "chained_span_sha256": "ce659b1f70a40a48c2e61427cbd57d102cf310178171454fcb0d895177245827",
+        "chained_span": "def _hchruuk(value: int) -> int:\n    return value * 5 - 47  # spec: value * 11 - 43",
+        "errors": []
+      },
+      "frozen_validation": {
+        "hoisted": {
+          "task": "nav_readreq_pilot_67003",
+          "split": "readreq_pilot",
+          "template": "delegate_scale_sub",
+          "n_overrides": 13,
+          "checks": {
+            "typed_base_fails": true,
+            "typed_heldout_base_fails": true,
+            "typed_gold_passes": true,
+            "typed_heldout_gold_passes": true,
+            "erased_base_fails": true,
+            "erased_heldout_base_fails": true,
+            "erased_gold_passes": true,
+            "erased_heldout_gold_passes": true,
+            "runtime_files_identical": true,
+            "runtime_outputs_identical": true,
+            "factory_implementation_identical": true,
+            "all_declared_returns_match_runtime": true,
+            "specific_overloads_precede_fallback": true,
+            "variants_type_clean": true,
+            "gold_identical": true,
+            "override_count_valid": true,
+            "registry_trace_unique": true,
+            "typed_lsp_discriminates": true,
+            "typed_lsp_span_matches_pristine_target": true,
+            "erased_lsp_nondiscriminating": true,
+            "literal_widening_removes_discrimination": true,
+            "lsp_server_healthy": true,
+            "lsp_no_errors": true,
+            "prompt_has_no_target_leak": true,
+            "positive_control_materialized": true
+          },
+          "lsp": {
+            "typed": {
+              "path": "pkg/units/ulmpbn.py",
+              "span_hash": "38303cf35233635e5f404e3f5a71631a1fa042a179ff01d1b6c2ad8ee5fec5b5",
+              "latency_ms": 6020.4,
+              "health_path": "pkg/units/ulmpbn.py",
+              "resolved_class": "Cvmhidzn",
+              "resolved_method_span_hash": "dc91fb1e418365f015350ab40ff78e8e9185a756eca6a4e4057ce63dbbd3eb05"
+            },
+            "typed_widened": {
+              "path": "pkg/base.py",
+              "span_hash": "789abd091eb96780c447b8aeafc50f40bde4a442ce7360f517c5fba92cc181d3",
+              "resolved_class": "Bilnrxkq"
+            },
+            "erased": {
+              "path": "pkg/base.py",
+              "span_hash": "789abd091eb96780c447b8aeafc50f40bde4a442ce7360f517c5fba92cc181d3",
+              "latency_ms": 6019.9,
+              "health_path": "pkg/base.py",
+              "resolved_class": "Bilnrxkq",
+              "resolved_method_span_hash": "53c39d6045d4e6e7eb41891ba5874e6e22d68778b40f99c4e81cd400a264565d"
+            }
+          },
+          "lsp_errors": [],
+          "runtime_factory_classes": {
+            "typed": {
+              "keqfen": "Cecyofph",
+              "kifxma": "Cqkxobjq",
+              "kimhoo": "Cydmulbs",
+              "kkmvti": "Cejsgdwf",
+              "kkqjor": "Cgbuqktp",
+              "knlymx": "Cnxvogkj",
+              "koprbi": "Cbqkaaqx",
+              "kqmuuo": "Cvmhidzn",
+              "kragiq": "Ckyrnfdf",
+              "ksyydy": "Chfgavck",
+              "kvupzn": "Comhccow",
+              "kyvond": "Czrfpemr",
+              "kzbmny": "Cpiesptj"
+            },
+            "erased": {
+              "keqfen": "Cecyofph",
+              "kifxma": "Cqkxobjq",
+              "kimhoo": "Cydmulbs",
+              "kkmvti": "Cejsgdwf",
+              "kkqjor": "Cgbuqktp",
+              "knlymx": "Cnxvogkj",
+              "koprbi": "Cbqkaaqx",
+              "kqmuuo": "Cvmhidzn",
+              "kragiq": "Ckyrnfdf",
+              "ksyydy": "Chfgavck",
+              "kvupzn": "Comhccow",
+              "kyvond": "Czrfpemr",
+              "kzbmny": "Cpiesptj"
+            }
+          },
+          "declared_registry_contract": {
+            "kkqjor": "Cgbuqktp",
+            "kyvond": "Czrfpemr",
+            "keqfen": "Cecyofph",
+            "kifxma": "Cqkxobjq",
+            "kkmvti": "Cejsgdwf",
+            "kqmuuo": "Cvmhidzn",
+            "kzbmny": "Cpiesptj",
+            "knlymx": "Cnxvogkj",
+            "kimhoo": "Cydmulbs",
+            "ksyydy": "Chfgavck",
+            "kragiq": "Ckyrnfdf",
+            "koprbi": "Cbqkaaqx",
+            "kvupzn": "Comhccow"
+          },
+          "parsed_typed_stub_contract": {
+            "kkqjor": "Cgbuqktp",
+            "kyvond": "Czrfpemr",
+            "keqfen": "Cecyofph",
+            "kifxma": "Cqkxobjq",
+            "kkmvti": "Cejsgdwf",
+            "kqmuuo": "Cvmhidzn",
+            "kzbmny": "Cpiesptj",
+            "knlymx": "Cnxvogkj",
+            "kimhoo": "Cydmulbs",
+            "ksyydy": "Chfgavck",
+            "kragiq": "Ckyrnfdf",
+            "koprbi": "Cbqkaaqx",
+            "kvupzn": "Comhccow"
+          },
+          "type_errors": {
+            "typed": [],
+            "erased": []
+          },
+          "leakage": [],
+          "passed": true
+        },
+        "inline": {
+          "task": "nav_readreq_pilot_67003",
+          "split": "readreq_pilot",
+          "template": "delegate_scale_sub",
+          "n_overrides": 13,
+          "checks": {
+            "typed_base_fails": true,
+            "typed_heldout_base_fails": true,
+            "typed_gold_passes": true,
+            "typed_heldout_gold_passes": true,
+            "erased_base_fails": true,
+            "erased_heldout_base_fails": true,
+            "erased_gold_passes": true,
+            "erased_heldout_gold_passes": true,
+            "runtime_files_identical": true,
+            "runtime_outputs_identical": true,
+            "factory_implementation_identical": true,
+            "all_declared_returns_match_runtime": true,
+            "specific_overloads_precede_fallback": true,
+            "variants_type_clean": true,
+            "gold_identical": true,
+            "override_count_valid": true,
+            "registry_trace_unique": true,
+            "typed_lsp_discriminates": true,
+            "typed_lsp_span_matches_pristine_target": true,
+            "erased_lsp_nondiscriminating": true,
+            "literal_widening_removes_discrimination": true,
+            "lsp_server_healthy": true,
+            "lsp_no_errors": true,
+            "prompt_has_no_target_leak": true,
+            "positive_control_materialized": true
+          },
+          "lsp": {
+            "typed": {
+              "path": "pkg/units/ulmpbn.py",
+              "span_hash": "d900096adb83d60a7c1153f050b92340d18343186c13a6b1c9ba2625ed38c417",
+              "latency_ms": 6018.3,
+              "health_path": "pkg/units/ulmpbn.py",
+              "resolved_class": "Cvmhidzn",
+              "resolved_method_span_hash": "05182d6e949c880d3f0763f3262affdd4ce2ae95bef7f1f0aacc327929a68b5c"
+            },
+            "typed_widened": {
+              "path": "pkg/base.py",
+              "span_hash": "789abd091eb96780c447b8aeafc50f40bde4a442ce7360f517c5fba92cc181d3",
+              "resolved_class": "Bilnrxkq"
+            },
+            "erased": {
+              "path": "pkg/base.py",
+              "span_hash": "789abd091eb96780c447b8aeafc50f40bde4a442ce7360f517c5fba92cc181d3",
+              "latency_ms": 6020.8,
+              "health_path": "pkg/base.py",
+              "resolved_class": "Bilnrxkq",
+              "resolved_method_span_hash": "53c39d6045d4e6e7eb41891ba5874e6e22d68778b40f99c4e81cd400a264565d"
+            }
+          },
+          "lsp_errors": [],
+          "runtime_factory_classes": {
+            "typed": {
+              "keqfen": "Cecyofph",
+              "kifxma": "Cqkxobjq",
+              "kimhoo": "Cydmulbs",
+              "kkmvti": "Cejsgdwf",
+              "kkqjor": "Cgbuqktp",
+              "knlymx": "Cnxvogkj",
+              "koprbi": "Cbqkaaqx",
+              "kqmuuo": "Cvmhidzn",
+              "kragiq": "Ckyrnfdf",
+              "ksyydy": "Chfgavck",
+              "kvupzn": "Comhccow",
+              "kyvond": "Czrfpemr",
+              "kzbmny": "Cpiesptj"
+            },
+            "erased": {
+              "keqfen": "Cecyofph",
+              "kifxma": "Cqkxobjq",
+              "kimhoo": "Cydmulbs",
+              "kkmvti": "Cejsgdwf",
+              "kkqjor": "Cgbuqktp",
+              "knlymx": "Cnxvogkj",
+              "koprbi": "Cbqkaaqx",
+              "kqmuuo": "Cvmhidzn",
+              "kragiq": "Ckyrnfdf",
+              "ksyydy": "Chfgavck",
+              "kvupzn": "Comhccow",
+              "kyvond": "Czrfpemr",
+              "kzbmny": "Cpiesptj"
+            }
+          },
+          "declared_registry_contract": {
+            "kkqjor": "Cgbuqktp",
+            "kyvond": "Czrfpemr",
+            "keqfen": "Cecyofph",
+            "kifxma": "Cqkxobjq",
+            "kkmvti": "Cejsgdwf",
+            "kqmuuo": "Cvmhidzn",
+            "kzbmny": "Cpiesptj",
+            "knlymx": "Cnxvogkj",
+            "kimhoo": "Cydmulbs",
+            "ksyydy": "Chfgavck",
+            "kragiq": "Ckyrnfdf",
+            "koprbi": "Cbqkaaqx",
+            "kvupzn": "Comhccow"
+          },
+          "parsed_typed_stub_contract": {
+            "kkqjor": "Cgbuqktp",
+            "kyvond": "Czrfpemr",
+            "keqfen": "Cecyofph",
+            "kifxma": "Cqkxobjq",
+            "kkmvti": "Cejsgdwf",
+            "kqmuuo": "Cvmhidzn",
+            "kzbmny": "Cpiesptj",
+            "knlymx": "Cnxvogkj",
+            "kimhoo": "Cydmulbs",
+            "ksyydy": "Chfgavck",
+            "kragiq": "Ckyrnfdf",
+            "koprbi": "Cbqkaaqx",
+            "kvupzn": "Comhccow"
+          },
+          "type_errors": {
+            "typed": [],
+            "erased": []
+          },
+          "leakage": [],
+          "passed": true
+        }
+      },
+      "checks": {
+        "frozen_validator_hoisted": true,
+        "frozen_validator_inline": true,
+        "span_meta_path_is_target": true,
+        "span_lsp_path_is_target": true,
+        "span_lsp_span_equals_metadata": true,
+        "span_no_lsp_errors": true,
+        "span_gold_not_in_span": true,
+        "span_span_has_numbered_lines": true,
+        "span_span_names_target_path": true,
+        "inline_span_usable": true,
+        "narrowing_hides_nothing": true,
+        "single_lsp_candidate": true,
+        "live_span_equals_delivered": true,
+        "chained_span_is_pristine_helper": true,
+        "no_lsp_errors_genuineness": true,
+        "span_excludes_helper_def": true,
+        "span_names_helper_call": true,
+        "helper_lines_outside_span": true,
+        "inline_span_carries_the_information": true,
+        "ambiguity_set_large_enough": true,
+        "blind_guess_ceiling_within_bound": true,
+        "truth_in_ambiguity_set": true,
+        "heldout_varies_over_ambiguity_set": true,
+        "ambiguity_matches_task_metadata": true,
+        "table_key_unique": true,
+        "positive_outputs": true,
+        "twin_byte_identity": true,
+        "twin_heldout_differs": true,
+        "no_read_adversary_fails_heldout": true,
+        "wrapper_family_ceiling_within_bound": true,
+        "bug_is_value_dependent": true,
+        "constant_delta_repair_excluded": true,
+        "slope_wrapper_repair_excluded": true,
+        "spec_comment_is_load_bearing": true,
+        "heldout_oracle_guarded": true,
+        "heldout_not_greppable": true,
+        "guard_leaves_source_readable": true,
+        "instr_ledger_sees_model_whole_read": true,
+        "instr_ledger_sees_model_ranged_read": true,
+        "instr_ledger_sees_post_edit_view": true,
+        "instr_ledger_sees_grep_scan": true,
+        "instr_ledger_sees_edit_normalisation": true,
+        "instr_whole_read_delivers_hidden_line": true,
+        "instr_ranged_read_delivers_hidden_line": true,
+        "instr_edit_normalisation_sees_true_source": true,
+        "instr_post_edit_view_leaks_without_redactor": true,
+        "instr_post_edit_view_omits_hidden_line": true,
+        "instr_post_edit_view_omits_gold_expression": true,
+        "instr_post_edit_view_marks_elision": true,
+        "instr_post_edit_view_preserves_line_count": true,
+        "instr_redaction_counted": true,
+        "instr_deliberate_read_still_delivers_after_redactor": true,
+        "instr_ranged_read_still_delivers_after_redactor": true,
+        "instr_grep_reaches_target_file": true,
+        "instr_grep_on_name_returns_def_and_call": true,
+        "instr_grep_on_name_omits_constant": true,
+        "instr_grep_on_arithmetic_delivers_hidden_line": true,
+        "instr_heldout_view_denied": true,
+        "instr_heldout_denial_gives_no_pointer": true,
+        "instr_heldout_grep_denied": true,
+        "instr_heldout_attempts_counted": true,
+        "instr_model_tests_are_purged": true,
+        "instr_target_module_under_view_truncation": true,
+        "read_only_oracle_solves": true,
+        "oracle_spec_route_verifies_visible_fact": true,
+        "live_constant_delta_repair_fails_heldout": true,
+        "both_repair_routes_pass": true,
+        "hardcode_fails_heldout": true,
+        "gold_passes_after_purge": true,
+        "hoist_wellformed": true,
+        "helper_bodies_delegate": true,
+        "rendered_constants_match_table": true,
+        "spec_comments_uniform": true,
+        "exactly_one_spec_mismatch": true,
+        "identifiers_unique": true,
+        "hoist_behaviour_preserving": true,
+        "twin_runtime_identical": true,
+        "twin_differs_by_one_line": true,
+        "twin_prompt_identical": true,
+        "twin_tests_identical": true,
+        "twin_expected_identical": true,
+        "flavours_share_gold_file": true,
+        "pycache_purged": true,
+        "selection_gates_reproduce": true
+      },
+      "failing": [],
+      "passed": true
+    },
+    {
+      "task": "nav_readreq_pilot_67009",
+      "split": "readreq_pilot",
+      "seed": 67009,
+      "template": "delegate_xor_offset",
+      "flavours": [
+        "hoisted",
+        "inline"
+      ],
+      "n_overrides": 10,
+      "target_path": "pkg/units/uhnxee.py",
+      "target_class": "Cbxdcdfe",
+      "helper": {
+        "name": "_habdewh",
+        "def_line": 4,
+        "return_line": 5,
+        "return_text": "    return (value ^ 16) + 70  # spec: (value ^ 25) + 66",
+        "source": "def _habdewh(value: int) -> int:\n    return (value ^ 16) + 70  # spec: (value ^ 25) + 66",
+        "multiplier": 25,
+        "buggy_multiplier": 16,
+        "offset": 66,
+        "buggy_offset": 70,
+        "delta": -9,
+        "offset_delta": 4,
+        "call_line": 10,
+        "flavour": "hoisted",
+        "gold_expression": "(value ^ 25) + 66",
+        "buggy_expression": "(value ^ 16) + 70",
+        "spec_comment": "  # spec: (value ^ 25) + 66",
+        "inline_repair": {
+          "path": "pkg/units/uhnxee.py",
+          "start": 10,
+          "end": 10,
+          "new_text": "        return (value ^ 25) + 66"
+        }
+      },
+      "span": {
+        "start": 9,
+        "end": 10,
+        "source": "    def mivkflun(self, value: int) -> int:\n        return _habdewh(value)",
+        "delivered": "# pkg/units/uhnxee.py:9-10\n   9|     def mivkflun(self, value: int) -> int:\n  10|         return _habdewh(value)",
+        "delivered_sha256": "9b1c4d3a8199b3e9c9d7d832b630b725313a0405bc25d6f8723c02f498a0bbd1",
+        "inline_delivered_sha256": "08b91469cc6845081d1447ee5678b540aee1b0bc56f79a9d59840ef9f76aef4c"
+      },
+      "gold": {
+        "hoisted": {
+          "path": "pkg/units/uhnxee.py",
+          "start": 5,
+          "end": 5,
+          "new_text": "    return (value ^ 25) + 66"
+        },
+        "inline": {
+          "path": "pkg/units/uhnxee.py",
+          "start": 10,
+          "end": 10,
+          "new_text": "        return (value ^ 25) + 66"
+        }
+      },
+      "ambiguity": {
+        "input": 4,
+        "expected": 95,
+        "held_input": 11,
+        "held_expected": 84,
+        "truth": {
+          "a": 25,
+          "b": 66
+        },
+        "n_members": 43,
+        "n_distinct_heldout": 16,
+        "blind_guess_ceiling": 0.093023,
+        "exact_function_ceiling": 0.023256,
+        "truth_in_set": true,
+        "members": [
+          {
+            "a": 2,
+            "b": 89,
+            "held": 98
+          },
+          {
+            "a": 3,
+            "b": 88,
+            "held": 96
+          },
+          {
+            "a": 8,
+            "b": 83,
+            "held": 86
+          },
+          {
+            "a": 9,
+            "b": 82,
+            "held": 84
+          },
+          {
+            "a": 10,
+            "b": 81,
+            "held": 82
+          },
+          {
+            "a": 11,
+            "b": 80,
+            "held": 80
+          },
+          {
+            "a": 12,
+            "b": 87,
+            "held": 94
+          },
+          {
+            "a": 13,
+            "b": 86,
+            "held": 92
+          },
+          {
+            "a": 14,
+            "b": 85,
+            "held": 90
+          },
+          {
+            "a": 15,
+            "b": 84,
+            "held": 88
+          },
+          {
+            "a": 16,
+            "b": 75,
+            "held": 102
+          },
+          {
+            "a": 17,
+            "b": 74,
+            "held": 100
+          },
+          {
+            "a": 19,
+            "b": 72,
+            "held": 96
+          },
+          {
+            "a": 20,
+            "b": 79,
+            "held": 110
+          },
+          {
+            "a": 21,
+            "b": 78,
+            "held": 108
+          },
+          {
+            "a": 23,
+            "b": 76,
+            "held": 104
+          },
+          {
+            "a": 24,
+            "b": 67,
+            "held": 86
+          },
+          {
+            "a": 25,
+            "b": 66,
+            "held": 84
+          },
+          {
+            "a": 27,
+            "b": 64,
+            "held": 80
+          },
+          {
+            "a": 28,
+            "b": 71,
+            "held": 94
+          },
+          {
+            "a": 31,
+            "b": 68,
+            "held": 88
+          },
+          {
+            "a": 32,
+            "b": 59,
+            "held": 102
+          },
+          {
+            "a": 33,
+            "b": 58,
+            "held": 100
+          },
+          {
+            "a": 35,
+            "b": 56,
+            "held": 96
+          },
+          {
+            "a": 37,
+            "b": 62,
+            "held": 108
+          },
+          {
+            "a": 38,
+            "b": 61,
+            "held": 106
+          },
+          {
+            "a": 40,
+            "b": 51,
+            "held": 86
+          },
+          {
+            "a": 41,
+            "b": 50,
+            "held": 84
+          },
+          {
+            "a": 43,
+            "b": 48,
+            "held": 80
+          },
+          {
+            "a": 44,
+            "b": 55,
+            "held": 94
+          },
+          {
+            "a": 46,
+            "b": 53,
+            "held": 90
+          },
+          {
+            "a": 47,
+            "b": 52,
+            "held": 88
+          },
+          {
+            "a": 48,
+            "b": 43,
+            "held": 102
+          },
+          {
+            "a": 49,
+            "b": 42,
+            "held": 100
+          },
+          {
+            "a": 50,
+            "b": 41,
+            "held": 98
+          },
+          {
+            "a": 51,
+            "b": 40,
+            "held": 96
+          },
+          {
+            "a": 52,
+            "b": 47,
+            "held": 110
+          },
+          {
+            "a": 53,
+            "b": 46,
+            "held": 108
+          },
+          {
+            "a": 54,
+            "b": 45,
+            "held": 106
+          },
+          {
+            "a": 55,
+            "b": 44,
+            "held": 104
+          },
+          {
+            "a": 58,
+            "b": 33,
+            "held": 82
+          },
+          {
+            "a": 59,
+            "b": 32,
+            "held": 80
+          },
+          {
+            "a": 60,
+            "b": 39,
+            "held": 94
+          }
+        ],
+        "distinct_heldout": [
+          80,
+          82,
+          84,
+          86,
+          88,
+          90,
+          92,
+          94,
+          96,
+          98,
+          100,
+          102,
+          104,
+          106,
+          108,
+          110
+        ]
+      },
+      "adversary": {
+        "n_one_param_forms": 17,
+        "c_range": [
+          -500,
+          500
+        ],
+        "n_visible_passing_one_param": 10,
+        "escapes": [],
+        "no_escape": true,
+        "n_heldout_only_candidates": 10,
+        "heldout_only_candidates": [
+          {
+            "form": "value - c",
+            "c": -73
+          },
+          {
+            "form": "value * value + c",
+            "c": -37
+          },
+          {
+            "form": "g(value) + c",
+            "c": -13
+          },
+          {
+            "form": "g(value) - c",
+            "c": 13
+          },
+          {
+            "form": "g(value) ^ c",
+            "c": 53
+          },
+          {
+            "form": "value + c",
+            "c": 73
+          },
+          {
+            "form": "c",
+            "c": 84
+          },
+          {
+            "form": "c - value",
+            "c": 95
+          },
+          {
+            "form": "value ^ c",
+            "c": 95
+          },
+          {
+            "form": "c - g(value)",
+            "c": 181
+          }
+        ],
+        "buggy_multiplier": 16,
+        "buggy_offset": 70,
+        "delta": [
+          -9,
+          4
+        ],
+        "code_offset_route_multipliers": [
+          29
+        ],
+        "code_offset_route_passes_heldout": false,
+        "wrapper_family": "g(value) + c1*value + c2",
+        "wrapper_slope_range": [
+          -12,
+          12
+        ],
+        "wrapper_n_visible_passing": 25,
+        "wrapper_n_heldout_passing": 0,
+        "wrapper_blind_guess_ceiling": 0.04
+      },
+      "twin": {
+        "twin_member": {
+          "a": 3,
+          "b": 88,
+          "held": 96
+        },
+        "twin_byte_identity": true,
+        "twin_heldout_differs": true,
+        "twin_visible_identical_files": true,
+        "twin_target_module_diff_lines": [
+          5
+        ],
+        "twin_held_expected": [
+          84,
+          96
+        ],
+        "twin_expected": [
+          95,
+          95
+        ],
+        "twin_prompt_identical": true,
+        "twin_span_identical": true,
+        "twin_heldout_file_differs": true
+      },
+      "repair": {
+        "read_only_oracle": {
+          "ok": true,
+          "reason": "ok",
+          "path": "pkg/units/uhnxee.py",
+          "helper": "_habdewh",
+          "line": 5,
+          "new_text": "    return (value ^ 25) + 66",
+          "spec_expression": "(value ^ 25) + 66",
+          "code_expression": "(value ^ 16) + 70",
+          "equation_multipliers": [
+            29
+          ],
+          "equation_expression": "(value ^ 29) + 70",
+          "spec_route_verifies_visible_fact": true,
+          "equation_route_agrees": false
+        },
+        "wrapper_probe": [
+          {
+            "c": -1,
+            "new_text": "        return _habdewh(value) - 1",
+            "applied": true,
+            "visible": false,
+            "held": false
+          },
+          {
+            "c": 1,
+            "new_text": "        return _habdewh(value) + 1",
+            "applied": true,
+            "visible": false,
+            "held": false
+          },
+          {
+            "c": 5,
+            "new_text": "        return _habdewh(value) + 5",
+            "applied": true,
+            "visible": true,
+            "held": false
+          }
+        ],
+        "gold_route": {
+          "applied": true,
+          "visible": true,
+          "held": true,
+          "edit": {
+            "path": "pkg/units/uhnxee.py",
+            "start": 5,
+            "end": 5,
+            "new_text": "    return (value ^ 25) + 66"
+          }
+        },
+        "in_span_route": {
+          "applied": true,
+          "visible": true,
+          "held": true,
+          "edit": {
+            "path": "pkg/units/uhnxee.py",
+            "start": 10,
+            "end": 10,
+            "new_text": "        return (value ^ 25) + 66"
+          }
+        },
+        "hardcode_route": {
+          "applied": true,
+          "visible": true,
+          "held": false,
+          "edit": {
+            "path": "pkg/units/uhnxee.py",
+            "start": 10,
+            "end": 10,
+            "new_text": "        return 95"
+          }
+        },
+        "bytecode_probe": {
+          "applied": true,
+          "held_out_pass_unpurged": true,
+          "held_out_pass_purged": true,
+          "stale_bytecode_reproduced": false
+        }
+      },
+      "instrumentation": {
+        "checks": {
+          "ledger_sees_model_whole_read": true,
+          "ledger_sees_model_ranged_read": true,
+          "ledger_sees_post_edit_view": true,
+          "ledger_sees_grep_scan": true,
+          "ledger_sees_edit_normalisation": true,
+          "whole_read_delivers_hidden_line": true,
+          "ranged_read_delivers_hidden_line": true,
+          "edit_normalisation_sees_true_source": true,
+          "post_edit_view_leaks_without_redactor": true,
+          "post_edit_view_omits_hidden_line": true,
+          "post_edit_view_omits_gold_expression": true,
+          "post_edit_view_marks_elision": true,
+          "post_edit_view_preserves_line_count": true,
+          "redaction_counted": true,
+          "deliberate_read_still_delivers_after_redactor": true,
+          "ranged_read_still_delivers_after_redactor": true,
+          "grep_reaches_target_file": true,
+          "grep_on_name_returns_def_and_call": true,
+          "grep_on_name_omits_constant": true,
+          "grep_on_arithmetic_delivers_hidden_line": true,
+          "heldout_view_denied": true,
+          "heldout_denial_gives_no_pointer": true,
+          "heldout_grep_denied": true,
+          "heldout_attempts_counted": true,
+          "model_tests_are_purged": true,
+          "target_module_under_view_truncation": true
+        },
+        "channels": [
+          "model_read_whole",
+          "model_read_ranged",
+          "edit_normalisation",
+          "post_edit_view",
+          "post_edit_view",
+          "model_read_whole",
+          "model_read_ranged",
+          "edit_normalisation",
+          "grep_scan",
+          "grep_scan"
+        ],
+        "n_heldout_attempts": 3,
+        "n_post_edit_redactions": 1,
+        "n_test_purges": 1
+      },
+      "lsp": {
+        "raw_enclosing_sha256": "5e5722f72b7960b4d839e0ed59bfc0b904c2d0f3f93a43931743c2d6c40dd93c",
+        "raw_enclosing_path": "pkg/units/uhnxee.py",
+        "delivered_span_sha256": "9b1c4d3a8199b3e9c9d7d832b630b725313a0405bc25d6f8723c02f498a0bbd1",
+        "chained_span_path": "pkg/units/uhnxee.py",
+        "chained_span_sha256": "a048e43ba5d1713ba9fae55a3d4611e0a8177c42f54cb1a861ed7f0315abc0dc",
+        "chained_span": "def _habdewh(value: int) -> int:\n    return (value ^ 16) + 70  # spec: (value ^ 25) + 66",
+        "errors": []
+      },
+      "frozen_validation": {
+        "hoisted": {
+          "task": "nav_readreq_pilot_67009",
+          "split": "readreq_pilot",
+          "template": "delegate_xor_offset",
+          "n_overrides": 10,
+          "checks": {
+            "typed_base_fails": true,
+            "typed_heldout_base_fails": true,
+            "typed_gold_passes": true,
+            "typed_heldout_gold_passes": true,
+            "erased_base_fails": true,
+            "erased_heldout_base_fails": true,
+            "erased_gold_passes": true,
+            "erased_heldout_gold_passes": true,
+            "runtime_files_identical": true,
+            "runtime_outputs_identical": true,
+            "factory_implementation_identical": true,
+            "all_declared_returns_match_runtime": true,
+            "specific_overloads_precede_fallback": true,
+            "variants_type_clean": true,
+            "gold_identical": true,
+            "override_count_valid": true,
+            "registry_trace_unique": true,
+            "typed_lsp_discriminates": true,
+            "typed_lsp_span_matches_pristine_target": true,
+            "erased_lsp_nondiscriminating": true,
+            "literal_widening_removes_discrimination": true,
+            "lsp_server_healthy": true,
+            "lsp_no_errors": true,
+            "prompt_has_no_target_leak": true,
+            "positive_control_materialized": true
+          },
+          "lsp": {
+            "typed": {
+              "path": "pkg/units/uhnxee.py",
+              "span_hash": "5e5722f72b7960b4d839e0ed59bfc0b904c2d0f3f93a43931743c2d6c40dd93c",
+              "latency_ms": 6020.5,
+              "health_path": "pkg/units/uhnxee.py",
+              "resolved_class": "Cbxdcdfe",
+              "resolved_method_span_hash": "23ea5ff7800c2d297e59278114d9e4a46b9a1da124ed03d0c80afcbc78dbf955"
+            },
+            "typed_widened": {
+              "path": "pkg/base.py",
+              "span_hash": "1d92294b1dfff93dda5a0c67296afbfa6c889aaf1e8181a049001baa0ec969d4",
+              "resolved_class": "Bdowlifn"
+            },
+            "erased": {
+              "path": "pkg/base.py",
+              "span_hash": "1d92294b1dfff93dda5a0c67296afbfa6c889aaf1e8181a049001baa0ec969d4",
+              "latency_ms": 6012.1,
+              "health_path": "pkg/base.py",
+              "resolved_class": "Bdowlifn",
+              "resolved_method_span_hash": "4f0ba9fd243c00269ec3c92c70f92710e85e3bcd88eb0f33d412ec9592fb8f95"
+            }
+          },
+          "lsp_errors": [],
+          "runtime_factory_classes": {
+            "typed": {
+              "kdcgon": "Crdyqnli",
+              "kdxlfp": "Cskjhgqf",
+              "kepiaf": "Cdtwkwhy",
+              "kfwkyt": "Cxpdwjhw",
+              "kiynvo": "Cbxdcdfe",
+              "kjsulk": "Coobgcro",
+              "kowkfs": "Cuvcwpms",
+              "kqsypm": "Cktxhisx",
+              "kvmamp": "Cprdymbz",
+              "kwuhxw": "Cimunqvd"
+            },
+            "erased": {
+              "kdcgon": "Crdyqnli",
+              "kdxlfp": "Cskjhgqf",
+              "kepiaf": "Cdtwkwhy",
+              "kfwkyt": "Cxpdwjhw",
+              "kiynvo": "Cbxdcdfe",
+              "kjsulk": "Coobgcro",
+              "kowkfs": "Cuvcwpms",
+              "kqsypm": "Cktxhisx",
+              "kvmamp": "Cprdymbz",
+              "kwuhxw": "Cimunqvd"
+            }
+          },
+          "declared_registry_contract": {
+            "kiynvo": "Cbxdcdfe",
+            "kfwkyt": "Cxpdwjhw",
+            "kdcgon": "Crdyqnli",
+            "kjsulk": "Coobgcro",
+            "kwuhxw": "Cimunqvd",
+            "kvmamp": "Cprdymbz",
+            "kepiaf": "Cdtwkwhy",
+            "kdxlfp": "Cskjhgqf",
+            "kqsypm": "Cktxhisx",
+            "kowkfs": "Cuvcwpms"
+          },
+          "parsed_typed_stub_contract": {
+            "kiynvo": "Cbxdcdfe",
+            "kfwkyt": "Cxpdwjhw",
+            "kdcgon": "Crdyqnli",
+            "kjsulk": "Coobgcro",
+            "kwuhxw": "Cimunqvd",
+            "kvmamp": "Cprdymbz",
+            "kepiaf": "Cdtwkwhy",
+            "kdxlfp": "Cskjhgqf",
+            "kqsypm": "Cktxhisx",
+            "kowkfs": "Cuvcwpms"
+          },
+          "type_errors": {
+            "typed": [],
+            "erased": []
+          },
+          "leakage": [],
+          "passed": true
+        },
+        "inline": {
+          "task": "nav_readreq_pilot_67009",
+          "split": "readreq_pilot",
+          "template": "delegate_xor_offset",
+          "n_overrides": 10,
+          "checks": {
+            "typed_base_fails": true,
+            "typed_heldout_base_fails": true,
+            "typed_gold_passes": true,
+            "typed_heldout_gold_passes": true,
+            "erased_base_fails": true,
+            "erased_heldout_base_fails": true,
+            "erased_gold_passes": true,
+            "erased_heldout_gold_passes": true,
+            "runtime_files_identical": true,
+            "runtime_outputs_identical": true,
+            "factory_implementation_identical": true,
+            "all_declared_returns_match_runtime": true,
+            "specific_overloads_precede_fallback": true,
+            "variants_type_clean": true,
+            "gold_identical": true,
+            "override_count_valid": true,
+            "registry_trace_unique": true,
+            "typed_lsp_discriminates": true,
+            "typed_lsp_span_matches_pristine_target": true,
+            "erased_lsp_nondiscriminating": true,
+            "literal_widening_removes_discrimination": true,
+            "lsp_server_healthy": true,
+            "lsp_no_errors": true,
+            "prompt_has_no_target_leak": true,
+            "positive_control_materialized": true
+          },
+          "lsp": {
+            "typed": {
+              "path": "pkg/units/uhnxee.py",
+              "span_hash": "5e53612c4af4f179ad0fe7115d97b23a86a830cff5167120233e7c56e5fc9c32",
+              "latency_ms": 6011.6,
+              "health_path": "pkg/units/uhnxee.py",
+              "resolved_class": "Cbxdcdfe",
+              "resolved_method_span_hash": "bfa76e6d848a5e4f976a5676d39d363655b84ebf8b22be245304c06c136161fc"
+            },
+            "typed_widened": {
+              "path": "pkg/base.py",
+              "span_hash": "1d92294b1dfff93dda5a0c67296afbfa6c889aaf1e8181a049001baa0ec969d4",
+              "resolved_class": "Bdowlifn"
+            },
+            "erased": {
+              "path": "pkg/base.py",
+              "span_hash": "1d92294b1dfff93dda5a0c67296afbfa6c889aaf1e8181a049001baa0ec969d4",
+              "latency_ms": 6012.5,
+              "health_path": "pkg/base.py",
+              "resolved_class": "Bdowlifn",
+              "resolved_method_span_hash": "4f0ba9fd243c00269ec3c92c70f92710e85e3bcd88eb0f33d412ec9592fb8f95"
+            }
+          },
+          "lsp_errors": [],
+          "runtime_factory_classes": {
+            "typed": {
+              "kdcgon": "Crdyqnli",
+              "kdxlfp": "Cskjhgqf",
+              "kepiaf": "Cdtwkwhy",
+              "kfwkyt": "Cxpdwjhw",
+              "kiynvo": "Cbxdcdfe",
+              "kjsulk": "Coobgcro",
+              "kowkfs": "Cuvcwpms",
+              "kqsypm": "Cktxhisx",
+              "kvmamp": "Cprdymbz",
+              "kwuhxw": "Cimunqvd"
+            },
+            "erased": {
+              "kdcgon": "Crdyqnli",
+              "kdxlfp": "Cskjhgqf",
+              "kepiaf": "Cdtwkwhy",
+              "kfwkyt": "Cxpdwjhw",
+              "kiynvo": "Cbxdcdfe",
+              "kjsulk": "Coobgcro",
+              "kowkfs": "Cuvcwpms",
+              "kqsypm": "Cktxhisx",
+              "kvmamp": "Cprdymbz",
+              "kwuhxw": "Cimunqvd"
+            }
+          },
+          "declared_registry_contract": {
+            "kiynvo": "Cbxdcdfe",
+            "kfwkyt": "Cxpdwjhw",
+            "kdcgon": "Crdyqnli",
+            "kjsulk": "Coobgcro",
+            "kwuhxw": "Cimunqvd",
+            "kvmamp": "Cprdymbz",
+            "kepiaf": "Cdtwkwhy",
+            "kdxlfp": "Cskjhgqf",
+            "kqsypm": "Cktxhisx",
+            "kowkfs": "Cuvcwpms"
+          },
+          "parsed_typed_stub_contract": {
+            "kiynvo": "Cbxdcdfe",
+            "kfwkyt": "Cxpdwjhw",
+            "kdcgon": "Crdyqnli",
+            "kjsulk": "Coobgcro",
+            "kwuhxw": "Cimunqvd",
+            "kvmamp": "Cprdymbz",
+            "kepiaf": "Cdtwkwhy",
+            "kdxlfp": "Cskjhgqf",
+            "kqsypm": "Cktxhisx",
+            "kowkfs": "Cuvcwpms"
+          },
+          "type_errors": {
+            "typed": [],
+            "erased": []
+          },
+          "leakage": [],
+          "passed": true
+        }
+      },
+      "checks": {
+        "frozen_validator_hoisted": true,
+        "frozen_validator_inline": true,
+        "span_meta_path_is_target": true,
+        "span_lsp_path_is_target": true,
+        "span_lsp_span_equals_metadata": true,
+        "span_no_lsp_errors": true,
+        "span_gold_not_in_span": true,
+        "span_span_has_numbered_lines": true,
+        "span_span_names_target_path": true,
+        "inline_span_usable": true,
+        "narrowing_hides_nothing": true,
+        "single_lsp_candidate": true,
+        "live_span_equals_delivered": true,
+        "chained_span_is_pristine_helper": true,
+        "no_lsp_errors_genuineness": true,
+        "span_excludes_helper_def": true,
+        "span_names_helper_call": true,
+        "helper_lines_outside_span": true,
+        "inline_span_carries_the_information": true,
+        "ambiguity_set_large_enough": true,
+        "blind_guess_ceiling_within_bound": true,
+        "truth_in_ambiguity_set": true,
+        "heldout_varies_over_ambiguity_set": true,
+        "ambiguity_matches_task_metadata": true,
+        "table_key_unique": true,
+        "positive_outputs": true,
+        "twin_byte_identity": true,
+        "twin_heldout_differs": true,
+        "no_read_adversary_fails_heldout": true,
+        "wrapper_family_ceiling_within_bound": true,
+        "bug_is_value_dependent": true,
+        "constant_delta_repair_excluded": true,
+        "slope_wrapper_repair_excluded": true,
+        "spec_comment_is_load_bearing": true,
+        "heldout_oracle_guarded": true,
+        "heldout_not_greppable": true,
+        "guard_leaves_source_readable": true,
+        "instr_ledger_sees_model_whole_read": true,
+        "instr_ledger_sees_model_ranged_read": true,
+        "instr_ledger_sees_post_edit_view": true,
+        "instr_ledger_sees_grep_scan": true,
+        "instr_ledger_sees_edit_normalisation": true,
+        "instr_whole_read_delivers_hidden_line": true,
+        "instr_ranged_read_delivers_hidden_line": true,
+        "instr_edit_normalisation_sees_true_source": true,
+        "instr_post_edit_view_leaks_without_redactor": true,
+        "instr_post_edit_view_omits_hidden_line": true,
+        "instr_post_edit_view_omits_gold_expression": true,
+        "instr_post_edit_view_marks_elision": true,
+        "instr_post_edit_view_preserves_line_count": true,
+        "instr_redaction_counted": true,
+        "instr_deliberate_read_still_delivers_after_redactor": true,
+        "instr_ranged_read_still_delivers_after_redactor": true,
+        "instr_grep_reaches_target_file": true,
+        "instr_grep_on_name_returns_def_and_call": true,
+        "instr_grep_on_name_omits_constant": true,
+        "instr_grep_on_arithmetic_delivers_hidden_line": true,
+        "instr_heldout_view_denied": true,
+        "instr_heldout_denial_gives_no_pointer": true,
+        "instr_heldout_grep_denied": true,
+        "instr_heldout_attempts_counted": true,
+        "instr_model_tests_are_purged": true,
+        "instr_target_module_under_view_truncation": true,
+        "read_only_oracle_solves": true,
+        "oracle_spec_route_verifies_visible_fact": true,
+        "live_constant_delta_repair_fails_heldout": true,
+        "both_repair_routes_pass": true,
+        "hardcode_fails_heldout": true,
+        "gold_passes_after_purge": true,
+        "hoist_wellformed": true,
+        "helper_bodies_delegate": true,
+        "rendered_constants_match_table": true,
+        "spec_comments_uniform": true,
+        "exactly_one_spec_mismatch": true,
+        "identifiers_unique": true,
+        "hoist_behaviour_preserving": true,
+        "twin_runtime_identical": true,
+        "twin_differs_by_one_line": true,
+        "twin_prompt_identical": true,
+        "twin_tests_identical": true,
+        "twin_expected_identical": true,
+        "flavours_share_gold_file": true,
+        "pycache_purged": true,
+        "selection_gates_reproduce": true
+      },
+      "failing": [],
+      "passed": true
+    },
+    {
+      "task": "nav_readreq_pilot_67012",
+      "split": "readreq_pilot",
+      "seed": 67012,
+      "template": "delegate_scale_offset",
+      "flavours": [
+        "hoisted",
+        "inline"
+      ],
+      "n_overrides": 13,
+      "target_path": "pkg/units/udyilx.py",
+      "target_class": "Ckhfnrky",
+      "helper": {
+        "name": "_hhqhywu",
+        "def_line": 4,
+        "return_line": 5,
+        "return_text": "    return value * 24 + 13  # spec: value * 22 + 21",
+        "source": "def _hhqhywu(value: int) -> int:\n    return value * 24 + 13  # spec: value * 22 + 21",
+        "multiplier": 22,
+        "buggy_multiplier": 24,
+        "offset": 21,
+        "buggy_offset": 13,
+        "delta": 2,
+        "offset_delta": -8,
+        "call_line": 10,
+        "flavour": "hoisted",
+        "gold_expression": "value * 22 + 21",
+        "buggy_expression": "value * 24 + 13",
+        "spec_comment": "  # spec: value * 22 + 21",
+        "inline_repair": {
+          "path": "pkg/units/udyilx.py",
+          "start": 10,
+          "end": 10,
+          "new_text": "        return value * 22 + 21"
+        }
+      },
+      "span": {
+        "start": 9,
+        "end": 10,
+        "source": "    def mwsfdyey(self, value: int) -> int:\n        return _hhqhywu(value)",
+        "delivered": "# pkg/units/udyilx.py:9-10\n   9|     def mwsfdyey(self, value: int) -> int:\n  10|         return _hhqhywu(value)",
+        "delivered_sha256": "08f9f5c14caf653e2d79f2991f796022148b19f4d1883d761b6f39efc36d92ff",
+        "inline_delivered_sha256": "66f58fabacfeb8778b668b7b7262be64b62b93839962239843c702acd991fca4"
+      },
+      "gold": {
+        "hoisted": {
+          "path": "pkg/units/udyilx.py",
+          "start": 5,
+          "end": 5,
+          "new_text": "    return value * 22 + 21"
+        },
+        "inline": {
+          "path": "pkg/units/udyilx.py",
+          "start": 10,
+          "end": 10,
+          "new_text": "        return value * 22 + 21"
+        }
+      },
+      "ambiguity": {
+        "input": 3,
+        "expected": 87,
+        "held_input": 10,
+        "held_expected": 241,
+        "truth": {
+          "a": 22,
+          "b": 21
+        },
+        "n_members": 18,
+        "n_distinct_heldout": 18,
+        "blind_guess_ceiling": 0.055556,
+        "exact_function_ceiling": 0.055556,
+        "truth_in_set": true,
+        "members": [
+          {
+            "a": 2,
+            "b": 81,
+            "held": 101
+          },
+          {
+            "a": 3,
+            "b": 78,
+            "held": 108
+          },
+          {
+            "a": 4,
+            "b": 75,
+            "held": 115
+          },
+          {
+            "a": 6,
+            "b": 69,
+            "held": 129
+          },
+          {
+            "a": 7,
+            "b": 66,
+            "held": 136
+          },
+          {
+            "a": 10,
+            "b": 57,
+            "held": 157
+          },
+          {
+            "a": 11,
+            "b": 54,
+            "held": 164
+          },
+          {
+            "a": 12,
+            "b": 51,
+            "held": 171
+          },
+          {
+            "a": 14,
+            "b": 45,
+            "held": 185
+          },
+          {
+            "a": 16,
+            "b": 39,
+            "held": 199
+          },
+          {
+            "a": 17,
+            "b": 36,
+            "held": 206
+          },
+          {
+            "a": 18,
+            "b": 33,
+            "held": 213
+          },
+          {
+            "a": 19,
+            "b": 30,
+            "held": 220
+          },
+          {
+            "a": 20,
+            "b": 27,
+            "held": 227
+          },
+          {
+            "a": 21,
+            "b": 24,
+            "held": 234
+          },
+          {
+            "a": 22,
+            "b": 21,
+            "held": 241
+          },
+          {
+            "a": 24,
+            "b": 15,
+            "held": 255
+          },
+          {
+            "a": 25,
+            "b": 12,
+            "held": 262
+          }
+        ],
+        "distinct_heldout": [
+          101,
+          108,
+          115,
+          129,
+          136,
+          157,
+          164,
+          171,
+          185,
+          199,
+          206,
+          213,
+          220,
+          227,
+          234,
+          241,
+          255,
+          262
+        ]
+      },
+      "adversary": {
+        "n_one_param_forms": 17,
+        "c_range": [
+          -500,
+          500
+        ],
+        "n_visible_passing_one_param": 11,
+        "escapes": [],
+        "no_escape": true,
+        "n_heldout_only_candidates": 10,
+        "heldout_only_candidates": [
+          {
+            "form": "value - c",
+            "c": -231
+          },
+          {
+            "form": "g(value) + c",
+            "c": -12
+          },
+          {
+            "form": "g(value) - c",
+            "c": 12
+          },
+          {
+            "form": "g(value) ^ c",
+            "c": 12
+          },
+          {
+            "form": "value * value + c",
+            "c": 141
+          },
+          {
+            "form": "value + c",
+            "c": 231
+          },
+          {
+            "form": "c",
+            "c": 241
+          },
+          {
+            "form": "c - value",
+            "c": 251
+          },
+          {
+            "form": "value ^ c",
+            "c": 251
+          },
+          {
+            "form": "c - g(value)",
+            "c": 494
+          }
+        ],
+        "buggy_multiplier": 24,
+        "buggy_offset": 13,
+        "delta": [
+          2,
+          -8
+        ],
+        "code_offset_route_multipliers": [],
+        "code_offset_route_passes_heldout": false,
+        "wrapper_family": "g(value) + c1*value + c2",
+        "wrapper_slope_range": [
+          -12,
+          12
+        ],
+        "wrapper_n_visible_passing": 25,
+        "wrapper_n_heldout_passing": 1,
+        "wrapper_blind_guess_ceiling": 0.04
+      },
+      "twin": {
+        "twin_member": {
+          "a": 2,
+          "b": 81,
+          "held": 101
+        },
+        "twin_byte_identity": true,
+        "twin_heldout_differs": true,
+        "twin_visible_identical_files": true,
+        "twin_target_module_diff_lines": [
+          5
+        ],
+        "twin_held_expected": [
+          241,
+          101
+        ],
+        "twin_expected": [
+          87,
+          87
+        ],
+        "twin_prompt_identical": true,
+        "twin_span_identical": true,
+        "twin_heldout_file_differs": true
+      },
+      "repair": {
+        "read_only_oracle": {
+          "ok": true,
+          "reason": "ok",
+          "path": "pkg/units/udyilx.py",
+          "helper": "_hhqhywu",
+          "line": 5,
+          "new_text": "    return value * 22 + 21",
+          "spec_expression": "value * 22 + 21",
+          "code_expression": "value * 24 + 13",
+          "equation_multipliers": [],
+          "equation_expression": null,
+          "spec_route_verifies_visible_fact": true,
+          "equation_route_agrees": false
+        },
+        "wrapper_probe": [
+          {
+            "c": -1,
+            "new_text": "        return _hhqhywu(value) - 1",
+            "applied": true,
+            "visible": false,
+            "held": false
+          },
+          {
+            "c": 1,
+            "new_text": "        return _hhqhywu(value) + 1",
+            "applied": true,
+            "visible": false,
+            "held": false
+          },
+          {
+            "c": 2,
+            "new_text": "        return _hhqhywu(value) + 2",
+            "applied": true,
+            "visible": true,
+            "held": false
+          }
+        ],
+        "gold_route": {
+          "applied": true,
+          "visible": true,
+          "held": true,
+          "edit": {
+            "path": "pkg/units/udyilx.py",
+            "start": 5,
+            "end": 5,
+            "new_text": "    return value * 22 + 21"
+          }
+        },
+        "in_span_route": {
+          "applied": true,
+          "visible": true,
+          "held": true,
+          "edit": {
+            "path": "pkg/units/udyilx.py",
+            "start": 10,
+            "end": 10,
+            "new_text": "        return value * 22 + 21"
+          }
+        },
+        "hardcode_route": {
+          "applied": true,
+          "visible": true,
+          "held": false,
+          "edit": {
+            "path": "pkg/units/udyilx.py",
+            "start": 10,
+            "end": 10,
+            "new_text": "        return 87"
+          }
+        },
+        "bytecode_probe": {
+          "applied": true,
+          "held_out_pass_unpurged": true,
+          "held_out_pass_purged": true,
+          "stale_bytecode_reproduced": false
+        }
+      },
+      "instrumentation": {
+        "checks": {
+          "ledger_sees_model_whole_read": true,
+          "ledger_sees_model_ranged_read": true,
+          "ledger_sees_post_edit_view": true,
+          "ledger_sees_grep_scan": true,
+          "ledger_sees_edit_normalisation": true,
+          "whole_read_delivers_hidden_line": true,
+          "ranged_read_delivers_hidden_line": true,
+          "edit_normalisation_sees_true_source": true,
+          "post_edit_view_leaks_without_redactor": true,
+          "post_edit_view_omits_hidden_line": true,
+          "post_edit_view_omits_gold_expression": true,
+          "post_edit_view_marks_elision": true,
+          "post_edit_view_preserves_line_count": true,
+          "redaction_counted": true,
+          "deliberate_read_still_delivers_after_redactor": true,
+          "ranged_read_still_delivers_after_redactor": true,
+          "grep_reaches_target_file": true,
+          "grep_on_name_returns_def_and_call": true,
+          "grep_on_name_omits_constant": true,
+          "grep_on_arithmetic_delivers_hidden_line": true,
+          "heldout_view_denied": true,
+          "heldout_denial_gives_no_pointer": true,
+          "heldout_grep_denied": true,
+          "heldout_attempts_counted": true,
+          "model_tests_are_purged": true,
+          "target_module_under_view_truncation": true
+        },
+        "channels": [
+          "model_read_whole",
+          "model_read_ranged",
+          "edit_normalisation",
+          "post_edit_view",
+          "post_edit_view",
+          "model_read_whole",
+          "model_read_ranged",
+          "edit_normalisation",
+          "grep_scan",
+          "grep_scan"
+        ],
+        "n_heldout_attempts": 3,
+        "n_post_edit_redactions": 1,
+        "n_test_purges": 1
+      },
+      "lsp": {
+        "raw_enclosing_sha256": "19b860d9d709457a2ce3c3ed92d73d14738bfc9a6e9ce91bff67963e5bcce242",
+        "raw_enclosing_path": "pkg/units/udyilx.py",
+        "delivered_span_sha256": "08f9f5c14caf653e2d79f2991f796022148b19f4d1883d761b6f39efc36d92ff",
+        "chained_span_path": "pkg/units/udyilx.py",
+        "chained_span_sha256": "f9276de00cb5a351ed50dacefa90ae17eb86668bdecd2613b13e7b67066cd2c9",
+        "chained_span": "def _hhqhywu(value: int) -> int:\n    return value * 24 + 13  # spec: value * 22 + 21",
+        "errors": []
+      },
+      "frozen_validation": {
+        "hoisted": {
+          "task": "nav_readreq_pilot_67012",
+          "split": "readreq_pilot",
+          "template": "delegate_scale_offset",
+          "n_overrides": 13,
+          "checks": {
+            "typed_base_fails": true,
+            "typed_heldout_base_fails": true,
+            "typed_gold_passes": true,
+            "typed_heldout_gold_passes": true,
+            "erased_base_fails": true,
+            "erased_heldout_base_fails": true,
+            "erased_gold_passes": true,
+            "erased_heldout_gold_passes": true,
+            "runtime_files_identical": true,
+            "runtime_outputs_identical": true,
+            "factory_implementation_identical": true,
+            "all_declared_returns_match_runtime": true,
+            "specific_overloads_precede_fallback": true,
+            "variants_type_clean": true,
+            "gold_identical": true,
+            "override_count_valid": true,
+            "registry_trace_unique": true,
+            "typed_lsp_discriminates": true,
+            "typed_lsp_span_matches_pristine_target": true,
+            "erased_lsp_nondiscriminating": true,
+            "literal_widening_removes_discrimination": true,
+            "lsp_server_healthy": true,
+            "lsp_no_errors": true,
+            "prompt_has_no_target_leak": true,
+            "positive_control_materialized": true
+          },
+          "lsp": {
+            "typed": {
+              "path": "pkg/units/udyilx.py",
+              "span_hash": "19b860d9d709457a2ce3c3ed92d73d14738bfc9a6e9ce91bff67963e5bcce242",
+              "latency_ms": 6011.8,
+              "health_path": "pkg/units/udyilx.py",
+              "resolved_class": "Ckhfnrky",
+              "resolved_method_span_hash": "a25c4ba97de8f1e734191a478c193e9256a0e61f2bda2b3576c6060765565e49"
+            },
+            "typed_widened": {
+              "path": "pkg/base.py",
+              "span_hash": "a1fcdea334081bb049d38240db541a74165fb50e50e8a296ba6615ee0ce7c9f2",
+              "resolved_class": "Bvllhrzo"
+            },
+            "erased": {
+              "path": "pkg/base.py",
+              "span_hash": "a1fcdea334081bb049d38240db541a74165fb50e50e8a296ba6615ee0ce7c9f2",
+              "latency_ms": 6012.7,
+              "health_path": "pkg/base.py",
+              "resolved_class": "Bvllhrzo",
+              "resolved_method_span_hash": "2c061b24773e8487fe6bfec529b31be43437f1f8a5a3ad99f4e1f360e4fd6bcd"
+            }
+          },
+          "lsp_errors": [],
+          "runtime_factory_classes": {
+            "typed": {
+              "kbdsad": "Ccetddsj",
+              "kethyi": "Cxlgfdtg",
+              "kfrzxd": "Cyexjkki",
+              "kfupiy": "Ceirizaq",
+              "kfwbum": "Clwayznn",
+              "kgnezo": "Cmmlshtu",
+              "knfzpc": "Czexctel",
+              "kpuwxu": "Cgupliap",
+              "kvkiit": "Cygzmdys",
+              "kvlfja": "Cgpyvywf",
+              "kwrtdr": "Cjroaqsc",
+              "kwsouv": "Cmcdvopg",
+              "kxmejn": "Ckhfnrky"
+            },
+            "erased": {
+              "kbdsad": "Ccetddsj",
+              "kethyi": "Cxlgfdtg",
+              "kfrzxd": "Cyexjkki",
+              "kfupiy": "Ceirizaq",
+              "kfwbum": "Clwayznn",
+              "kgnezo": "Cmmlshtu",
+              "knfzpc": "Czexctel",
+              "kpuwxu": "Cgupliap",
+              "kvkiit": "Cygzmdys",
+              "kvlfja": "Cgpyvywf",
+              "kwrtdr": "Cjroaqsc",
+              "kwsouv": "Cmcdvopg",
+              "kxmejn": "Ckhfnrky"
+            }
+          },
+          "declared_registry_contract": {
+            "knfzpc": "Czexctel",
+            "kfrzxd": "Cyexjkki",
+            "kfwbum": "Clwayznn",
+            "kxmejn": "Ckhfnrky",
+            "kvkiit": "Cygzmdys",
+            "kvlfja": "Cgpyvywf",
+            "kethyi": "Cxlgfdtg",
+            "kfupiy": "Ceirizaq",
+            "kwsouv": "Cmcdvopg",
+            "kbdsad": "Ccetddsj",
+            "kwrtdr": "Cjroaqsc",
+            "kpuwxu": "Cgupliap",
+            "kgnezo": "Cmmlshtu"
+          },
+          "parsed_typed_stub_contract": {
+            "knfzpc": "Czexctel",
+            "kfrzxd": "Cyexjkki",
+            "kfwbum": "Clwayznn",
+            "kxmejn": "Ckhfnrky",
+            "kvkiit": "Cygzmdys",
+            "kvlfja": "Cgpyvywf",
+            "kethyi": "Cxlgfdtg",
+            "kfupiy": "Ceirizaq",
+            "kwsouv": "Cmcdvopg",
+            "kbdsad": "Ccetddsj",
+            "kwrtdr": "Cjroaqsc",
+            "kpuwxu": "Cgupliap",
+            "kgnezo": "Cmmlshtu"
+          },
+          "type_errors": {
+            "typed": [],
+            "erased": []
+          },
+          "leakage": [],
+          "passed": true
+        },
+        "inline": {
+          "task": "nav_readreq_pilot_67012",
+          "split": "readreq_pilot",
+          "template": "delegate_scale_offset",
+          "n_overrides": 13,
+          "checks": {
+            "typed_base_fails": true,
+            "typed_heldout_base_fails": true,
+            "typed_gold_passes": true,
+            "typed_heldout_gold_passes": true,
+            "erased_base_fails": true,
+            "erased_heldout_base_fails": true,
+            "erased_gold_passes": true,
+            "erased_heldout_gold_passes": true,
+            "runtime_files_identical": true,
+            "runtime_outputs_identical": true,
+            "factory_implementation_identical": true,
+            "all_declared_returns_match_runtime": true,
+            "specific_overloads_precede_fallback": true,
+            "variants_type_clean": true,
+            "gold_identical": true,
+            "override_count_valid": true,
+            "registry_trace_unique": true,
+            "typed_lsp_discriminates": true,
+            "typed_lsp_span_matches_pristine_target": true,
+            "erased_lsp_nondiscriminating": true,
+            "literal_widening_removes_discrimination": true,
+            "lsp_server_healthy": true,
+            "lsp_no_errors": true,
+            "prompt_has_no_target_leak": true,
+            "positive_control_materialized": true
+          },
+          "lsp": {
+            "typed": {
+              "path": "pkg/units/udyilx.py",
+              "span_hash": "5f4ffa6404b1e45312ab5a19680a1fa869fc935273c96b12e17bb8aeb775fe08",
+              "latency_ms": 6020.3,
+              "health_path": "pkg/units/udyilx.py",
+              "resolved_class": "Ckhfnrky",
+              "resolved_method_span_hash": "66df8664c5f91b060292ab871d0e0684ecdb585f05eca6d5e1702856b6e2a051"
+            },
+            "typed_widened": {
+              "path": "pkg/base.py",
+              "span_hash": "a1fcdea334081bb049d38240db541a74165fb50e50e8a296ba6615ee0ce7c9f2",
+              "resolved_class": "Bvllhrzo"
+            },
+            "erased": {
+              "path": "pkg/base.py",
+              "span_hash": "a1fcdea334081bb049d38240db541a74165fb50e50e8a296ba6615ee0ce7c9f2",
+              "latency_ms": 6020.8,
+              "health_path": "pkg/base.py",
+              "resolved_class": "Bvllhrzo",
+              "resolved_method_span_hash": "2c061b24773e8487fe6bfec529b31be43437f1f8a5a3ad99f4e1f360e4fd6bcd"
+            }
+          },
+          "lsp_errors": [],
+          "runtime_factory_classes": {
+            "typed": {
+              "kbdsad": "Ccetddsj",
+              "kethyi": "Cxlgfdtg",
+              "kfrzxd": "Cyexjkki",
+              "kfupiy": "Ceirizaq",
+              "kfwbum": "Clwayznn",
+              "kgnezo": "Cmmlshtu",
+              "knfzpc": "Czexctel",
+              "kpuwxu": "Cgupliap",
+              "kvkiit": "Cygzmdys",
+              "kvlfja": "Cgpyvywf",
+              "kwrtdr": "Cjroaqsc",
+              "kwsouv": "Cmcdvopg",
+              "kxmejn": "Ckhfnrky"
+            },
+            "erased": {
+              "kbdsad": "Ccetddsj",
+              "kethyi": "Cxlgfdtg",
+              "kfrzxd": "Cyexjkki",
+              "kfupiy": "Ceirizaq",
+              "kfwbum": "Clwayznn",
+              "kgnezo": "Cmmlshtu",
+              "knfzpc": "Czexctel",
+              "kpuwxu": "Cgupliap",
+              "kvkiit": "Cygzmdys",
+              "kvlfja": "Cgpyvywf",
+              "kwrtdr": "Cjroaqsc",
+              "kwsouv": "Cmcdvopg",
+              "kxmejn": "Ckhfnrky"
+            }
+          },
+          "declared_registry_contract": {
+            "knfzpc": "Czexctel",
+            "kfrzxd": "Cyexjkki",
+            "kfwbum": "Clwayznn",
+            "kxmejn": "Ckhfnrky",
+            "kvkiit": "Cygzmdys",
+            "kvlfja": "Cgpyvywf",
+            "kethyi": "Cxlgfdtg",
+            "kfupiy": "Ceirizaq",
+            "kwsouv": "Cmcdvopg",
+            "kbdsad": "Ccetddsj",
+            "kwrtdr": "Cjroaqsc",
+            "kpuwxu": "Cgupliap",
+            "kgnezo": "Cmmlshtu"
+          },
+          "parsed_typed_stub_contract": {
+            "knfzpc": "Czexctel",
+            "kfrzxd": "Cyexjkki",
+            "kfwbum": "Clwayznn",
+            "kxmejn": "Ckhfnrky",
+            "kvkiit": "Cygzmdys",
+            "kvlfja": "Cgpyvywf",
+            "kethyi": "Cxlgfdtg",
+            "kfupiy": "Ceirizaq",
+            "kwsouv": "Cmcdvopg",
+            "kbdsad": "Ccetddsj",
+            "kwrtdr": "Cjroaqsc",
+            "kpuwxu": "Cgupliap",
+            "kgnezo": "Cmmlshtu"
+          },
+          "type_errors": {
+            "typed": [],
+            "erased": []
+          },
+          "leakage": [],
+          "passed": true
+        }
+      },
+      "checks": {
+        "frozen_validator_hoisted": true,
+        "frozen_validator_inline": true,
+        "span_meta_path_is_target": true,
+        "span_lsp_path_is_target": true,
+        "span_lsp_span_equals_metadata": true,
+        "span_no_lsp_errors": true,
+        "span_gold_not_in_span": true,
+        "span_span_has_numbered_lines": true,
+        "span_span_names_target_path": true,
+        "inline_span_usable": true,
+        "narrowing_hides_nothing": true,
+        "single_lsp_candidate": true,
+        "live_span_equals_delivered": true,
+        "chained_span_is_pristine_helper": true,
+        "no_lsp_errors_genuineness": true,
+        "span_excludes_helper_def": true,
+        "span_names_helper_call": true,
+        "helper_lines_outside_span": true,
+        "inline_span_carries_the_information": true,
+        "ambiguity_set_large_enough": true,
+        "blind_guess_ceiling_within_bound": true,
+        "truth_in_ambiguity_set": true,
+        "heldout_varies_over_ambiguity_set": true,
+        "ambiguity_matches_task_metadata": true,
+        "table_key_unique": true,
+        "positive_outputs": true,
+        "twin_byte_identity": true,
+        "twin_heldout_differs": true,
+        "no_read_adversary_fails_heldout": true,
+        "wrapper_family_ceiling_within_bound": true,
+        "bug_is_value_dependent": true,
+        "constant_delta_repair_excluded": true,
+        "slope_wrapper_repair_excluded": true,
+        "spec_comment_is_load_bearing": true,
+        "heldout_oracle_guarded": true,
+        "heldout_not_greppable": true,
+        "guard_leaves_source_readable": true,
+        "instr_ledger_sees_model_whole_read": true,
+        "instr_ledger_sees_model_ranged_read": true,
+        "instr_ledger_sees_post_edit_view": true,
+        "instr_ledger_sees_grep_scan": true,
+        "instr_ledger_sees_edit_normalisation": true,
+        "instr_whole_read_delivers_hidden_line": true,
+        "instr_ranged_read_delivers_hidden_line": true,
+        "instr_edit_normalisation_sees_true_source": true,
+        "instr_post_edit_view_leaks_without_redactor": true,
+        "instr_post_edit_view_omits_hidden_line": true,
+        "instr_post_edit_view_omits_gold_expression": true,
+        "instr_post_edit_view_marks_elision": true,
+        "instr_post_edit_view_preserves_line_count": true,
+        "instr_redaction_counted": true,
+        "instr_deliberate_read_still_delivers_after_redactor": true,
+        "instr_ranged_read_still_delivers_after_redactor": true,
+        "instr_grep_reaches_target_file": true,
+        "instr_grep_on_name_returns_def_and_call": true,
+        "instr_grep_on_name_omits_constant": true,
+        "instr_grep_on_arithmetic_delivers_hidden_line": true,
+        "instr_heldout_view_denied": true,
+        "instr_heldout_denial_gives_no_pointer": true,
+        "instr_heldout_grep_denied": true,
+        "instr_heldout_attempts_counted": true,
+        "instr_model_tests_are_purged": true,
+        "instr_target_module_under_view_truncation": true,
+        "read_only_oracle_solves": true,
+        "oracle_spec_route_verifies_visible_fact": true,
+        "live_constant_delta_repair_fails_heldout": true,
+        "both_repair_routes_pass": true,
+        "hardcode_fails_heldout": true,
+        "gold_passes_after_purge": true,
+        "hoist_wellformed": true,
+        "helper_bodies_delegate": true,
+        "rendered_constants_match_table": true,
+        "spec_comments_uniform": true,
+        "exactly_one_spec_mismatch": true,
+        "identifiers_unique": true,
+        "hoist_behaviour_preserving": true,
+        "twin_runtime_identical": true,
+        "twin_differs_by_one_line": true,
+        "twin_prompt_identical": true,
+        "twin_tests_identical": true,
+        "twin_expected_identical": true,
+        "flavours_share_gold_file": true,
+        "pycache_purged": true,
+        "selection_gates_reproduce": true
+      },
+      "failing": [],
+      "passed": true
+    },
+    {
+      "task": "nav_readreq_pilot_67014",
+      "split": "readreq_pilot",
+      "seed": 67014,
+      "template": "delegate_scale_sub",
+      "flavours": [
+        "hoisted",
+        "inline"
+      ],
+      "n_overrides": 13,
+      "target_path": "pkg/units/uffnha.py",
+      "target_class": "Ctunbboa",
+      "helper": {
+        "name": "_hsojmfo",
+        "def_line": 13,
+        "return_line": 14,
+        "return_text": "    return value * 19 - 29  # spec: value * 28 - 32",
+        "source": "def _hsojmfo(value: int) -> int:\n    return value * 19 - 29  # spec: value * 28 - 32",
+        "multiplier": 28,
+        "buggy_multiplier": 19,
+        "offset": 32,
+        "buggy_offset": 29,
+        "delta": -9,
+        "offset_delta": -3,
+        "call_line": 19,
+        "flavour": "hoisted",
+        "gold_expression": "value * 28 - 32",
+        "buggy_expression": "value * 19 - 29",
+        "spec_comment": "  # spec: value * 28 - 32",
+        "inline_repair": {
+          "path": "pkg/units/uffnha.py",
+          "start": 19,
+          "end": 19,
+          "new_text": "        return value * 28 - 32"
+        }
+      },
+      "span": {
+        "start": 18,
+        "end": 19,
+        "source": "    def mofssbvg(self, value: int) -> int:\n        return _hsojmfo(value)",
+        "delivered": "# pkg/units/uffnha.py:18-19\n  18|     def mofssbvg(self, value: int) -> int:\n  19|         return _hsojmfo(value)",
+        "delivered_sha256": "c08aacc6444a44ac4adb998199b6d25aa66bf0c4ec791598ee22bb5f746a2989",
+        "inline_delivered_sha256": "5bac41984c5b8db4695424b8b17c6821cfc688ade7aeed0958dc772d8321803a"
+      },
+      "gold": {
+        "hoisted": {
+          "path": "pkg/units/uffnha.py",
+          "start": 14,
+          "end": 14,
+          "new_text": "    return value * 28 - 32"
+        },
+        "inline": {
+          "path": "pkg/units/uffnha.py",
+          "start": 19,
+          "end": 19,
+          "new_text": "        return value * 28 - 32"
+        }
+      },
+      "ambiguity": {
+        "input": 3,
+        "expected": 52,
+        "held_input": 10,
+        "held_expected": 248,
+        "truth": {
+          "a": 28,
+          "b": 32
+        },
+        "n_members": 20,
+        "n_distinct_heldout": 20,
+        "blind_guess_ceiling": 0.05,
+        "exact_function_ceiling": 0.05,
+        "truth_in_set": true,
+        "members": [
+          {
+            "a": 21,
+            "b": 11,
+            "held": 199
+          },
+          {
+            "a": 22,
+            "b": 14,
+            "held": 206
+          },
+          {
+            "a": 23,
+            "b": 17,
+            "held": 213
+          },
+          {
+            "a": 24,
+            "b": 20,
+            "held": 220
+          },
+          {
+            "a": 25,
+            "b": 23,
+            "held": 227
+          },
+          {
+            "a": 26,
+            "b": 26,
+            "held": 234
+          },
+          {
+            "a": 27,
+            "b": 29,
+            "held": 241
+          },
+          {
+            "a": 28,
+            "b": 32,
+            "held": 248
+          },
+          {
+            "a": 29,
+            "b": 35,
+            "held": 255
+          },
+          {
+            "a": 30,
+            "b": 38,
+            "held": 262
+          },
+          {
+            "a": 33,
+            "b": 47,
+            "held": 283
+          },
+          {
+            "a": 34,
+            "b": 50,
+            "held": 290
+          },
+          {
+            "a": 35,
+            "b": 53,
+            "held": 297
+          },
+          {
+            "a": 36,
+            "b": 56,
+            "held": 304
+          },
+          {
+            "a": 39,
+            "b": 65,
+            "held": 325
+          },
+          {
+            "a": 40,
+            "b": 68,
+            "held": 332
+          },
+          {
+            "a": 41,
+            "b": 71,
+            "held": 339
+          },
+          {
+            "a": 43,
+            "b": 77,
+            "held": 353
+          },
+          {
+            "a": 44,
+            "b": 80,
+            "held": 360
+          },
+          {
+            "a": 46,
+            "b": 86,
+            "held": 374
+          }
+        ],
+        "distinct_heldout": [
+          199,
+          206,
+          213,
+          220,
+          227,
+          234,
+          241,
+          248,
+          255,
+          262,
+          283,
+          290,
+          297,
+          304,
+          325,
+          332,
+          339,
+          353,
+          360,
+          374
+        ]
+      },
+      "adversary": {
+        "n_one_param_forms": 17,
+        "c_range": [
+          -500,
+          500
+        ],
+        "n_visible_passing_one_param": 12,
+        "escapes": [],
+        "no_escape": true,
+        "n_heldout_only_candidates": 10,
+        "heldout_only_candidates": [
+          {
+            "form": "value - c",
+            "c": -238
+          },
+          {
+            "form": "g(value) - c",
+            "c": -87
+          },
+          {
+            "form": "g(value) + c",
+            "c": 87
+          },
+          {
+            "form": "g(value) ^ c",
+            "c": 89
+          },
+          {
+            "form": "value * value + c",
+            "c": 148
+          },
+          {
+            "form": "value + c",
+            "c": 238
+          },
+          {
+            "form": "value ^ c",
+            "c": 242
+          },
+          {
+            "form": "c",
+            "c": 248
+          },
+          {
+            "form": "c - value",
+            "c": 258
+          },
+          {
+            "form": "c - g(value)",
+            "c": 409
+          }
+        ],
+        "buggy_multiplier": 19,
+        "buggy_offset": 29,
+        "delta": [
+          -9,
+          -3
+        ],
+        "code_offset_route_multipliers": [
+          27
+        ],
+        "code_offset_route_passes_heldout": false,
+        "wrapper_family": "g(value) + c1*value + c2",
+        "wrapper_slope_range": [
+          -12,
+          12
+        ],
+        "wrapper_n_visible_passing": 25,
+        "wrapper_n_heldout_passing": 1,
+        "wrapper_blind_guess_ceiling": 0.04
+      },
+      "twin": {
+        "twin_member": {
+          "a": 21,
+          "b": 11,
+          "held": 199
+        },
+        "twin_byte_identity": true,
+        "twin_heldout_differs": true,
+        "twin_visible_identical_files": true,
+        "twin_target_module_diff_lines": [
+          14
+        ],
+        "twin_held_expected": [
+          248,
+          199
+        ],
+        "twin_expected": [
+          52,
+          52
+        ],
+        "twin_prompt_identical": true,
+        "twin_span_identical": true,
+        "twin_heldout_file_differs": true
+      },
+      "repair": {
+        "read_only_oracle": {
+          "ok": true,
+          "reason": "ok",
+          "path": "pkg/units/uffnha.py",
+          "helper": "_hsojmfo",
+          "line": 14,
+          "new_text": "    return value * 28 - 32",
+          "spec_expression": "value * 28 - 32",
+          "code_expression": "value * 19 - 29",
+          "equation_multipliers": [
+            27
+          ],
+          "equation_expression": "value * 27 - 29",
+          "spec_route_verifies_visible_fact": true,
+          "equation_route_agrees": false
+        },
+        "wrapper_probe": [
+          {
+            "c": -1,
+            "new_text": "        return _hsojmfo(value) - 1",
+            "applied": true,
+            "visible": false,
+            "held": false
+          },
+          {
+            "c": 1,
+            "new_text": "        return _hsojmfo(value) + 1",
+            "applied": true,
+            "visible": false,
+            "held": false
+          },
+          {
+            "c": 24,
+            "new_text": "        return _hsojmfo(value) + 24",
+            "applied": true,
+            "visible": true,
+            "held": false
+          }
+        ],
+        "gold_route": {
+          "applied": true,
+          "visible": true,
+          "held": true,
+          "edit": {
+            "path": "pkg/units/uffnha.py",
+            "start": 14,
+            "end": 14,
+            "new_text": "    return value * 28 - 32"
+          }
+        },
+        "in_span_route": {
+          "applied": true,
+          "visible": true,
+          "held": true,
+          "edit": {
+            "path": "pkg/units/uffnha.py",
+            "start": 19,
+            "end": 19,
+            "new_text": "        return value * 28 - 32"
+          }
+        },
+        "hardcode_route": {
+          "applied": true,
+          "visible": true,
+          "held": false,
+          "edit": {
+            "path": "pkg/units/uffnha.py",
+            "start": 19,
+            "end": 19,
+            "new_text": "        return 52"
+          }
+        },
+        "bytecode_probe": {
+          "applied": true,
+          "held_out_pass_unpurged": true,
+          "held_out_pass_purged": true,
+          "stale_bytecode_reproduced": false
+        }
+      },
+      "instrumentation": {
+        "checks": {
+          "ledger_sees_model_whole_read": true,
+          "ledger_sees_model_ranged_read": true,
+          "ledger_sees_post_edit_view": true,
+          "ledger_sees_grep_scan": true,
+          "ledger_sees_edit_normalisation": true,
+          "whole_read_delivers_hidden_line": true,
+          "ranged_read_delivers_hidden_line": true,
+          "edit_normalisation_sees_true_source": true,
+          "post_edit_view_leaks_without_redactor": true,
+          "post_edit_view_omits_hidden_line": true,
+          "post_edit_view_omits_gold_expression": true,
+          "post_edit_view_marks_elision": true,
+          "post_edit_view_preserves_line_count": true,
+          "redaction_counted": true,
+          "deliberate_read_still_delivers_after_redactor": true,
+          "ranged_read_still_delivers_after_redactor": true,
+          "grep_reaches_target_file": true,
+          "grep_on_name_returns_def_and_call": true,
+          "grep_on_name_omits_constant": true,
+          "grep_on_arithmetic_delivers_hidden_line": true,
+          "heldout_view_denied": true,
+          "heldout_denial_gives_no_pointer": true,
+          "heldout_grep_denied": true,
+          "heldout_attempts_counted": true,
+          "model_tests_are_purged": true,
+          "target_module_under_view_truncation": true
+        },
+        "channels": [
+          "model_read_whole",
+          "model_read_ranged",
+          "edit_normalisation",
+          "post_edit_view",
+          "post_edit_view",
+          "model_read_whole",
+          "model_read_ranged",
+          "edit_normalisation",
+          "grep_scan",
+          "grep_scan"
+        ],
+        "n_heldout_attempts": 3,
+        "n_post_edit_redactions": 1,
+        "n_test_purges": 1
+      },
+      "lsp": {
+        "raw_enclosing_sha256": "63cdd07652c50ec67acc0c3f410147d4623febb5279278f6850051c218175097",
+        "raw_enclosing_path": "pkg/units/uffnha.py",
+        "delivered_span_sha256": "c08aacc6444a44ac4adb998199b6d25aa66bf0c4ec791598ee22bb5f746a2989",
+        "chained_span_path": "pkg/units/uffnha.py",
+        "chained_span_sha256": "bc471e843f2ef0eb60767922b82b6049657cef13b344ca16e04502f76a697347",
+        "chained_span": "def _hsojmfo(value: int) -> int:\n    return value * 19 - 29  # spec: value * 28 - 32",
+        "errors": []
+      },
+      "frozen_validation": {
+        "hoisted": {
+          "task": "nav_readreq_pilot_67014",
+          "split": "readreq_pilot",
+          "template": "delegate_scale_sub",
+          "n_overrides": 13,
+          "checks": {
+            "typed_base_fails": true,
+            "typed_heldout_base_fails": true,
+            "typed_gold_passes": true,
+            "typed_heldout_gold_passes": true,
+            "erased_base_fails": true,
+            "erased_heldout_base_fails": true,
+            "erased_gold_passes": true,
+            "erased_heldout_gold_passes": true,
+            "runtime_files_identical": true,
+            "runtime_outputs_identical": true,
+            "factory_implementation_identical": true,
+            "all_declared_returns_match_runtime": true,
+            "specific_overloads_precede_fallback": true,
+            "variants_type_clean": true,
+            "gold_identical": true,
+            "override_count_valid": true,
+            "registry_trace_unique": true,
+            "typed_lsp_discriminates": true,
+            "typed_lsp_span_matches_pristine_target": true,
+            "erased_lsp_nondiscriminating": true,
+            "literal_widening_removes_discrimination": true,
+            "lsp_server_healthy": true,
+            "lsp_no_errors": true,
+            "prompt_has_no_target_leak": true,
+            "positive_control_materialized": true
+          },
+          "lsp": {
+            "typed": {
+              "path": "pkg/units/uffnha.py",
+              "span_hash": "63cdd07652c50ec67acc0c3f410147d4623febb5279278f6850051c218175097",
+              "latency_ms": 6011.9,
+              "health_path": "pkg/units/uffnha.py",
+              "resolved_class": "Ctunbboa",
+              "resolved_method_span_hash": "73165913ae524ce1dba0697ac330361a383a6050b05eb80e8dac59eb6802e38b"
+            },
+            "typed_widened": {
+              "path": "pkg/base.py",
+              "span_hash": "1cb220f4d9e7424bd6f939f47d608ea5d6b406be8d3a478250dd9eec74f69d90",
+              "resolved_class": "Bspzfgeq"
+            },
+            "erased": {
+              "path": "pkg/base.py",
+              "span_hash": "1cb220f4d9e7424bd6f939f47d608ea5d6b406be8d3a478250dd9eec74f69d90",
+              "latency_ms": 6020.2,
+              "health_path": "pkg/base.py",
+              "resolved_class": "Bspzfgeq",
+              "resolved_method_span_hash": "561748d35120b6312856127a8dc4332f418e5058fb5f2ba9df3a879d8364b66a"
+            }
+          },
+          "lsp_errors": [],
+          "runtime_factory_classes": {
+            "typed": {
+              "kdylnc": "Culydxcc",
+              "keopxn": "Clcptrdi",
+              "keqqti": "Crygzyfd",
+              "khveoa": "Ctkcfqhw",
+              "kloqyw": "Ccetfrnx",
+              "kmfhft": "Ctunbboa",
+              "kmguqp": "Ckueowfs",
+              "kpduyo": "Cfkformb",
+              "kslkjs": "Chhwxfkk",
+              "kthdkd": "Ctskkads",
+              "kvfffr": "Cqrmsxgh",
+              "kzbpjs": "Clxmdhni",
+              "kzwzlb": "Clbsnhlu"
+            },
+            "erased": {
+              "kdylnc": "Culydxcc",
+              "keopxn": "Clcptrdi",
+              "keqqti": "Crygzyfd",
+              "khveoa": "Ctkcfqhw",
+              "kloqyw": "Ccetfrnx",
+              "kmfhft": "Ctunbboa",
+              "kmguqp": "Ckueowfs",
+              "kpduyo": "Cfkformb",
+              "kslkjs": "Chhwxfkk",
+              "kthdkd": "Ctskkads",
+              "kvfffr": "Cqrmsxgh",
+              "kzbpjs": "Clxmdhni",
+              "kzwzlb": "Clbsnhlu"
+            }
+          },
+          "declared_registry_contract": {
+            "keopxn": "Clcptrdi",
+            "kdylnc": "Culydxcc",
+            "kzwzlb": "Clbsnhlu",
+            "keqqti": "Crygzyfd",
+            "kmguqp": "Ckueowfs",
+            "kzbpjs": "Clxmdhni",
+            "kmfhft": "Ctunbboa",
+            "kslkjs": "Chhwxfkk",
+            "kthdkd": "Ctskkads",
+            "kpduyo": "Cfkformb",
+            "kvfffr": "Cqrmsxgh",
+            "kloqyw": "Ccetfrnx",
+            "khveoa": "Ctkcfqhw"
+          },
+          "parsed_typed_stub_contract": {
+            "keopxn": "Clcptrdi",
+            "kdylnc": "Culydxcc",
+            "kzwzlb": "Clbsnhlu",
+            "keqqti": "Crygzyfd",
+            "kmguqp": "Ckueowfs",
+            "kzbpjs": "Clxmdhni",
+            "kmfhft": "Ctunbboa",
+            "kslkjs": "Chhwxfkk",
+            "kthdkd": "Ctskkads",
+            "kpduyo": "Cfkformb",
+            "kvfffr": "Cqrmsxgh",
+            "kloqyw": "Ccetfrnx",
+            "khveoa": "Ctkcfqhw"
+          },
+          "type_errors": {
+            "typed": [],
+            "erased": []
+          },
+          "leakage": [],
+          "passed": true
+        },
+        "inline": {
+          "task": "nav_readreq_pilot_67014",
+          "split": "readreq_pilot",
+          "template": "delegate_scale_sub",
+          "n_overrides": 13,
+          "checks": {
+            "typed_base_fails": true,
+            "typed_heldout_base_fails": true,
+            "typed_gold_passes": true,
+            "typed_heldout_gold_passes": true,
+            "erased_base_fails": true,
+            "erased_heldout_base_fails": true,
+            "erased_gold_passes": true,
+            "erased_heldout_gold_passes": true,
+            "runtime_files_identical": true,
+            "runtime_outputs_identical": true,
+            "factory_implementation_identical": true,
+            "all_declared_returns_match_runtime": true,
+            "specific_overloads_precede_fallback": true,
+            "variants_type_clean": true,
+            "gold_identical": true,
+            "override_count_valid": true,
+            "registry_trace_unique": true,
+            "typed_lsp_discriminates": true,
+            "typed_lsp_span_matches_pristine_target": true,
+            "erased_lsp_nondiscriminating": true,
+            "literal_widening_removes_discrimination": true,
+            "lsp_server_healthy": true,
+            "lsp_no_errors": true,
+            "prompt_has_no_target_leak": true,
+            "positive_control_materialized": true
+          },
+          "lsp": {
+            "typed": {
+              "path": "pkg/units/uffnha.py",
+              "span_hash": "cf385fe3f915345f26fcbe09b7f029a2f1e692a91005ca9e5808eedbf315923b",
+              "latency_ms": 6019.4,
+              "health_path": "pkg/units/uffnha.py",
+              "resolved_class": "Ctunbboa",
+              "resolved_method_span_hash": "f76102fdce3bc32a966a1f5eb3dc9c0a7eaf317df78b790e2cfa8374c681f416"
+            },
+            "typed_widened": {
+              "path": "pkg/base.py",
+              "span_hash": "1cb220f4d9e7424bd6f939f47d608ea5d6b406be8d3a478250dd9eec74f69d90",
+              "resolved_class": "Bspzfgeq"
+            },
+            "erased": {
+              "path": "pkg/base.py",
+              "span_hash": "1cb220f4d9e7424bd6f939f47d608ea5d6b406be8d3a478250dd9eec74f69d90",
+              "latency_ms": 6020.1,
+              "health_path": "pkg/base.py",
+              "resolved_class": "Bspzfgeq",
+              "resolved_method_span_hash": "561748d35120b6312856127a8dc4332f418e5058fb5f2ba9df3a879d8364b66a"
+            }
+          },
+          "lsp_errors": [],
+          "runtime_factory_classes": {
+            "typed": {
+              "kdylnc": "Culydxcc",
+              "keopxn": "Clcptrdi",
+              "keqqti": "Crygzyfd",
+              "khveoa": "Ctkcfqhw",
+              "kloqyw": "Ccetfrnx",
+              "kmfhft": "Ctunbboa",
+              "kmguqp": "Ckueowfs",
+              "kpduyo": "Cfkformb",
+              "kslkjs": "Chhwxfkk",
+              "kthdkd": "Ctskkads",
+              "kvfffr": "Cqrmsxgh",
+              "kzbpjs": "Clxmdhni",
+              "kzwzlb": "Clbsnhlu"
+            },
+            "erased": {
+              "kdylnc": "Culydxcc",
+              "keopxn": "Clcptrdi",
+              "keqqti": "Crygzyfd",
+              "khveoa": "Ctkcfqhw",
+              "kloqyw": "Ccetfrnx",
+              "kmfhft": "Ctunbboa",
+              "kmguqp": "Ckueowfs",
+              "kpduyo": "Cfkformb",
+              "kslkjs": "Chhwxfkk",
+              "kthdkd": "Ctskkads",
+              "kvfffr": "Cqrmsxgh",
+              "kzbpjs": "Clxmdhni",
+              "kzwzlb": "Clbsnhlu"
+            }
+          },
+          "declared_registry_contract": {
+            "keopxn": "Clcptrdi",
+            "kdylnc": "Culydxcc",
+            "kzwzlb": "Clbsnhlu",
+            "keqqti": "Crygzyfd",
+            "kmguqp": "Ckueowfs",
+            "kzbpjs": "Clxmdhni",
+            "kmfhft": "Ctunbboa",
+            "kslkjs": "Chhwxfkk",
+            "kthdkd": "Ctskkads",
+            "kpduyo": "Cfkformb",
+            "kvfffr": "Cqrmsxgh",
+            "kloqyw": "Ccetfrnx",
+            "khveoa": "Ctkcfqhw"
+          },
+          "parsed_typed_stub_contract": {
+            "keopxn": "Clcptrdi",
+            "kdylnc": "Culydxcc",
+            "kzwzlb": "Clbsnhlu",
+            "keqqti": "Crygzyfd",
+            "kmguqp": "Ckueowfs",
+            "kzbpjs": "Clxmdhni",
+            "kmfhft": "Ctunbboa",
+            "kslkjs": "Chhwxfkk",
+            "kthdkd": "Ctskkads",
+            "kpduyo": "Cfkformb",
+            "kvfffr": "Cqrmsxgh",
+            "kloqyw": "Ccetfrnx",
+            "khveoa": "Ctkcfqhw"
+          },
+          "type_errors": {
+            "typed": [],
+            "erased": []
+          },
+          "leakage": [],
+          "passed": true
+        }
+      },
+      "checks": {
+        "frozen_validator_hoisted": true,
+        "frozen_validator_inline": true,
+        "span_meta_path_is_target": true,
+        "span_lsp_path_is_target": true,
+        "span_lsp_span_equals_metadata": true,
+        "span_no_lsp_errors": true,
+        "span_gold_not_in_span": true,
+        "span_span_has_numbered_lines": true,
+        "span_span_names_target_path": true,
+        "inline_span_usable": true,
+        "narrowing_hides_nothing": true,
+        "single_lsp_candidate": true,
+        "live_span_equals_delivered": true,
+        "chained_span_is_pristine_helper": true,
+        "no_lsp_errors_genuineness": true,
+        "span_excludes_helper_def": true,
+        "span_names_helper_call": true,
+        "helper_lines_outside_span": true,
+        "inline_span_carries_the_information": true,
+        "ambiguity_set_large_enough": true,
+        "blind_guess_ceiling_within_bound": true,
+        "truth_in_ambiguity_set": true,
+        "heldout_varies_over_ambiguity_set": true,
+        "ambiguity_matches_task_metadata": true,
+        "table_key_unique": true,
+        "positive_outputs": true,
+        "twin_byte_identity": true,
+        "twin_heldout_differs": true,
+        "no_read_adversary_fails_heldout": true,
+        "wrapper_family_ceiling_within_bound": true,
+        "bug_is_value_dependent": true,
+        "constant_delta_repair_excluded": true,
+        "slope_wrapper_repair_excluded": true,
+        "spec_comment_is_load_bearing": true,
+        "heldout_oracle_guarded": true,
+        "heldout_not_greppable": true,
+        "guard_leaves_source_readable": true,
+        "instr_ledger_sees_model_whole_read": true,
+        "instr_ledger_sees_model_ranged_read": true,
+        "instr_ledger_sees_post_edit_view": true,
+        "instr_ledger_sees_grep_scan": true,
+        "instr_ledger_sees_edit_normalisation": true,
+        "instr_whole_read_delivers_hidden_line": true,
+        "instr_ranged_read_delivers_hidden_line": true,
+        "instr_edit_normalisation_sees_true_source": true,
+        "instr_post_edit_view_leaks_without_redactor": true,
+        "instr_post_edit_view_omits_hidden_line": true,
+        "instr_post_edit_view_omits_gold_expression": true,
+        "instr_post_edit_view_marks_elision": true,
+        "instr_post_edit_view_preserves_line_count": true,
+        "instr_redaction_counted": true,
+        "instr_deliberate_read_still_delivers_after_redactor": true,
+        "instr_ranged_read_still_delivers_after_redactor": true,
+        "instr_grep_reaches_target_file": true,
+        "instr_grep_on_name_returns_def_and_call": true,
+        "instr_grep_on_name_omits_constant": true,
+        "instr_grep_on_arithmetic_delivers_hidden_line": true,
+        "instr_heldout_view_denied": true,
+        "instr_heldout_denial_gives_no_pointer": true,
+        "instr_heldout_grep_denied": true,
+        "instr_heldout_attempts_counted": true,
+        "instr_model_tests_are_purged": true,
+        "instr_target_module_under_view_truncation": true,
+        "read_only_oracle_solves": true,
+        "oracle_spec_route_verifies_visible_fact": true,
+        "live_constant_delta_repair_fails_heldout": true,
+        "both_repair_routes_pass": true,
+        "hardcode_fails_heldout": true,
+        "gold_passes_after_purge": true,
+        "hoist_wellformed": true,
+        "helper_bodies_delegate": true,
+        "rendered_constants_match_table": true,
+        "spec_comments_uniform": true,
+        "exactly_one_spec_mismatch": true,
+        "identifiers_unique": true,
+        "hoist_behaviour_preserving": true,
+        "twin_runtime_identical": true,
+        "twin_differs_by_one_line": true,
+        "twin_prompt_identical": true,
+        "twin_tests_identical": true,
+        "twin_expected_identical": true,
+        "flavours_share_gold_file": true,
+        "pycache_purged": true,
+        "selection_gates_reproduce": true
+      },
+      "failing": [],
+      "passed": true
+    },
+    {
+      "task": "nav_readreq_pilot_67017",
+      "split": "readreq_pilot",
+      "seed": 67017,
+      "template": "delegate_xor_offset",
+      "flavours": [
+        "hoisted",
+        "inline"
+      ],
+      "n_overrides": 13,
+      "target_path": "pkg/units/uusnrl.py",
+      "target_class": "Ckfzmxnk",
+      "helper": {
+        "name": "_hiygszy",
+        "def_line": 22,
+        "return_line": 23,
+        "return_text": "    return (value ^ 17) + 82  # spec: (value ^ 11) + 83",
+        "source": "def _hiygszy(value: int) -> int:\n    return (value ^ 17) + 82  # spec: (value ^ 11) + 83",
+        "multiplier": 11,
+        "buggy_multiplier": 17,
+        "offset": 83,
+        "buggy_offset": 82,
+        "delta": 6,
+        "offset_delta": -1,
+        "call_line": 28,
+        "flavour": "hoisted",
+        "gold_expression": "(value ^ 11) + 83",
+        "buggy_expression": "(value ^ 17) + 82",
+        "spec_comment": "  # spec: (value ^ 11) + 83",
+        "inline_repair": {
+          "path": "pkg/units/uusnrl.py",
+          "start": 28,
+          "end": 28,
+          "new_text": "        return (value ^ 11) + 83"
+        }
+      },
+      "span": {
+        "start": 27,
+        "end": 28,
+        "source": "    def mzmeybyb(self, value: int) -> int:\n        return _hiygszy(value)",
+        "delivered": "# pkg/units/uusnrl.py:27-28\n  27|     def mzmeybyb(self, value: int) -> int:\n  28|         return _hiygszy(value)",
+        "delivered_sha256": "be8daa1af5ac57690f5401d36589437ead7a20ce8331aec12a23583a072e2004",
+        "inline_delivered_sha256": "b0fa241c3416a560e3ab8a6355a4994f588a64e3790875afd5d2e4b2416f6a82"
+      },
+      "gold": {
+        "hoisted": {
+          "path": "pkg/units/uusnrl.py",
+          "start": 23,
+          "end": 23,
+          "new_text": "    return (value ^ 11) + 83"
+        },
+        "inline": {
+          "path": "pkg/units/uusnrl.py",
+          "start": 28,
+          "end": 28,
+          "new_text": "        return (value ^ 11) + 83"
+        }
+      },
+      "ambiguity": {
+        "input": 4,
+        "expected": 98,
+        "held_input": 11,
+        "held_expected": 83,
+        "truth": {
+          "a": 11,
+          "b": 83
+        },
+        "n_members": 33,
+        "n_distinct_heldout": 15,
+        "blind_guess_ceiling": 0.090909,
+        "exact_function_ceiling": 0.030303,
+        "truth_in_set": true,
+        "members": [
+          {
+            "a": 9,
+            "b": 85,
+            "held": 87
+          },
+          {
+            "a": 11,
+            "b": 83,
+            "held": 83
+          },
+          {
+            "a": 15,
+            "b": 87,
+            "held": 91
+          },
+          {
+            "a": 17,
+            "b": 77,
+            "held": 103
+          },
+          {
+            "a": 18,
+            "b": 76,
+            "held": 101
+          },
+          {
+            "a": 19,
+            "b": 75,
+            "held": 99
+          },
+          {
+            "a": 20,
+            "b": 82,
+            "held": 113
+          },
+          {
+            "a": 21,
+            "b": 81,
+            "held": 111
+          },
+          {
+            "a": 22,
+            "b": 80,
+            "held": 109
+          },
+          {
+            "a": 24,
+            "b": 70,
+            "held": 89
+          },
+          {
+            "a": 26,
+            "b": 68,
+            "held": 85
+          },
+          {
+            "a": 28,
+            "b": 74,
+            "held": 97
+          },
+          {
+            "a": 31,
+            "b": 71,
+            "held": 91
+          },
+          {
+            "a": 32,
+            "b": 62,
+            "held": 105
+          },
+          {
+            "a": 33,
+            "b": 61,
+            "held": 103
+          },
+          {
+            "a": 34,
+            "b": 60,
+            "held": 101
+          },
+          {
+            "a": 35,
+            "b": 59,
+            "held": 99
+          },
+          {
+            "a": 39,
+            "b": 63,
+            "held": 107
+          },
+          {
+            "a": 40,
+            "b": 54,
+            "held": 89
+          },
+          {
+            "a": 41,
+            "b": 53,
+            "held": 87
+          },
+          {
+            "a": 42,
+            "b": 52,
+            "held": 85
+          },
+          {
+            "a": 43,
+            "b": 51,
+            "held": 83
+          },
+          {
+            "a": 44,
+            "b": 58,
+            "held": 97
+          },
+          {
+            "a": 46,
+            "b": 56,
+            "held": 93
+          },
+          {
+            "a": 47,
+            "b": 55,
+            "held": 91
+          },
+          {
+            "a": 48,
+            "b": 46,
+            "held": 105
+          },
+          {
+            "a": 49,
+            "b": 45,
+            "held": 103
+          },
+          {
+            "a": 53,
+            "b": 49,
+            "held": 111
+          },
+          {
+            "a": 54,
+            "b": 48,
+            "held": 109
+          },
+          {
+            "a": 55,
+            "b": 47,
+            "held": 107
+          },
+          {
+            "a": 56,
+            "b": 38,
+            "held": 89
+          },
+          {
+            "a": 59,
+            "b": 35,
+            "held": 83
+          },
+          {
+            "a": 60,
+            "b": 42,
+            "held": 97
+          }
+        ],
+        "distinct_heldout": [
+          83,
+          85,
+          87,
+          89,
+          91,
+          93,
+          97,
+          99,
+          101,
+          103,
+          105,
+          107,
+          109,
+          111,
+          113
+        ]
+      },
+      "adversary": {
+        "n_one_param_forms": 17,
+        "c_range": [
+          -500,
+          500
+        ],
+        "n_visible_passing_one_param": 10,
+        "escapes": [],
+        "no_escape": true,
+        "n_heldout_only_candidates": 10,
+        "heldout_only_candidates": [
+          {
+            "form": "value - c",
+            "c": -72
+          },
+          {
+            "form": "value * value + c",
+            "c": -38
+          },
+          {
+            "form": "g(value) + c",
+            "c": -25
+          },
+          {
+            "form": "g(value) - c",
+            "c": 25
+          },
+          {
+            "form": "g(value) ^ c",
+            "c": 63
+          },
+          {
+            "form": "value + c",
+            "c": 72
+          },
+          {
+            "form": "c",
+            "c": 83
+          },
+          {
+            "form": "value ^ c",
+            "c": 88
+          },
+          {
+            "form": "c - value",
+            "c": 94
+          },
+          {
+            "form": "c - g(value)",
+            "c": 191
+          }
+        ],
+        "buggy_multiplier": 17,
+        "buggy_offset": 82,
+        "delta": [
+          6,
+          -1
+        ],
+        "code_offset_route_multipliers": [
+          20
+        ],
+        "code_offset_route_passes_heldout": false,
+        "wrapper_family": "g(value) + c1*value + c2",
+        "wrapper_slope_range": [
+          -12,
+          12
+        ],
+        "wrapper_n_visible_passing": 25,
+        "wrapper_n_heldout_passing": 0,
+        "wrapper_blind_guess_ceiling": 0.04
+      },
+      "twin": {
+        "twin_member": {
+          "a": 9,
+          "b": 85,
+          "held": 87
+        },
+        "twin_byte_identity": true,
+        "twin_heldout_differs": true,
+        "twin_visible_identical_files": true,
+        "twin_target_module_diff_lines": [
+          23
+        ],
+        "twin_held_expected": [
+          83,
+          87
+        ],
+        "twin_expected": [
+          98,
+          98
+        ],
+        "twin_prompt_identical": true,
+        "twin_span_identical": true,
+        "twin_heldout_file_differs": true
+      },
+      "repair": {
+        "read_only_oracle": {
+          "ok": true,
+          "reason": "ok",
+          "path": "pkg/units/uusnrl.py",
+          "helper": "_hiygszy",
+          "line": 23,
+          "new_text": "    return (value ^ 11) + 83",
+          "spec_expression": "(value ^ 11) + 83",
+          "code_expression": "(value ^ 17) + 82",
+          "equation_multipliers": [
+            20
+          ],
+          "equation_expression": "(value ^ 20) + 82",
+          "spec_route_verifies_visible_fact": true,
+          "equation_route_agrees": false
+        },
+        "wrapper_probe": [
+          {
+            "c": -5,
+            "new_text": "        return _hiygszy(value) - 5",
+            "applied": true,
+            "visible": true,
+            "held": false
+          },
+          {
+            "c": -1,
+            "new_text": "        return _hiygszy(value) - 1",
+            "applied": true,
+            "visible": false,
+            "held": false
+          },
+          {
+            "c": 1,
+            "new_text": "        return _hiygszy(value) + 1",
+            "applied": true,
+            "visible": false,
+            "held": false
+          }
+        ],
+        "gold_route": {
+          "applied": true,
+          "visible": true,
+          "held": true,
+          "edit": {
+            "path": "pkg/units/uusnrl.py",
+            "start": 23,
+            "end": 23,
+            "new_text": "    return (value ^ 11) + 83"
+          }
+        },
+        "in_span_route": {
+          "applied": true,
+          "visible": true,
+          "held": true,
+          "edit": {
+            "path": "pkg/units/uusnrl.py",
+            "start": 28,
+            "end": 28,
+            "new_text": "        return (value ^ 11) + 83"
+          }
+        },
+        "hardcode_route": {
+          "applied": true,
+          "visible": true,
+          "held": false,
+          "edit": {
+            "path": "pkg/units/uusnrl.py",
+            "start": 28,
+            "end": 28,
+            "new_text": "        return 98"
+          }
+        },
+        "bytecode_probe": {
+          "applied": true,
+          "held_out_pass_unpurged": true,
+          "held_out_pass_purged": true,
+          "stale_bytecode_reproduced": false
+        }
+      },
+      "instrumentation": {
+        "checks": {
+          "ledger_sees_model_whole_read": true,
+          "ledger_sees_model_ranged_read": true,
+          "ledger_sees_post_edit_view": true,
+          "ledger_sees_grep_scan": true,
+          "ledger_sees_edit_normalisation": true,
+          "whole_read_delivers_hidden_line": true,
+          "ranged_read_delivers_hidden_line": true,
+          "edit_normalisation_sees_true_source": true,
+          "post_edit_view_leaks_without_redactor": true,
+          "post_edit_view_omits_hidden_line": true,
+          "post_edit_view_omits_gold_expression": true,
+          "post_edit_view_marks_elision": true,
+          "post_edit_view_preserves_line_count": true,
+          "redaction_counted": true,
+          "deliberate_read_still_delivers_after_redactor": true,
+          "ranged_read_still_delivers_after_redactor": true,
+          "grep_reaches_target_file": true,
+          "grep_on_name_returns_def_and_call": true,
+          "grep_on_name_omits_constant": true,
+          "grep_on_arithmetic_delivers_hidden_line": true,
+          "heldout_view_denied": true,
+          "heldout_denial_gives_no_pointer": true,
+          "heldout_grep_denied": true,
+          "heldout_attempts_counted": true,
+          "model_tests_are_purged": true,
+          "target_module_under_view_truncation": true
+        },
+        "channels": [
+          "model_read_whole",
+          "model_read_ranged",
+          "edit_normalisation",
+          "post_edit_view",
+          "post_edit_view",
+          "model_read_whole",
+          "model_read_ranged",
+          "edit_normalisation",
+          "grep_scan",
+          "grep_scan"
+        ],
+        "n_heldout_attempts": 3,
+        "n_post_edit_redactions": 1,
+        "n_test_purges": 1
+      },
+      "lsp": {
+        "raw_enclosing_sha256": "b05a7a4c633c2db4c682103a966b355b38353eb78b5f1c5876a56fbf597e35fb",
+        "raw_enclosing_path": "pkg/units/uusnrl.py",
+        "delivered_span_sha256": "be8daa1af5ac57690f5401d36589437ead7a20ce8331aec12a23583a072e2004",
+        "chained_span_path": "pkg/units/uusnrl.py",
+        "chained_span_sha256": "0333d5ab39903080513f0b4dbc363a8fb3051d2e691b21fc74e3b5100b1c9032",
+        "chained_span": "def _hiygszy(value: int) -> int:\n    return (value ^ 17) + 82  # spec: (value ^ 11) + 83",
+        "errors": []
+      },
+      "frozen_validation": {
+        "hoisted": {
+          "task": "nav_readreq_pilot_67017",
+          "split": "readreq_pilot",
+          "template": "delegate_xor_offset",
+          "n_overrides": 13,
+          "checks": {
+            "typed_base_fails": true,
+            "typed_heldout_base_fails": true,
+            "typed_gold_passes": true,
+            "typed_heldout_gold_passes": true,
+            "erased_base_fails": true,
+            "erased_heldout_base_fails": true,
+            "erased_gold_passes": true,
+            "erased_heldout_gold_passes": true,
+            "runtime_files_identical": true,
+            "runtime_outputs_identical": true,
+            "factory_implementation_identical": true,
+            "all_declared_returns_match_runtime": true,
+            "specific_overloads_precede_fallback": true,
+            "variants_type_clean": true,
+            "gold_identical": true,
+            "override_count_valid": true,
+            "registry_trace_unique": true,
+            "typed_lsp_discriminates": true,
+            "typed_lsp_span_matches_pristine_target": true,
+            "erased_lsp_nondiscriminating": true,
+            "literal_widening_removes_discrimination": true,
+            "lsp_server_healthy": true,
+            "lsp_no_errors": true,
+            "prompt_has_no_target_leak": true,
+            "positive_control_materialized": true
+          },
+          "lsp": {
+            "typed": {
+              "path": "pkg/units/uusnrl.py",
+              "span_hash": "b05a7a4c633c2db4c682103a966b355b38353eb78b5f1c5876a56fbf597e35fb",
+              "latency_ms": 6020.3,
+              "health_path": "pkg/units/uusnrl.py",
+              "resolved_class": "Ckfzmxnk",
+              "resolved_method_span_hash": "c35171b4e1eb1ae3533ed07e1595c43de6ee37152bf8f2a0a91c562edd04fc5d"
+            },
+            "typed_widened": {
+              "path": "pkg/base.py",
+              "span_hash": "8d58b00a5d994ced01a638385e057d6cee20ed67daa0b2be1c958602e3efb844",
+              "resolved_class": "Bznhnplq"
+            },
+            "erased": {
+              "path": "pkg/base.py",
+              "span_hash": "8d58b00a5d994ced01a638385e057d6cee20ed67daa0b2be1c958602e3efb844",
+              "latency_ms": 6020.8,
+              "health_path": "pkg/base.py",
+              "resolved_class": "Bznhnplq",
+              "resolved_method_span_hash": "f079a05164194759b678c396fda1bc2b418ac709c5089c8478509c9d98d2b69b"
+            }
+          },
+          "lsp_errors": [],
+          "runtime_factory_classes": {
+            "typed": {
+              "kcrkkc": "Cgdjyamb",
+              "kcxaej": "Cbvxmpxo",
+              "kdcwhc": "Cmfcpuce",
+              "kdfsgk": "Cuftnwqb",
+              "khchgr": "Cuurdcee",
+              "khrxuz": "Chlvaxlf",
+              "knhtao": "Csdqttgf",
+              "koylsa": "Ckfzmxnk",
+              "kplthr": "Culchawu",
+              "krtapw": "Cjkjfqps",
+              "kyltdg": "Cdqkdydi",
+              "kyxtyv": "Cdfvdlin",
+              "kzbilx": "Cabqrpkh"
+            },
+            "erased": {
+              "kcrkkc": "Cgdjyamb",
+              "kcxaej": "Cbvxmpxo",
+              "kdcwhc": "Cmfcpuce",
+              "kdfsgk": "Cuftnwqb",
+              "khchgr": "Cuurdcee",
+              "khrxuz": "Chlvaxlf",
+              "knhtao": "Csdqttgf",
+              "koylsa": "Ckfzmxnk",
+              "kplthr": "Culchawu",
+              "krtapw": "Cjkjfqps",
+              "kyltdg": "Cdqkdydi",
+              "kyxtyv": "Cdfvdlin",
+              "kzbilx": "Cabqrpkh"
+            }
+          },
+          "declared_registry_contract": {
+            "kcxaej": "Cbvxmpxo",
+            "knhtao": "Csdqttgf",
+            "kyxtyv": "Cdfvdlin",
+            "kzbilx": "Cabqrpkh",
+            "kyltdg": "Cdqkdydi",
+            "khchgr": "Cuurdcee",
+            "khrxuz": "Chlvaxlf",
+            "kdfsgk": "Cuftnwqb",
+            "kdcwhc": "Cmfcpuce",
+            "kplthr": "Culchawu",
+            "krtapw": "Cjkjfqps",
+            "koylsa": "Ckfzmxnk",
+            "kcrkkc": "Cgdjyamb"
+          },
+          "parsed_typed_stub_contract": {
+            "kcxaej": "Cbvxmpxo",
+            "knhtao": "Csdqttgf",
+            "kyxtyv": "Cdfvdlin",
+            "kzbilx": "Cabqrpkh",
+            "kyltdg": "Cdqkdydi",
+            "khchgr": "Cuurdcee",
+            "khrxuz": "Chlvaxlf",
+            "kdfsgk": "Cuftnwqb",
+            "kdcwhc": "Cmfcpuce",
+            "kplthr": "Culchawu",
+            "krtapw": "Cjkjfqps",
+            "koylsa": "Ckfzmxnk",
+            "kcrkkc": "Cgdjyamb"
+          },
+          "type_errors": {
+            "typed": [],
+            "erased": []
+          },
+          "leakage": [],
+          "passed": true
+        },
+        "inline": {
+          "task": "nav_readreq_pilot_67017",
+          "split": "readreq_pilot",
+          "template": "delegate_xor_offset",
+          "n_overrides": 13,
+          "checks": {
+            "typed_base_fails": true,
+            "typed_heldout_base_fails": true,
+            "typed_gold_passes": true,
+            "typed_heldout_gold_passes": true,
+            "erased_base_fails": true,
+            "erased_heldout_base_fails": true,
+            "erased_gold_passes": true,
+            "erased_heldout_gold_passes": true,
+            "runtime_files_identical": true,
+            "runtime_outputs_identical": true,
+            "factory_implementation_identical": true,
+            "all_declared_returns_match_runtime": true,
+            "specific_overloads_precede_fallback": true,
+            "variants_type_clean": true,
+            "gold_identical": true,
+            "override_count_valid": true,
+            "registry_trace_unique": true,
+            "typed_lsp_discriminates": true,
+            "typed_lsp_span_matches_pristine_target": true,
+            "erased_lsp_nondiscriminating": true,
+            "literal_widening_removes_discrimination": true,
+            "lsp_server_healthy": true,
+            "lsp_no_errors": true,
+            "prompt_has_no_target_leak": true,
+            "positive_control_materialized": true
+          },
+          "lsp": {
+            "typed": {
+              "path": "pkg/units/uusnrl.py",
+              "span_hash": "db31c8a17cf0efc6365cfdb187ed2b132d73bbe685203bc8eaddebee507f42b2",
+              "latency_ms": 6021.0,
+              "health_path": "pkg/units/uusnrl.py",
+              "resolved_class": "Ckfzmxnk",
+              "resolved_method_span_hash": "85a53e703b76cfa20c6800582c71d5f891dc5db5b817acb7cbbc7fb44c82cf0d"
+            },
+            "typed_widened": {
+              "path": "pkg/base.py",
+              "span_hash": "8d58b00a5d994ced01a638385e057d6cee20ed67daa0b2be1c958602e3efb844",
+              "resolved_class": "Bznhnplq"
+            },
+            "erased": {
+              "path": "pkg/base.py",
+              "span_hash": "8d58b00a5d994ced01a638385e057d6cee20ed67daa0b2be1c958602e3efb844",
+              "latency_ms": 6019.7,
+              "health_path": "pkg/base.py",
+              "resolved_class": "Bznhnplq",
+              "resolved_method_span_hash": "f079a05164194759b678c396fda1bc2b418ac709c5089c8478509c9d98d2b69b"
+            }
+          },
+          "lsp_errors": [],
+          "runtime_factory_classes": {
+            "typed": {
+              "kcrkkc": "Cgdjyamb",
+              "kcxaej": "Cbvxmpxo",
+              "kdcwhc": "Cmfcpuce",
+              "kdfsgk": "Cuftnwqb",
+              "khchgr": "Cuurdcee",
+              "khrxuz": "Chlvaxlf",
+              "knhtao": "Csdqttgf",
+              "koylsa": "Ckfzmxnk",
+              "kplthr": "Culchawu",
+              "krtapw": "Cjkjfqps",
+              "kyltdg": "Cdqkdydi",
+              "kyxtyv": "Cdfvdlin",
+              "kzbilx": "Cabqrpkh"
+            },
+            "erased": {
+              "kcrkkc": "Cgdjyamb",
+              "kcxaej": "Cbvxmpxo",
+              "kdcwhc": "Cmfcpuce",
+              "kdfsgk": "Cuftnwqb",
+              "khchgr": "Cuurdcee",
+              "khrxuz": "Chlvaxlf",
+              "knhtao": "Csdqttgf",
+              "koylsa": "Ckfzmxnk",
+              "kplthr": "Culchawu",
+              "krtapw": "Cjkjfqps",
+              "kyltdg": "Cdqkdydi",
+              "kyxtyv": "Cdfvdlin",
+              "kzbilx": "Cabqrpkh"
+            }
+          },
+          "declared_registry_contract": {
+            "kcxaej": "Cbvxmpxo",
+            "knhtao": "Csdqttgf",
+            "kyxtyv": "Cdfvdlin",
+            "kzbilx": "Cabqrpkh",
+            "kyltdg": "Cdqkdydi",
+            "khchgr": "Cuurdcee",
+            "khrxuz": "Chlvaxlf",
+            "kdfsgk": "Cuftnwqb",
+            "kdcwhc": "Cmfcpuce",
+            "kplthr": "Culchawu",
+            "krtapw": "Cjkjfqps",
+            "koylsa": "Ckfzmxnk",
+            "kcrkkc": "Cgdjyamb"
+          },
+          "parsed_typed_stub_contract": {
+            "kcxaej": "Cbvxmpxo",
+            "knhtao": "Csdqttgf",
+            "kyxtyv": "Cdfvdlin",
+            "kzbilx": "Cabqrpkh",
+            "kyltdg": "Cdqkdydi",
+            "khchgr": "Cuurdcee",
+            "khrxuz": "Chlvaxlf",
+            "kdfsgk": "Cuftnwqb",
+            "kdcwhc": "Cmfcpuce",
+            "kplthr": "Culchawu",
+            "krtapw": "Cjkjfqps",
+            "koylsa": "Ckfzmxnk",
+            "kcrkkc": "Cgdjyamb"
+          },
+          "type_errors": {
+            "typed": [],
+            "erased": []
+          },
+          "leakage": [],
+          "passed": true
+        }
+      },
+      "checks": {
+        "frozen_validator_hoisted": true,
+        "frozen_validator_inline": true,
+        "span_meta_path_is_target": true,
+        "span_lsp_path_is_target": true,
+        "span_lsp_span_equals_metadata": true,
+        "span_no_lsp_errors": true,
+        "span_gold_not_in_span": true,
+        "span_span_has_numbered_lines": true,
+        "span_span_names_target_path": true,
+        "inline_span_usable": true,
+        "narrowing_hides_nothing": true,
+        "single_lsp_candidate": true,
+        "live_span_equals_delivered": true,
+        "chained_span_is_pristine_helper": true,
+        "no_lsp_errors_genuineness": true,
+        "span_excludes_helper_def": true,
+        "span_names_helper_call": true,
+        "helper_lines_outside_span": true,
+        "inline_span_carries_the_information": true,
+        "ambiguity_set_large_enough": true,
+        "blind_guess_ceiling_within_bound": true,
+        "truth_in_ambiguity_set": true,
+        "heldout_varies_over_ambiguity_set": true,
+        "ambiguity_matches_task_metadata": true,
+        "table_key_unique": true,
+        "positive_outputs": true,
+        "twin_byte_identity": true,
+        "twin_heldout_differs": true,
+        "no_read_adversary_fails_heldout": true,
+        "wrapper_family_ceiling_within_bound": true,
+        "bug_is_value_dependent": true,
+        "constant_delta_repair_excluded": true,
+        "slope_wrapper_repair_excluded": true,
+        "spec_comment_is_load_bearing": true,
+        "heldout_oracle_guarded": true,
+        "heldout_not_greppable": true,
+        "guard_leaves_source_readable": true,
+        "instr_ledger_sees_model_whole_read": true,
+        "instr_ledger_sees_model_ranged_read": true,
+        "instr_ledger_sees_post_edit_view": true,
+        "instr_ledger_sees_grep_scan": true,
+        "instr_ledger_sees_edit_normalisation": true,
+        "instr_whole_read_delivers_hidden_line": true,
+        "instr_ranged_read_delivers_hidden_line": true,
+        "instr_edit_normalisation_sees_true_source": true,
+        "instr_post_edit_view_leaks_without_redactor": true,
+        "instr_post_edit_view_omits_hidden_line": true,
+        "instr_post_edit_view_omits_gold_expression": true,
+        "instr_post_edit_view_marks_elision": true,
+        "instr_post_edit_view_preserves_line_count": true,
+        "instr_redaction_counted": true,
+        "instr_deliberate_read_still_delivers_after_redactor": true,
+        "instr_ranged_read_still_delivers_after_redactor": true,
+        "instr_grep_reaches_target_file": true,
+        "instr_grep_on_name_returns_def_and_call": true,
+        "instr_grep_on_name_omits_constant": true,
+        "instr_grep_on_arithmetic_delivers_hidden_line": true,
+        "instr_heldout_view_denied": true,
+        "instr_heldout_denial_gives_no_pointer": true,
+        "instr_heldout_grep_denied": true,
+        "instr_heldout_attempts_counted": true,
+        "instr_model_tests_are_purged": true,
+        "instr_target_module_under_view_truncation": true,
+        "read_only_oracle_solves": true,
+        "oracle_spec_route_verifies_visible_fact": true,
+        "live_constant_delta_repair_fails_heldout": true,
+        "both_repair_routes_pass": true,
+        "hardcode_fails_heldout": true,
+        "gold_passes_after_purge": true,
+        "hoist_wellformed": true,
+        "helper_bodies_delegate": true,
+        "rendered_constants_match_table": true,
+        "spec_comments_uniform": true,
+        "exactly_one_spec_mismatch": true,
+        "identifiers_unique": true,
+        "hoist_behaviour_preserving": true,
+        "twin_runtime_identical": true,
+        "twin_differs_by_one_line": true,
+        "twin_prompt_identical": true,
+        "twin_tests_identical": true,
+        "twin_expected_identical": true,
+        "flavours_share_gold_file": true,
+        "pycache_purged": true,
+        "selection_gates_reproduce": true
+      },
+      "failing": [],
+      "passed": true
+    }
+  ],
+  "passed": true
+}
