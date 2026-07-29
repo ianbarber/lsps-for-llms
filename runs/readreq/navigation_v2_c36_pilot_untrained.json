@@ -1,0 +1,2854 @@
+{
+  "protocol": "navigation-v2",
+  "experiment": "read-required-substitution",
+  "claim": "C36",
+  "model": "Qwen/Qwen3.6-27B",
+  "model_meta": {
+    "adapter": null,
+    "adapter_meta": null,
+    "condition": "untrained",
+    "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+    "transformers": "5.9.0",
+    "torch": "2.11.0+cu128",
+    "dtype": "torch.bfloat16"
+  },
+  "config": {
+    "out": "runs/readreq/navigation_v2_c36_pilot_untrained.json",
+    "model": "Qwen/Qwen3.6-27B",
+    "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+    "adapter": null,
+    "split": "readreq_pilot",
+    "arms": "push_insufficient,push_sufficient",
+    "names": null,
+    "seed": 0,
+    "temperature": 0.0,
+    "max_new": 1000,
+    "max_turns": 12,
+    "max_reads": 12,
+    "gpu_only": true,
+    "tmp_root": null,
+    "validation": "runs/protocol/navigation_v2_readreq_pilot_validation.json"
+  },
+  "arms": [
+    "push_insufficient",
+    "push_sufficient"
+  ],
+  "split": "readreq_pilot",
+  "seeds": [
+    67001,
+    67003,
+    67009,
+    67012,
+    67014,
+    67017
+  ],
+  "templates": [
+    "delegate_scale_offset",
+    "delegate_scale_sub",
+    "delegate_xor_offset"
+  ],
+  "apparatus_deviation_sha256": {
+    "install_heldout_guard": "3da796c23c114d3db26752732ac23828b0392a27082d84c7ffd80312c18a480e",
+    "install_post_edit_redactor": "1e3a873ae674c6a1dae84a6005228eac6b73d3cbd41f61bf1b9fa7956812e39e",
+    "install_test_purge": "4b0a79ced12acfce8d20eee1b1a45f0b1901c2ae7b823449776965035a56b675",
+    "install_read_ledger": "db555add3dd902ff1e8a209c202e3707f10315cf193233940e4ecb4e1171a1c3"
+  },
+  "apparatus_deviation_note": "Installed identically in every cell and both model conditions: model-issued reads of held-out paths are denied (n_heldout_read_attempts per row); the INVOLUNTARY post-edit file view has the one informative line elided, with deliberate <read>/<read lines>/<grep> untouched (n_post_edit_redactions per row); __pycache__ is purged before every test the model runs (n_model_test_purges per row) as well as before scoring. Full rationale and per-instance verification are in the validation artifact's `apparatus_deviations`.",
+  "validation_artifact": "runs/protocol/navigation_v2_readreq_pilot_validation.json",
+  "protocol_source_sha256": {
+    "scripts/experiments/navigation_tasks.py": "f860fd07fdeb2d4f78d89a047c6804d79cc3babd60fab7e0a06e839679692d97",
+    "scripts/experiments/run_navigation.py": "319743150b0b49a86e8c52d5264f5736d887a396e89bb5bfa7280fdce4ea72b8",
+    "scripts/analysis/analyze_navigation.py": "c48d2c7b696244107665c0b07f2cd6c4fc2febb7b6f6d67b931ea02cc9be5a77",
+    "scripts/run_navigation_pilot.sh": "727d6780ae7d3fbac35b88e02ddbe554b3a6687293e329a1f11d05a62f2adb77",
+    "scripts/run_navigation_confirmation.sh": "af48c93caf45c9047828d5a7b76eed7977419290ad6863917a1df88fa50a1d56",
+    "scaffold/stream_agent.py": "0267afa17a22c5f0eea77bce82927b5d25890dea0500312163d2a1e2e1f40b79",
+    "scaffold/real_env.py": "a1b38f3d228d659a37329eb9088a80de20422f07712de9bdd9b3c7ad694ae70b",
+    "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
+    "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
+    "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
+  },
+  "pyrefly": {
+    "path": "/home/ianbarber/Projects/Streams/.venv-streams/bin/pyrefly",
+    "version": "pyrefly 1.0.0"
+  },
+  "rows": [
+    {
+      "task": "nav_readreq_pilot_67001",
+      "family": 67001,
+      "split": "readreq_pilot",
+      "variant": "typed",
+      "arm": "push_insufficient",
+      "seed": 0,
+      "flavour": "hoisted",
+      "template": "delegate_scale_offset",
+      "condition": "untrained",
+      "adapter": null,
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "repair_correct": true,
+      "held_out_pass_unpurged": true,
+      "stale_bytecode_suspected": false,
+      "bailed": false,
+      "in_tokens": 1054,
+      "out_tokens": 217,
+      "turns": 5,
+      "n_reads": 3,
+      "n_lsp": 0,
+      "n_tests": 1,
+      "n_edits": 1,
+      "wall_sec": 86.565,
+      "server_latency_ms": 0,
+      "server_errors": [],
+      "semantic_supplied_path": "pkg/units/ugblmf.py",
+      "semantic_payload_sha256": "0b96244f5fc5fecbc1434bd4e9c1bd6a5463c58b6220a64cb7260970e443dbf2",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "helper": {
+        "name": "_hmwggea",
+        "def_line": 13,
+        "return_line": 14,
+        "return_text": "    return value * 50 + 46  # spec: value * 57 + 47",
+        "source": "def _hmwggea(value: int) -> int:\n    return value * 50 + 46  # spec: value * 57 + 47",
+        "multiplier": 57,
+        "buggy_multiplier": 50,
+        "offset": 47,
+        "buggy_offset": 46,
+        "delta": -7,
+        "offset_delta": -1,
+        "call_line": 19,
+        "flavour": "hoisted",
+        "gold_expression": "value * 57 + 47",
+        "buggy_expression": "value * 50 + 46",
+        "spec_comment": "  # spec: value * 57 + 47",
+        "inline_repair": {
+          "path": "pkg/units/ugblmf.py",
+          "start": 19,
+          "end": 19,
+          "new_text": "        return value * 57 + 47"
+        }
+      },
+      "ambiguity_n": 20,
+      "ambiguity_n_distinct_heldout": 20,
+      "blind_guess_ceiling": 0.05,
+      "n_heldout_read_attempts": 0,
+      "heldout_read_attempts": [],
+      "n_post_edit_redactions": 0,
+      "n_model_test_purges": 3,
+      "reread_defining_path": "pkg/units/ugblmf.py",
+      "n_target_reads_total": 1,
+      "n_reads_after_span": 1,
+      "n_reads_after_span_whole": 0,
+      "n_reads_after_span_ranged": 1,
+      "read_after_span": true,
+      "first_found_defn_event_idx": null,
+      "n_defn_found": null,
+      "n_target_reads_before_first_edit": 1,
+      "n_target_reads_total_normalised": 1,
+      "n_target_greps_before_first_edit": 1,
+      "n_target_greps_total": 1,
+      "n_defn_blocked": 0,
+      "n_defn_blocked_before_first_edit": 0,
+      "n_probe_edits": 0,
+      "n_probe_edits_before_first_edit": 0,
+      "probe_edit": false,
+      "n_ranged_reads_covering_helper": 1,
+      "retrieved_missing_information": true,
+      "retrieved_missing_information_before_first_edit": true,
+      "sought_missing_information": true,
+      "sought_missing_information_before_first_edit": true,
+      "sought_component_read": true,
+      "sought_component_grep": true,
+      "sought_component_defn_blocked": false,
+      "sought_component_probe": false,
+      "read_ledger": [
+        {
+          "path": "pkg/units/ugblmf.py",
+          "frames": [
+            "_grep",
+            "run",
+            "main"
+          ],
+          "channel": "grep_scan",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/ugblmf.py",
+          "frames": [
+            "_read_range",
+            "run",
+            "main"
+          ],
+          "channel": "model_read_ranged",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/ugblmf.py",
+          "frames": [
+            "_grep",
+            "run",
+            "main"
+          ],
+          "channel": "grep_scan",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/ugblmf.py",
+          "frames": [
+            "run",
+            "main",
+            "<module>"
+          ],
+          "channel": "edit_normalisation",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/ugblmf.py",
+          "frames": [
+            "apply_line_edit",
+            "apply_line_edit",
+            "apply_line_edit"
+          ],
+          "channel": "other:apply_line_edit<-apply_line_edit",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/ugblmf.py",
+          "frames": [
+            "_file_view",
+            "<genexpr>",
+            "deliver_turn"
+          ],
+          "channel": "post_edit_view",
+          "n_edits_before": 1
+        }
+      ],
+      "read_ledger_channels": [
+        "grep_scan",
+        "model_read_ranged",
+        "grep_scan",
+        "edit_normalisation",
+        "other:apply_line_edit<-apply_line_edit",
+        "post_edit_view"
+      ],
+      "first_target_read_channel": "grep_scan",
+      "hidden_line_in_context": true,
+      "gold_expression_in_context": true,
+      "hidden_line_channel": "grep_scan",
+      "hidden_line_before_first_edit": true,
+      "multiplier_literal_in_stream": true,
+      "buggy_multiplier_literal_in_stream": true,
+      "correct_file_localized_before_first_edit": true,
+      "first_edit_path": "pkg/units/ugblmf.py",
+      "wrong_file_edits": 0,
+      "semantic_then_target_read": true,
+      "generalization_pass": true,
+      "events": [
+        {
+          "tok": 11,
+          "type": "grep",
+          "n": 1,
+          "pat": "def _hmwggea",
+          "nhits": 1,
+          "paths": [
+            "pkg/units/ugblmf.py"
+          ],
+          "response_chars": 99
+        },
+        {
+          "tok": 36,
+          "type": "read",
+          "n": 2,
+          "path": "pkg/units/ugblmf.py",
+          "ranged": true,
+          "response_chars": 284
+        },
+        {
+          "tok": 48,
+          "type": "grep",
+          "n": 3,
+          "pat": "kbekro",
+          "nhits": 3,
+          "paths": [
+            "pkg/app.py",
+            "pkg/factory.py",
+            "pkg/factory.pyi"
+          ],
+          "response_chars": 219
+        },
+        {
+          "tok": 203,
+          "type": "line_edit",
+          "path": "pkg/units/ugblmf.py",
+          "lines": "13-14",
+          "ok": true,
+          "info": "ok",
+          "fail_streak": 0,
+          "replace": "def _hmwggea(value: int) -> int:\n    return value * 57 + 47",
+          "serialization_mode": "inline_exact_indentation",
+          "raw_body_sha256": "31df5e464ce5d2a045fc84e5d8bda9b8b835c6df9ad4ec48f6551264a2600ff4",
+          "applied_body_sha256": "31df5e464ce5d2a045fc84e5d8bda9b8b835c6df9ad4ec48f6551264a2600ff4"
+        },
+        {
+          "tok": 203,
+          "type": "turn",
+          "n": 4,
+          "via": "eos"
+        },
+        {
+          "tok": 210,
+          "type": "test",
+          "n": 1,
+          "resolved": true
+        },
+        {
+          "tok": 210,
+          "type": "turn",
+          "n": 5,
+          "via": "test"
+        },
+        {
+          "tok": 217,
+          "type": "done_attempt",
+          "prefix_sha256": "cf72e8b4504f9650a606fae7bea0043c7557cd0649531ba09a0c90f2f221d539",
+          "source": "model"
+        }
+      ],
+      "stream_tail": "<grep pat=\"def _hmwggea\"/><|im_end|>\n<|im_start|>user\n<grep pat=\"def _hmwggea\" hits=\"1\">\npkg/units/ugblmf.py:13: def _hmwggea(value: int) -> int:\n</grep><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<read path=\"pkg/units/ugblmf.py\" lines=\"13-19\"/><|im_end|>\n<|im_start|>user\n<file path=\"pkg/units/ugblmf.py\" lines=\"13-19\">\n  13| def _hmwggea(value: int) -> int:\n  14|     return value * 50 + 46  # spec: value * 57 + 47\n  15| \n  16| \n  17| class Cotiwchx(Bfxmbaqx):\n  18|     def mirfhhpi(self, value: int) -> int:\n  19|         return _hmwggea(value)\n</file><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<grep pat=\"kbekro\"/><|im_end|>\n<|im_start|>user\n<grep pat=\"kbekro\" hits=\"3\">\npkg/app.py:6: def execute(token: Literal[\"kbekro\"], value: int) -> int:\npkg/factory.py:13: \"kbekro\": Cotiwchx,\npkg/factory.pyi:24: def make(token: Literal[\"kbekro\"]) -> Cotiwchx: ...\n</grep><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\nThe factory maps `\"kbekro\"` to `Cotiwchx`, which is in `pkg/units/ugblmf.py`. The comment on line 14 says the spec is `value * 57 + 47`, but the code uses `value * 50 + 46`. Let me verify: `2 * 57 + 47 = 114 + 47 = 161`. That matches the expected output.\n\n<edit path=\"pkg/units/ugblmf.py\" lines=\"13-14\">def _hmwggea(value: int) -> int:\n    return value * 57 + 47</edit><|im_end|>\n<|im_start|>user\nRun <test/> to check whether your edit fixed the tests.\n\nCurrent `pkg/units/ugblmf.py` (edit against THIS exact text):\n  1| from pkg.base import Bfxmbaqx\n  2| \n  3| \n  4| def _hfslayh(value: int) -> int:\n  5|     return value * 49 + 43  # spec: value * 49 + 43\n  6| \n  7| \n  8| class Cjbidpup(Bfxmbaqx):\n  9|     def mirfhhpi(self, value: int) -> int:\n 10|         return _hfslayh(value)\n 11| \n 12| \n 13| def _hmwggea(value: int) -> int:\n 14|     return value * 57 + 47\n 15| \n 16| \n 17| class Cotiwchx(Bfxmbaqx):\n 18|     def mirfhhpi(self, value: int) -> int:\n 19|         return _hmwggea(value)<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<test/><|im_end|>\n<|im_start|>user\n<test_result>\nALL TESTS PASS.\n</test_result>\nTests pass \u2014 emit <done/> if the fix is complete.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<done/>",
+      "outcome_category": "A_read_then_repair"
+    },
+    {
+      "task": "nav_readreq_pilot_67001",
+      "family": 67001,
+      "split": "readreq_pilot",
+      "variant": "typed",
+      "arm": "push_sufficient",
+      "seed": 0,
+      "flavour": "inline",
+      "template": "delegate_scale_offset",
+      "condition": "untrained",
+      "adapter": null,
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "repair_correct": true,
+      "held_out_pass_unpurged": true,
+      "stale_bytecode_suspected": false,
+      "bailed": false,
+      "in_tokens": 880,
+      "out_tokens": 92,
+      "turns": 3,
+      "n_reads": 1,
+      "n_lsp": 0,
+      "n_tests": 1,
+      "n_edits": 1,
+      "wall_sec": 40.924,
+      "server_latency_ms": 0,
+      "server_errors": [],
+      "semantic_supplied_path": "pkg/units/ugblmf.py",
+      "semantic_payload_sha256": "1c70341ea11893597ab7be6e290ab15983580d9ec3a652cf74afe6f03642888f",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "helper": {
+        "name": "_hmwggea",
+        "def_line": 13,
+        "return_line": 14,
+        "return_text": "    return value * 50 + 46  # spec: value * 57 + 47",
+        "source": "def _hmwggea(value: int) -> int:\n    return value * 50 + 46  # spec: value * 57 + 47",
+        "multiplier": 57,
+        "buggy_multiplier": 50,
+        "offset": 47,
+        "buggy_offset": 46,
+        "delta": -7,
+        "offset_delta": -1,
+        "call_line": 19,
+        "flavour": "inline",
+        "gold_expression": "value * 57 + 47",
+        "buggy_expression": "value * 50 + 46",
+        "spec_comment": "  # spec: value * 57 + 47",
+        "inline_repair": {
+          "path": "pkg/units/ugblmf.py",
+          "start": 19,
+          "end": 19,
+          "new_text": "        return value * 57 + 47"
+        }
+      },
+      "ambiguity_n": 20,
+      "ambiguity_n_distinct_heldout": 20,
+      "blind_guess_ceiling": 0.05,
+      "n_heldout_read_attempts": 0,
+      "heldout_read_attempts": [],
+      "n_post_edit_redactions": 1,
+      "n_model_test_purges": 3,
+      "reread_defining_path": "pkg/units/ugblmf.py",
+      "n_target_reads_total": 1,
+      "n_reads_after_span": 1,
+      "n_reads_after_span_whole": 0,
+      "n_reads_after_span_ranged": 1,
+      "read_after_span": true,
+      "first_found_defn_event_idx": null,
+      "n_defn_found": null,
+      "n_target_reads_before_first_edit": 1,
+      "n_target_reads_total_normalised": 1,
+      "n_target_greps_before_first_edit": 0,
+      "n_target_greps_total": 0,
+      "n_defn_blocked": 0,
+      "n_defn_blocked_before_first_edit": 0,
+      "n_probe_edits": 0,
+      "n_probe_edits_before_first_edit": 0,
+      "probe_edit": false,
+      "n_ranged_reads_covering_helper": 0,
+      "retrieved_missing_information": true,
+      "retrieved_missing_information_before_first_edit": true,
+      "sought_missing_information": true,
+      "sought_missing_information_before_first_edit": true,
+      "sought_component_read": true,
+      "sought_component_grep": false,
+      "sought_component_defn_blocked": false,
+      "sought_component_probe": false,
+      "read_ledger": [
+        {
+          "path": "pkg/units/ugblmf.py",
+          "frames": [
+            "_read_range",
+            "run",
+            "main"
+          ],
+          "channel": "model_read_ranged",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/ugblmf.py",
+          "frames": [
+            "apply_line_edit",
+            "apply_line_edit",
+            "apply_line_edit"
+          ],
+          "channel": "other:apply_line_edit<-apply_line_edit",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/ugblmf.py",
+          "frames": [
+            "_file_view",
+            "<genexpr>",
+            "deliver_turn"
+          ],
+          "channel": "post_edit_view",
+          "n_edits_before": 1
+        }
+      ],
+      "read_ledger_channels": [
+        "model_read_ranged",
+        "other:apply_line_edit<-apply_line_edit",
+        "post_edit_view"
+      ],
+      "first_target_read_channel": "model_read_ranged",
+      "hidden_line_in_context": true,
+      "gold_expression_in_context": true,
+      "hidden_line_channel": "model_read_ranged",
+      "hidden_line_before_first_edit": true,
+      "multiplier_literal_in_stream": true,
+      "buggy_multiplier_literal_in_stream": true,
+      "correct_file_localized_before_first_edit": true,
+      "first_edit_path": "pkg/units/ugblmf.py",
+      "wrong_file_edits": 0,
+      "semantic_then_target_read": true,
+      "generalization_pass": true,
+      "events": [
+        {
+          "tok": 21,
+          "type": "read",
+          "n": 1,
+          "path": "pkg/units/ugblmf.py",
+          "ranged": true,
+          "response_chars": 166
+        },
+        {
+          "tok": 78,
+          "type": "line_edit",
+          "path": "pkg/units/ugblmf.py",
+          "lines": "18-19",
+          "ok": true,
+          "info": "ok",
+          "fail_streak": 0,
+          "replace": "    def mirfhhpi(self, value: int) -> int:\n        return value * 57 + 47",
+          "serialization_mode": "newline",
+          "raw_body_sha256": "9a69ff154f2a90c2d18f9106e5d08ee2c746172eaa7aac4dd3e49cc4a284090b",
+          "applied_body_sha256": "9a69ff154f2a90c2d18f9106e5d08ee2c746172eaa7aac4dd3e49cc4a284090b"
+        },
+        {
+          "tok": 78,
+          "type": "turn",
+          "n": 2,
+          "via": "eos"
+        },
+        {
+          "tok": 85,
+          "type": "test",
+          "n": 1,
+          "resolved": true
+        },
+        {
+          "tok": 85,
+          "type": "turn",
+          "n": 3,
+          "via": "test"
+        },
+        {
+          "tok": 92,
+          "type": "done_attempt",
+          "prefix_sha256": "df884f33f339df4bcb169ffc6668afa2207151d819c0ea121195289072355c3a",
+          "source": "model"
+        }
+      ],
+      "stream_tail": "<read path=\"pkg/units/ugblmf.py\" lines=\"18-19\"/><|im_end|>\n<|im_start|>user\n<file path=\"pkg/units/ugblmf.py\" lines=\"18-19\">\n  18|     def mirfhhpi(self, value: int) -> int:\n  19|         return value * 50 + 46  # spec: value * 57 + 47\n</file><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<edit path=\"pkg/units/ugblmf.py\" lines=\"18-19\">\n    def mirfhhpi(self, value: int) -> int:\n        return value * 57 + 47\n</edit><|im_end|>\n<|im_start|>user\nRun <test/> to check whether your edit fixed the tests.\n\nCurrent `pkg/units/ugblmf.py` (edit against THIS exact text):\n  1| from pkg.base import Bfxmbaqx\n  2| \n  3| \n  4| def _hfslayh(value: int) -> int:\n  5|     return value * 49 + 43  # spec: value * 49 + 43\n  6| \n  7| \n  8| class Cjbidpup(Bfxmbaqx):\n  9|     def mirfhhpi(self, value: int) -> int:\n 10|         return _hfslayh(value)\n 11| \n 12| \n 13| def _hmwggea(value: int) -> int:\n 14|     return ...  # (elided from this automatic post-edit view; use <read path=\"pkg/units/ugblmf.py\"/> to see this line)\n 15| \n 16| \n 17| class Cotiwchx(Bfxmbaqx):\n 18|     def mirfhhpi(self, value: int) -> int:\n 19|         return value * 57 + 47<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<test/><|im_end|>\n<|im_start|>user\n<test_result>\nALL TESTS PASS.\n</test_result>\nTests pass \u2014 emit <done/> if the fix is complete.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<done/>",
+      "outcome_category": "A_read_then_repair"
+    },
+    {
+      "task": "nav_readreq_pilot_67003",
+      "family": 67003,
+      "split": "readreq_pilot",
+      "variant": "typed",
+      "arm": "push_insufficient",
+      "seed": 0,
+      "flavour": "hoisted",
+      "template": "delegate_scale_sub",
+      "condition": "untrained",
+      "adapter": null,
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "repair_correct": true,
+      "held_out_pass_unpurged": true,
+      "stale_bytecode_suspected": false,
+      "bailed": false,
+      "in_tokens": 1190,
+      "out_tokens": 228,
+      "turns": 5,
+      "n_reads": 3,
+      "n_lsp": 0,
+      "n_tests": 1,
+      "n_edits": 1,
+      "wall_sec": 90.084,
+      "server_latency_ms": 0,
+      "server_errors": [],
+      "semantic_supplied_path": "pkg/units/ulmpbn.py",
+      "semantic_payload_sha256": "150559d65f255dd1806e88b7d7b42e5826b0e5f999de9925d507d07836b0c408",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "helper": {
+        "name": "_hchruuk",
+        "def_line": 13,
+        "return_line": 14,
+        "return_text": "    return value * 5 - 47  # spec: value * 11 - 43",
+        "source": "def _hchruuk(value: int) -> int:\n    return value * 5 - 47  # spec: value * 11 - 43",
+        "multiplier": 11,
+        "buggy_multiplier": 5,
+        "offset": 43,
+        "buggy_offset": 47,
+        "delta": -6,
+        "offset_delta": 4,
+        "call_line": 19,
+        "flavour": "hoisted",
+        "gold_expression": "value * 11 - 43",
+        "buggy_expression": "value * 5 - 47",
+        "spec_comment": "  # spec: value * 11 - 43",
+        "inline_repair": {
+          "path": "pkg/units/ulmpbn.py",
+          "start": 19,
+          "end": 19,
+          "new_text": "        return value * 11 - 43"
+        }
+      },
+      "ambiguity_n": 14,
+      "ambiguity_n_distinct_heldout": 14,
+      "blind_guess_ceiling": 0.071429,
+      "n_heldout_read_attempts": 0,
+      "heldout_read_attempts": [],
+      "n_post_edit_redactions": 0,
+      "n_model_test_purges": 3,
+      "reread_defining_path": "pkg/units/ulmpbn.py",
+      "n_target_reads_total": 1,
+      "n_reads_after_span": 1,
+      "n_reads_after_span_whole": 0,
+      "n_reads_after_span_ranged": 1,
+      "read_after_span": true,
+      "first_found_defn_event_idx": null,
+      "n_defn_found": null,
+      "n_target_reads_before_first_edit": 1,
+      "n_target_reads_total_normalised": 1,
+      "n_target_greps_before_first_edit": 1,
+      "n_target_greps_total": 1,
+      "n_defn_blocked": 0,
+      "n_defn_blocked_before_first_edit": 0,
+      "n_probe_edits": 0,
+      "n_probe_edits_before_first_edit": 0,
+      "probe_edit": false,
+      "n_ranged_reads_covering_helper": 1,
+      "retrieved_missing_information": true,
+      "retrieved_missing_information_before_first_edit": true,
+      "sought_missing_information": true,
+      "sought_missing_information_before_first_edit": true,
+      "sought_component_read": true,
+      "sought_component_grep": true,
+      "sought_component_defn_blocked": false,
+      "sought_component_probe": false,
+      "read_ledger": [
+        {
+          "path": "pkg/units/ulmpbn.py",
+          "frames": [
+            "_grep",
+            "run",
+            "main"
+          ],
+          "channel": "grep_scan",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/ulmpbn.py",
+          "frames": [
+            "_read_range",
+            "run",
+            "main"
+          ],
+          "channel": "model_read_ranged",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/ulmpbn.py",
+          "frames": [
+            "_grep",
+            "run",
+            "main"
+          ],
+          "channel": "grep_scan",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/ulmpbn.py",
+          "frames": [
+            "run",
+            "main",
+            "<module>"
+          ],
+          "channel": "edit_normalisation",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/ulmpbn.py",
+          "frames": [
+            "apply_line_edit",
+            "apply_line_edit",
+            "apply_line_edit"
+          ],
+          "channel": "other:apply_line_edit<-apply_line_edit",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/ulmpbn.py",
+          "frames": [
+            "_file_view",
+            "<genexpr>",
+            "deliver_turn"
+          ],
+          "channel": "post_edit_view",
+          "n_edits_before": 1
+        }
+      ],
+      "read_ledger_channels": [
+        "grep_scan",
+        "model_read_ranged",
+        "grep_scan",
+        "edit_normalisation",
+        "other:apply_line_edit<-apply_line_edit",
+        "post_edit_view"
+      ],
+      "first_target_read_channel": "grep_scan",
+      "hidden_line_in_context": true,
+      "gold_expression_in_context": true,
+      "hidden_line_channel": "grep_scan",
+      "hidden_line_before_first_edit": true,
+      "multiplier_literal_in_stream": true,
+      "buggy_multiplier_literal_in_stream": true,
+      "correct_file_localized_before_first_edit": true,
+      "first_edit_path": "pkg/units/ulmpbn.py",
+      "wrong_file_edits": 0,
+      "semantic_then_target_read": true,
+      "generalization_pass": true,
+      "events": [
+        {
+          "tok": 11,
+          "type": "grep",
+          "n": 1,
+          "pat": "def _hchruuk",
+          "nhits": 1,
+          "paths": [
+            "pkg/units/ulmpbn.py"
+          ],
+          "response_chars": 99
+        },
+        {
+          "tok": 36,
+          "type": "read",
+          "n": 2,
+          "path": "pkg/units/ulmpbn.py",
+          "ranged": true,
+          "response_chars": 283
+        },
+        {
+          "tok": 49,
+          "type": "grep",
+          "n": 3,
+          "pat": "kqmuuo",
+          "nhits": 3,
+          "paths": [
+            "pkg/app.py",
+            "pkg/factory.py",
+            "pkg/factory.pyi"
+          ],
+          "response_chars": 219
+        },
+        {
+          "tok": 214,
+          "type": "line_edit",
+          "path": "pkg/units/ulmpbn.py",
+          "lines": "13-14",
+          "ok": true,
+          "info": "ok",
+          "fail_streak": 0,
+          "replace": "def _hchruuk(value: int) -> int:\n    return value * 11 - 43  # spec: value * 11 - 43",
+          "serialization_mode": "inline_exact_indentation",
+          "raw_body_sha256": "fef11b8c9c98c26a790514b16bbd0e0ad509ba0553b96e8ae653c2916b7d6c29",
+          "applied_body_sha256": "fef11b8c9c98c26a790514b16bbd0e0ad509ba0553b96e8ae653c2916b7d6c29"
+        },
+        {
+          "tok": 214,
+          "type": "turn",
+          "n": 4,
+          "via": "eos"
+        },
+        {
+          "tok": 221,
+          "type": "test",
+          "n": 1,
+          "resolved": true
+        },
+        {
+          "tok": 221,
+          "type": "turn",
+          "n": 5,
+          "via": "test"
+        },
+        {
+          "tok": 228,
+          "type": "done_attempt",
+          "prefix_sha256": "3b112ba771f3a1b2413a08e15744e36022c0053c1c8e7a71ddf0cc65c287854f",
+          "source": "model"
+        }
+      ],
+      "stream_tail": "<grep pat=\"def _hchruuk\"/><|im_end|>\n<|im_start|>user\n<grep pat=\"def _hchruuk\" hits=\"1\">\npkg/units/ulmpbn.py:13: def _hchruuk(value: int) -> int:\n</grep><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<read path=\"pkg/units/ulmpbn.py\" lines=\"13-19\"/><|im_end|>\n<|im_start|>user\n<file path=\"pkg/units/ulmpbn.py\" lines=\"13-19\">\n  13| def _hchruuk(value: int) -> int:\n  14|     return value * 5 - 47  # spec: value * 11 - 43\n  15| \n  16| \n  17| class Cvmhidzn(Bilnrxkq):\n  18|     def mqshvrue(self, value: int) -> int:\n  19|         return _hchruuk(value)\n</file><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<grep pat=\"kqmuuo\"/><|im_end|>\n<|im_start|>user\n<grep pat=\"kqmuuo\" hits=\"3\">\npkg/app.py:6: def execute(token: Literal[\"kqmuuo\"], value: int) -> int:\npkg/factory.py:13: \"kqmuuo\": Cvmhidzn,\npkg/factory.pyi:24: def make(token: Literal[\"kqmuuo\"]) -> Cvmhidzn: ...\n</grep><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\nThe token `\"kqmuuo\"` maps to `Cvmhidzn` in the factory, which uses `_hchruuk`. The comment says the spec is `value * 11 - 43`, but the code has `value * 5 - 47`. Let me verify: for `value=5`, `5 * 11 - 43 = 55 - 43 = 12`, which matches the expected output.\n\n<edit path=\"pkg/units/ulmpbn.py\" lines=\"13-14\">def _hchruuk(value: int) -> int:\n    return value * 11 - 43  # spec: value * 11 - 43</edit><|im_end|>\n<|im_start|>user\nRun <test/> to check whether your edit fixed the tests.\n\nCurrent `pkg/units/ulmpbn.py` (edit against THIS exact text):\n  1| from pkg.base import Bilnrxkq\n  2| \n  3| \n  4| def _hosibjo(value: int) -> int:\n  5|     return value * 38 - 65  # spec: value * 38 - 65\n  6| \n  7| \n  8| class Czrfpemr(Bilnrxkq):\n  9|     def mqshvrue(self, value: int) -> int:\n 10|         return _hosibjo(value)\n 11| \n 12| \n 13| def _hchruuk(value: int) -> int:\n 14|     return value * 11 - 43  # spec: value * 11 - 43\n 15| \n 16| \n 17| class Cvmhidzn(Bilnrxkq):\n 18|     def mqshvrue(self, value: int) -> int:\n 19|         return _hchruuk(value)\n 20| \n 21| \n 22| def _haziajv(value: int) -> int:\n 23|     return value * 44 - 75  # spec: value * 44 - 75\n 24| \n 25| \n 26| class Chfgavck(Bilnrxkq):\n 27|     def mqshvrue(self, value: int) -> int:\n 28|         return _haziajv(value)<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<test/><|im_end|>\n<|im_start|>user\n<test_result>\nALL TESTS PASS.\n</test_result>\nTests pass \u2014 emit <done/> if the fix is complete.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<done/>",
+      "outcome_category": "A_read_then_repair"
+    },
+    {
+      "task": "nav_readreq_pilot_67003",
+      "family": 67003,
+      "split": "readreq_pilot",
+      "variant": "typed",
+      "arm": "push_sufficient",
+      "seed": 0,
+      "flavour": "inline",
+      "template": "delegate_scale_sub",
+      "condition": "untrained",
+      "adapter": null,
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "repair_correct": true,
+      "held_out_pass_unpurged": true,
+      "stale_bytecode_suspected": false,
+      "bailed": false,
+      "in_tokens": 997,
+      "out_tokens": 90,
+      "turns": 3,
+      "n_reads": 1,
+      "n_lsp": 0,
+      "n_tests": 1,
+      "n_edits": 1,
+      "wall_sec": 41.06,
+      "server_latency_ms": 0,
+      "server_errors": [],
+      "semantic_supplied_path": "pkg/units/ulmpbn.py",
+      "semantic_payload_sha256": "9dc135f8034682af03cbec84760929bde616fe0b78cc0c77e3e57bdd2d19c4ce",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "helper": {
+        "name": "_hchruuk",
+        "def_line": 13,
+        "return_line": 14,
+        "return_text": "    return value * 5 - 47  # spec: value * 11 - 43",
+        "source": "def _hchruuk(value: int) -> int:\n    return value * 5 - 47  # spec: value * 11 - 43",
+        "multiplier": 11,
+        "buggy_multiplier": 5,
+        "offset": 43,
+        "buggy_offset": 47,
+        "delta": -6,
+        "offset_delta": 4,
+        "call_line": 19,
+        "flavour": "inline",
+        "gold_expression": "value * 11 - 43",
+        "buggy_expression": "value * 5 - 47",
+        "spec_comment": "  # spec: value * 11 - 43",
+        "inline_repair": {
+          "path": "pkg/units/ulmpbn.py",
+          "start": 19,
+          "end": 19,
+          "new_text": "        return value * 11 - 43"
+        }
+      },
+      "ambiguity_n": 14,
+      "ambiguity_n_distinct_heldout": 14,
+      "blind_guess_ceiling": 0.071429,
+      "n_heldout_read_attempts": 0,
+      "heldout_read_attempts": [],
+      "n_post_edit_redactions": 1,
+      "n_model_test_purges": 3,
+      "reread_defining_path": "pkg/units/ulmpbn.py",
+      "n_target_reads_total": 1,
+      "n_reads_after_span": 1,
+      "n_reads_after_span_whole": 0,
+      "n_reads_after_span_ranged": 1,
+      "read_after_span": true,
+      "first_found_defn_event_idx": null,
+      "n_defn_found": null,
+      "n_target_reads_before_first_edit": 1,
+      "n_target_reads_total_normalised": 1,
+      "n_target_greps_before_first_edit": 0,
+      "n_target_greps_total": 0,
+      "n_defn_blocked": 0,
+      "n_defn_blocked_before_first_edit": 0,
+      "n_probe_edits": 0,
+      "n_probe_edits_before_first_edit": 0,
+      "probe_edit": false,
+      "n_ranged_reads_covering_helper": 0,
+      "retrieved_missing_information": true,
+      "retrieved_missing_information_before_first_edit": true,
+      "sought_missing_information": true,
+      "sought_missing_information_before_first_edit": true,
+      "sought_component_read": true,
+      "sought_component_grep": false,
+      "sought_component_defn_blocked": false,
+      "sought_component_probe": false,
+      "read_ledger": [
+        {
+          "path": "pkg/units/ulmpbn.py",
+          "frames": [
+            "_read_range",
+            "run",
+            "main"
+          ],
+          "channel": "model_read_ranged",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/ulmpbn.py",
+          "frames": [
+            "run",
+            "main",
+            "<module>"
+          ],
+          "channel": "edit_normalisation",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/ulmpbn.py",
+          "frames": [
+            "apply_line_edit",
+            "apply_line_edit",
+            "apply_line_edit"
+          ],
+          "channel": "other:apply_line_edit<-apply_line_edit",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/ulmpbn.py",
+          "frames": [
+            "_file_view",
+            "<genexpr>",
+            "deliver_turn"
+          ],
+          "channel": "post_edit_view",
+          "n_edits_before": 1
+        }
+      ],
+      "read_ledger_channels": [
+        "model_read_ranged",
+        "edit_normalisation",
+        "other:apply_line_edit<-apply_line_edit",
+        "post_edit_view"
+      ],
+      "first_target_read_channel": "model_read_ranged",
+      "hidden_line_in_context": true,
+      "gold_expression_in_context": true,
+      "hidden_line_channel": "model_read_ranged",
+      "hidden_line_before_first_edit": true,
+      "multiplier_literal_in_stream": true,
+      "buggy_multiplier_literal_in_stream": true,
+      "correct_file_localized_before_first_edit": true,
+      "first_edit_path": "pkg/units/ulmpbn.py",
+      "wrong_file_edits": 0,
+      "semantic_then_target_read": true,
+      "generalization_pass": true,
+      "events": [
+        {
+          "tok": 21,
+          "type": "read",
+          "n": 1,
+          "path": "pkg/units/ulmpbn.py",
+          "ranged": true,
+          "response_chars": 165
+        },
+        {
+          "tok": 76,
+          "type": "line_edit",
+          "path": "pkg/units/ulmpbn.py",
+          "lines": "18-19",
+          "ok": true,
+          "info": "ok",
+          "fail_streak": 0,
+          "replace": "    def mqshvrue(self, value: int) -> int:\n        return value * 11 - 43",
+          "serialization_mode": "inline_exact_indentation",
+          "raw_body_sha256": "abe6415e1ff37864774bd6c72be65970afed1191d30c19647fb24d1007b8a709",
+          "applied_body_sha256": "abe6415e1ff37864774bd6c72be65970afed1191d30c19647fb24d1007b8a709"
+        },
+        {
+          "tok": 76,
+          "type": "turn",
+          "n": 2,
+          "via": "eos"
+        },
+        {
+          "tok": 83,
+          "type": "test",
+          "n": 1,
+          "resolved": true
+        },
+        {
+          "tok": 83,
+          "type": "turn",
+          "n": 3,
+          "via": "test"
+        },
+        {
+          "tok": 90,
+          "type": "done_attempt",
+          "prefix_sha256": "acbc3a1d426af0f7ec78541ab123347840b700673cf1f5298d17927536a4600e",
+          "source": "model"
+        }
+      ],
+      "stream_tail": "<read path=\"pkg/units/ulmpbn.py\" lines=\"18-19\"/><|im_end|>\n<|im_start|>user\n<file path=\"pkg/units/ulmpbn.py\" lines=\"18-19\">\n  18|     def mqshvrue(self, value: int) -> int:\n  19|         return value * 5 - 47  # spec: value * 11 - 43\n</file><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<edit path=\"pkg/units/ulmpbn.py\" lines=\"18-19\">    def mqshvrue(self, value: int) -> int:\n        return value * 11 - 43</edit><|im_end|>\n<|im_start|>user\nRun <test/> to check whether your edit fixed the tests.\n\nCurrent `pkg/units/ulmpbn.py` (edit against THIS exact text):\n  1| from pkg.base import Bilnrxkq\n  2| \n  3| \n  4| def _hosibjo(value: int) -> int:\n  5|     return value * 38 - 65  # spec: value * 38 - 65\n  6| \n  7| \n  8| class Czrfpemr(Bilnrxkq):\n  9|     def mqshvrue(self, value: int) -> int:\n 10|         return _hosibjo(value)\n 11| \n 12| \n 13| def _hchruuk(value: int) -> int:\n 14|     return ...  # (elided from this automatic post-edit view; use <read path=\"pkg/units/ulmpbn.py\"/> to see this line)\n 15| \n 16| \n 17| class Cvmhidzn(Bilnrxkq):\n 18|     def mqshvrue(self, value: int) -> int:\n 19|         return value * 11 - 43\n 20| \n 21| \n 22| def _haziajv(value: int) -> int:\n 23|     return value * 44 - 75  # spec: value * 44 - 75\n 24| \n 25| \n 26| class Chfgavck(Bilnrxkq):\n 27|     def mqshvrue(self, value: int) -> int:\n 28|         return _haziajv(value)<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<test/><|im_end|>\n<|im_start|>user\n<test_result>\nALL TESTS PASS.\n</test_result>\nTests pass \u2014 emit <done/> if the fix is complete.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<done/>",
+      "outcome_category": "A_read_then_repair"
+    },
+    {
+      "task": "nav_readreq_pilot_67009",
+      "family": 67009,
+      "split": "readreq_pilot",
+      "variant": "typed",
+      "arm": "push_insufficient",
+      "seed": 0,
+      "flavour": "hoisted",
+      "template": "delegate_xor_offset",
+      "condition": "untrained",
+      "adapter": null,
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "repair_correct": true,
+      "held_out_pass_unpurged": true,
+      "stale_bytecode_suspected": false,
+      "bailed": false,
+      "in_tokens": 1174,
+      "out_tokens": 158,
+      "turns": 4,
+      "n_reads": 2,
+      "n_lsp": 0,
+      "n_tests": 1,
+      "n_edits": 1,
+      "wall_sec": 65.576,
+      "server_latency_ms": 0,
+      "server_errors": [],
+      "semantic_supplied_path": "pkg/units/uhnxee.py",
+      "semantic_payload_sha256": "9b1c4d3a8199b3e9c9d7d832b630b725313a0405bc25d6f8723c02f498a0bbd1",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "helper": {
+        "name": "_habdewh",
+        "def_line": 4,
+        "return_line": 5,
+        "return_text": "    return (value ^ 16) + 70  # spec: (value ^ 25) + 66",
+        "source": "def _habdewh(value: int) -> int:\n    return (value ^ 16) + 70  # spec: (value ^ 25) + 66",
+        "multiplier": 25,
+        "buggy_multiplier": 16,
+        "offset": 66,
+        "buggy_offset": 70,
+        "delta": -9,
+        "offset_delta": 4,
+        "call_line": 10,
+        "flavour": "hoisted",
+        "gold_expression": "(value ^ 25) + 66",
+        "buggy_expression": "(value ^ 16) + 70",
+        "spec_comment": "  # spec: (value ^ 25) + 66",
+        "inline_repair": {
+          "path": "pkg/units/uhnxee.py",
+          "start": 10,
+          "end": 10,
+          "new_text": "        return (value ^ 25) + 66"
+        }
+      },
+      "ambiguity_n": 43,
+      "ambiguity_n_distinct_heldout": 16,
+      "blind_guess_ceiling": 0.093023,
+      "n_heldout_read_attempts": 0,
+      "heldout_read_attempts": [],
+      "n_post_edit_redactions": 0,
+      "n_model_test_purges": 3,
+      "reread_defining_path": "pkg/units/uhnxee.py",
+      "n_target_reads_total": 1,
+      "n_reads_after_span": 1,
+      "n_reads_after_span_whole": 0,
+      "n_reads_after_span_ranged": 1,
+      "read_after_span": true,
+      "first_found_defn_event_idx": null,
+      "n_defn_found": null,
+      "n_target_reads_before_first_edit": 1,
+      "n_target_reads_total_normalised": 1,
+      "n_target_greps_before_first_edit": 1,
+      "n_target_greps_total": 1,
+      "n_defn_blocked": 0,
+      "n_defn_blocked_before_first_edit": 0,
+      "n_probe_edits": 0,
+      "n_probe_edits_before_first_edit": 0,
+      "probe_edit": false,
+      "n_ranged_reads_covering_helper": 1,
+      "retrieved_missing_information": true,
+      "retrieved_missing_information_before_first_edit": true,
+      "sought_missing_information": true,
+      "sought_missing_information_before_first_edit": true,
+      "sought_component_read": true,
+      "sought_component_grep": true,
+      "sought_component_defn_blocked": false,
+      "sought_component_probe": false,
+      "read_ledger": [
+        {
+          "path": "pkg/units/uhnxee.py",
+          "frames": [
+            "_grep",
+            "run",
+            "main"
+          ],
+          "channel": "grep_scan",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uhnxee.py",
+          "frames": [
+            "_read_range",
+            "run",
+            "main"
+          ],
+          "channel": "model_read_ranged",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uhnxee.py",
+          "frames": [
+            "run",
+            "main",
+            "<module>"
+          ],
+          "channel": "edit_normalisation",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uhnxee.py",
+          "frames": [
+            "apply_line_edit",
+            "apply_line_edit",
+            "apply_line_edit"
+          ],
+          "channel": "other:apply_line_edit<-apply_line_edit",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uhnxee.py",
+          "frames": [
+            "_file_view",
+            "<genexpr>",
+            "deliver_turn"
+          ],
+          "channel": "post_edit_view",
+          "n_edits_before": 1
+        }
+      ],
+      "read_ledger_channels": [
+        "grep_scan",
+        "model_read_ranged",
+        "edit_normalisation",
+        "other:apply_line_edit<-apply_line_edit",
+        "post_edit_view"
+      ],
+      "first_target_read_channel": "grep_scan",
+      "hidden_line_in_context": true,
+      "gold_expression_in_context": true,
+      "hidden_line_channel": "grep_scan",
+      "hidden_line_before_first_edit": true,
+      "multiplier_literal_in_stream": true,
+      "buggy_multiplier_literal_in_stream": true,
+      "correct_file_localized_before_first_edit": true,
+      "first_edit_path": "pkg/units/uhnxee.py",
+      "wrong_file_edits": 0,
+      "semantic_then_target_read": true,
+      "generalization_pass": true,
+      "events": [
+        {
+          "tok": 11,
+          "type": "grep",
+          "n": 1,
+          "pat": "def _habdewh",
+          "nhits": 1,
+          "paths": [
+            "pkg/units/uhnxee.py"
+          ],
+          "response_chars": 98
+        },
+        {
+          "tok": 35,
+          "type": "read",
+          "n": 2,
+          "path": "pkg/units/uhnxee.py",
+          "ranged": true,
+          "response_chars": 459
+        },
+        {
+          "tok": 144,
+          "type": "line_edit",
+          "path": "pkg/units/uhnxee.py",
+          "lines": "4-5",
+          "ok": true,
+          "info": "ok",
+          "fail_streak": 0,
+          "replace": "def _habdewh(value: int) -> int:\n    return (value ^ 25) + 66",
+          "serialization_mode": "inline_exact_indentation",
+          "raw_body_sha256": "252a314bbcd3ba3894857ccf5e310119842dd221937b32402e6f7d781ce85241",
+          "applied_body_sha256": "252a314bbcd3ba3894857ccf5e310119842dd221937b32402e6f7d781ce85241"
+        },
+        {
+          "tok": 144,
+          "type": "turn",
+          "n": 3,
+          "via": "eos"
+        },
+        {
+          "tok": 151,
+          "type": "test",
+          "n": 1,
+          "resolved": true
+        },
+        {
+          "tok": 151,
+          "type": "turn",
+          "n": 4,
+          "via": "test"
+        },
+        {
+          "tok": 158,
+          "type": "done_attempt",
+          "prefix_sha256": "cf613030aa829627dc8edda2e4bedd27534cf8b8bec29460edd0a8adf3b4f57a",
+          "source": "model"
+        }
+      ],
+      "stream_tail": "<grep pat=\"def _habdewh\"/><|im_end|>\n<|im_start|>user\n<grep pat=\"def _habdewh\" hits=\"1\">\npkg/units/uhnxee.py:4: def _habdewh(value: int) -> int:\n</grep><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<read path=\"pkg/units/uhnxee.py\" lines=\"1-15\"/><|im_end|>\n<|im_start|>user\n<file path=\"pkg/units/uhnxee.py\" lines=\"1-15\">\n   1| from pkg.base import Bdowlifn\n   2| \n   3| \n   4| def _habdewh(value: int) -> int:\n   5|     return (value ^ 16) + 70  # spec: (value ^ 25) + 66\n   6| \n   7| \n   8| class Cbxdcdfe(Bdowlifn):\n   9|     def mivkflun(self, value: int) -> int:\n  10|         return _habdewh(value)\n  11| \n  12| \n  13| def _hlasocl(value: int) -> int:\n  14|     return (value ^ 39) + 63  # spec: (value ^ 39) + 63\n  15| \n</file><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\nThe comment on line 5 shows the spec: `(value ^ 25) + 66`. Let me verify: `4 ^ 25 = 29`, `29 + 66 = 95`. That matches the expected output.\n\n<edit path=\"pkg/units/uhnxee.py\" lines=\"4-5\">def _habdewh(value: int) -> int:\n    return (value ^ 25) + 66</edit><|im_end|>\n<|im_start|>user\nRun <test/> to check whether your edit fixed the tests.\n\nCurrent `pkg/units/uhnxee.py` (edit against THIS exact text):\n  1| from pkg.base import Bdowlifn\n  2| \n  3| \n  4| def _habdewh(value: int) -> int:\n  5|     return (value ^ 25) + 66\n  6| \n  7| \n  8| class Cbxdcdfe(Bdowlifn):\n  9|     def mivkflun(self, value: int) -> int:\n 10|         return _habdewh(value)\n 11| \n 12| \n 13| def _hlasocl(value: int) -> int:\n 14|     return (value ^ 39) + 63  # spec: (value ^ 39) + 63\n 15| \n 16| \n 17| class Cimunqvd(Bdowlifn):\n 18|     def mivkflun(self, value: int) -> int:\n 19|         return _hlasocl(value)\n 20| \n 21| \n 22| def _htaqnmh(value: int) -> int:\n 23|     return (value ^ 18) + 65  # spec: (value ^ 18) + 65\n 24| \n 25| \n 26| class Cktxhisx(Bdowlifn):\n 27|     def mivkflun(self, value: int) -> int:\n 28|         return _htaqnmh(value)<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<test/><|im_end|>\n<|im_start|>user\n<test_result>\nALL TESTS PASS.\n</test_result>\nTests pass \u2014 emit <done/> if the fix is complete.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<done/>",
+      "outcome_category": "A_read_then_repair"
+    },
+    {
+      "task": "nav_readreq_pilot_67009",
+      "family": 67009,
+      "split": "readreq_pilot",
+      "variant": "typed",
+      "arm": "push_sufficient",
+      "seed": 0,
+      "flavour": "inline",
+      "template": "delegate_xor_offset",
+      "condition": "untrained",
+      "adapter": null,
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "repair_correct": true,
+      "held_out_pass_unpurged": true,
+      "stale_bytecode_suspected": false,
+      "bailed": false,
+      "in_tokens": 1828,
+      "out_tokens": 268,
+      "turns": 5,
+      "n_reads": 3,
+      "n_lsp": 0,
+      "n_tests": 1,
+      "n_edits": 1,
+      "wall_sec": 108.946,
+      "server_latency_ms": 0,
+      "server_errors": [],
+      "semantic_supplied_path": "pkg/units/uhnxee.py",
+      "semantic_payload_sha256": "08b91469cc6845081d1447ee5678b540aee1b0bc56f79a9d59840ef9f76aef4c",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "helper": {
+        "name": "_habdewh",
+        "def_line": 4,
+        "return_line": 5,
+        "return_text": "    return (value ^ 16) + 70  # spec: (value ^ 25) + 66",
+        "source": "def _habdewh(value: int) -> int:\n    return (value ^ 16) + 70  # spec: (value ^ 25) + 66",
+        "multiplier": 25,
+        "buggy_multiplier": 16,
+        "offset": 66,
+        "buggy_offset": 70,
+        "delta": -9,
+        "offset_delta": 4,
+        "call_line": 10,
+        "flavour": "inline",
+        "gold_expression": "(value ^ 25) + 66",
+        "buggy_expression": "(value ^ 16) + 70",
+        "spec_comment": "  # spec: (value ^ 25) + 66",
+        "inline_repair": {
+          "path": "pkg/units/uhnxee.py",
+          "start": 10,
+          "end": 10,
+          "new_text": "        return (value ^ 25) + 66"
+        }
+      },
+      "ambiguity_n": 43,
+      "ambiguity_n_distinct_heldout": 16,
+      "blind_guess_ceiling": 0.093023,
+      "n_heldout_read_attempts": 0,
+      "heldout_read_attempts": [],
+      "n_post_edit_redactions": 1,
+      "n_model_test_purges": 3,
+      "reread_defining_path": "pkg/units/uhnxee.py",
+      "n_target_reads_total": 1,
+      "n_reads_after_span": 1,
+      "n_reads_after_span_whole": 0,
+      "n_reads_after_span_ranged": 1,
+      "read_after_span": true,
+      "first_found_defn_event_idx": null,
+      "n_defn_found": null,
+      "n_target_reads_before_first_edit": 1,
+      "n_target_reads_total_normalised": 1,
+      "n_target_greps_before_first_edit": 1,
+      "n_target_greps_total": 1,
+      "n_defn_blocked": 0,
+      "n_defn_blocked_before_first_edit": 0,
+      "n_probe_edits": 0,
+      "n_probe_edits_before_first_edit": 0,
+      "probe_edit": false,
+      "n_ranged_reads_covering_helper": 1,
+      "retrieved_missing_information": true,
+      "retrieved_missing_information_before_first_edit": true,
+      "sought_missing_information": true,
+      "sought_missing_information_before_first_edit": true,
+      "sought_component_read": true,
+      "sought_component_grep": true,
+      "sought_component_defn_blocked": false,
+      "sought_component_probe": false,
+      "read_ledger": [
+        {
+          "path": "pkg/units/uhnxee.py",
+          "frames": [
+            "_grep",
+            "run",
+            "main"
+          ],
+          "channel": "grep_scan",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uhnxee.py",
+          "frames": [
+            "_read_range",
+            "run",
+            "main"
+          ],
+          "channel": "model_read_ranged",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uhnxee.py",
+          "frames": [
+            "_grep",
+            "run",
+            "main"
+          ],
+          "channel": "grep_scan",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uhnxee.py",
+          "frames": [
+            "run",
+            "main",
+            "<module>"
+          ],
+          "channel": "edit_normalisation",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uhnxee.py",
+          "frames": [
+            "apply_line_edit",
+            "apply_line_edit",
+            "apply_line_edit"
+          ],
+          "channel": "other:apply_line_edit<-apply_line_edit",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uhnxee.py",
+          "frames": [
+            "_file_view",
+            "<genexpr>",
+            "deliver_turn"
+          ],
+          "channel": "post_edit_view",
+          "n_edits_before": 1
+        }
+      ],
+      "read_ledger_channels": [
+        "grep_scan",
+        "model_read_ranged",
+        "grep_scan",
+        "edit_normalisation",
+        "other:apply_line_edit<-apply_line_edit",
+        "post_edit_view"
+      ],
+      "first_target_read_channel": "grep_scan",
+      "hidden_line_in_context": true,
+      "gold_expression_in_context": true,
+      "hidden_line_channel": "grep_scan",
+      "hidden_line_before_first_edit": true,
+      "multiplier_literal_in_stream": true,
+      "buggy_multiplier_literal_in_stream": true,
+      "correct_file_localized_before_first_edit": true,
+      "first_edit_path": "pkg/units/uhnxee.py",
+      "wrong_file_edits": 0,
+      "semantic_then_target_read": true,
+      "generalization_pass": true,
+      "events": [
+        {
+          "tok": 10,
+          "type": "grep",
+          "n": 1,
+          "pat": "mivkflun",
+          "nhits": 13,
+          "paths": [
+            "pkg/app.py",
+            "pkg/base.py",
+            "pkg/units/uhnxee.py",
+            "pkg/units/ujnkwy.py",
+            "pkg/units/uminnb.py",
+            "pkg/units/upcrem.py",
+            "pkg/widened.py"
+          ],
+          "response_chars": 801
+        },
+        {
+          "tok": 34,
+          "type": "read",
+          "n": 2,
+          "path": "pkg/units/uhnxee.py",
+          "ranged": true,
+          "response_chars": 860
+        },
+        {
+          "tok": 46,
+          "type": "grep",
+          "n": 3,
+          "pat": "kiynvo",
+          "nhits": 3,
+          "paths": [
+            "pkg/app.py",
+            "pkg/factory.py",
+            "pkg/factory.pyi"
+          ],
+          "response_chars": 217
+        },
+        {
+          "tok": 254,
+          "type": "line_edit",
+          "path": "pkg/units/uhnxee.py",
+          "lines": "10-10",
+          "ok": true,
+          "info": "ok",
+          "fail_streak": 0,
+          "replace": "        return (value ^ 25) + 66",
+          "serialization_mode": "inline_exact_indentation",
+          "raw_body_sha256": "b7b4288d64c5ea5504141493612cf8836459f582df04e875a5ca51f58e851658",
+          "applied_body_sha256": "b7b4288d64c5ea5504141493612cf8836459f582df04e875a5ca51f58e851658"
+        },
+        {
+          "tok": 254,
+          "type": "turn",
+          "n": 4,
+          "via": "eos"
+        },
+        {
+          "tok": 261,
+          "type": "test",
+          "n": 1,
+          "resolved": true
+        },
+        {
+          "tok": 261,
+          "type": "turn",
+          "n": 5,
+          "via": "test"
+        },
+        {
+          "tok": 268,
+          "type": "done_attempt",
+          "prefix_sha256": "5eed380d5f3627bec3fb990688c3db61f92038bf514d7290e62b4408d47fad59",
+          "source": "model"
+        }
+      ],
+      "stream_tail": "ef _hlasocl(value: int) -> int:\n  14|     return (value ^ 39) + 63  # spec: (value ^ 39) + 63\n  15| \n  16| \n  17| class Cimunqvd(Bdowlifn):\n  18|     def mivkflun(self, value: int) -> int:\n  19|         return _hlasocl(value)\n  20| \n  21| \n  22| def _htaqnmh(value: int) -> int:\n  23|     return (value ^ 18) + 65  # spec: (value ^ 18) + 65\n  24| \n  25| \n  26| class Cktxhisx(Bdowlifn):\n  27|     def mivkflun(self, value: int) -> int:\n  28|         return _htaqnmh(value)\n</file><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<grep pat=\"kiynvo\"/><|im_end|>\n<|im_start|>user\n<grep pat=\"kiynvo\" hits=\"3\">\npkg/app.py:6: def execute(token: Literal[\"kiynvo\"], value: int) -> int:\npkg/factory.py:8: \"kiynvo\": Cbxdcdfe,\npkg/factory.pyi:9: def make(token: Literal[\"kiynvo\"]) -> Cbxdcdfe: ...\n</grep><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\nThe token `kiynvo` maps to `Cbxdcdfe` in the factory. The `mivkflun` method in `Cbxdcdfe` (line 10 of `pkg/units/uhnxee.py`) has a bug: it uses `(value ^ 16) + 70` but the spec comment says it should be `(value ^ 25) + 66`.\n\nLet me verify: `execute('kiynvo', 4)` should return 95.\n- Current: `(4 ^ 16) + 70 = 20 + 70 = 90` \u274c\n- Fixed: `(4 ^ 25) + 66 = 29 + 66 = 95` \u2713\n\n<edit path=\"pkg/units/uhnxee.py\" lines=\"10\">        return (value ^ 25) + 66</edit><|im_end|>\n<|im_start|>user\nRun <test/> to check whether your edit fixed the tests.\n\nCurrent `pkg/units/uhnxee.py` (edit against THIS exact text):\n  1| from pkg.base import Bdowlifn\n  2| \n  3| \n  4| def _habdewh(value: int) -> int:\n  5|     return ...  # (elided from this automatic post-edit view; use <read path=\"pkg/units/uhnxee.py\"/> to see this line)\n  6| \n  7| \n  8| class Cbxdcdfe(Bdowlifn):\n  9|     def mivkflun(self, value: int) -> int:\n 10|         return (value ^ 25) + 66\n 11| \n 12| \n 13| def _hlasocl(value: int) -> int:\n 14|     return (value ^ 39) + 63  # spec: (value ^ 39) + 63\n 15| \n 16| \n 17| class Cimunqvd(Bdowlifn):\n 18|     def mivkflun(self, value: int) -> int:\n 19|         return _hlasocl(value)\n 20| \n 21| \n 22| def _htaqnmh(value: int) -> int:\n 23|     return (value ^ 18) + 65  # spec: (value ^ 18) + 65\n 24| \n 25| \n 26| class Cktxhisx(Bdowlifn):\n 27|     def mivkflun(self, value: int) -> int:\n 28|         return _htaqnmh(value)<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<test/><|im_end|>\n<|im_start|>user\n<test_result>\nALL TESTS PASS.\n</test_result>\nTests pass \u2014 emit <done/> if the fix is complete.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<done/>",
+      "outcome_category": "A_read_then_repair"
+    },
+    {
+      "task": "nav_readreq_pilot_67012",
+      "family": 67012,
+      "split": "readreq_pilot",
+      "variant": "typed",
+      "arm": "push_insufficient",
+      "seed": 0,
+      "flavour": "hoisted",
+      "template": "delegate_scale_offset",
+      "condition": "untrained",
+      "adapter": null,
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "repair_correct": true,
+      "held_out_pass_unpurged": true,
+      "stale_bytecode_suspected": false,
+      "bailed": false,
+      "in_tokens": 1276,
+      "out_tokens": 224,
+      "turns": 5,
+      "n_reads": 3,
+      "n_lsp": 0,
+      "n_tests": 1,
+      "n_edits": 1,
+      "wall_sec": 89.32,
+      "server_latency_ms": 0,
+      "server_errors": [],
+      "semantic_supplied_path": "pkg/units/udyilx.py",
+      "semantic_payload_sha256": "08f9f5c14caf653e2d79f2991f796022148b19f4d1883d761b6f39efc36d92ff",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "helper": {
+        "name": "_hhqhywu",
+        "def_line": 4,
+        "return_line": 5,
+        "return_text": "    return value * 24 + 13  # spec: value * 22 + 21",
+        "source": "def _hhqhywu(value: int) -> int:\n    return value * 24 + 13  # spec: value * 22 + 21",
+        "multiplier": 22,
+        "buggy_multiplier": 24,
+        "offset": 21,
+        "buggy_offset": 13,
+        "delta": 2,
+        "offset_delta": -8,
+        "call_line": 10,
+        "flavour": "hoisted",
+        "gold_expression": "value * 22 + 21",
+        "buggy_expression": "value * 24 + 13",
+        "spec_comment": "  # spec: value * 22 + 21",
+        "inline_repair": {
+          "path": "pkg/units/udyilx.py",
+          "start": 10,
+          "end": 10,
+          "new_text": "        return value * 22 + 21"
+        }
+      },
+      "ambiguity_n": 18,
+      "ambiguity_n_distinct_heldout": 18,
+      "blind_guess_ceiling": 0.055556,
+      "n_heldout_read_attempts": 0,
+      "heldout_read_attempts": [],
+      "n_post_edit_redactions": 0,
+      "n_model_test_purges": 3,
+      "reread_defining_path": "pkg/units/udyilx.py",
+      "n_target_reads_total": 1,
+      "n_reads_after_span": 1,
+      "n_reads_after_span_whole": 0,
+      "n_reads_after_span_ranged": 1,
+      "read_after_span": true,
+      "first_found_defn_event_idx": null,
+      "n_defn_found": null,
+      "n_target_reads_before_first_edit": 1,
+      "n_target_reads_total_normalised": 1,
+      "n_target_greps_before_first_edit": 1,
+      "n_target_greps_total": 1,
+      "n_defn_blocked": 0,
+      "n_defn_blocked_before_first_edit": 0,
+      "n_probe_edits": 0,
+      "n_probe_edits_before_first_edit": 0,
+      "probe_edit": false,
+      "n_ranged_reads_covering_helper": 1,
+      "retrieved_missing_information": true,
+      "retrieved_missing_information_before_first_edit": true,
+      "sought_missing_information": true,
+      "sought_missing_information_before_first_edit": true,
+      "sought_component_read": true,
+      "sought_component_grep": true,
+      "sought_component_defn_blocked": false,
+      "sought_component_probe": false,
+      "read_ledger": [
+        {
+          "path": "pkg/units/udyilx.py",
+          "frames": [
+            "_grep",
+            "run",
+            "main"
+          ],
+          "channel": "grep_scan",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/udyilx.py",
+          "frames": [
+            "_read_range",
+            "run",
+            "main"
+          ],
+          "channel": "model_read_ranged",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/udyilx.py",
+          "frames": [
+            "_grep",
+            "run",
+            "main"
+          ],
+          "channel": "grep_scan",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/udyilx.py",
+          "frames": [
+            "apply_line_edit",
+            "apply_line_edit",
+            "apply_line_edit"
+          ],
+          "channel": "other:apply_line_edit<-apply_line_edit",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/udyilx.py",
+          "frames": [
+            "_file_view",
+            "<genexpr>",
+            "deliver_turn"
+          ],
+          "channel": "post_edit_view",
+          "n_edits_before": 1
+        }
+      ],
+      "read_ledger_channels": [
+        "grep_scan",
+        "model_read_ranged",
+        "grep_scan",
+        "other:apply_line_edit<-apply_line_edit",
+        "post_edit_view"
+      ],
+      "first_target_read_channel": "grep_scan",
+      "hidden_line_in_context": true,
+      "gold_expression_in_context": true,
+      "hidden_line_channel": "grep_scan",
+      "hidden_line_before_first_edit": true,
+      "multiplier_literal_in_stream": true,
+      "buggy_multiplier_literal_in_stream": true,
+      "correct_file_localized_before_first_edit": true,
+      "first_edit_path": "pkg/units/udyilx.py",
+      "wrong_file_edits": 0,
+      "semantic_then_target_read": true,
+      "generalization_pass": true,
+      "events": [
+        {
+          "tok": 11,
+          "type": "grep",
+          "n": 1,
+          "pat": "def _hhqhywu",
+          "nhits": 1,
+          "paths": [
+            "pkg/units/udyilx.py"
+          ],
+          "response_chars": 98
+        },
+        {
+          "tok": 35,
+          "type": "read",
+          "n": 2,
+          "path": "pkg/units/udyilx.py",
+          "ranged": true,
+          "response_chars": 449
+        },
+        {
+          "tok": 108,
+          "type": "grep",
+          "n": 3,
+          "pat": "kxmejn",
+          "nhits": 3,
+          "paths": [
+            "pkg/app.py",
+            "pkg/factory.py",
+            "pkg/factory.pyi"
+          ],
+          "response_chars": 219
+        },
+        {
+          "tok": 210,
+          "type": "line_edit",
+          "path": "pkg/units/udyilx.py",
+          "lines": "5-5",
+          "ok": true,
+          "info": "ok",
+          "fail_streak": 0,
+          "replace": "    return value * 22 + 21  # spec: value * 22 + 21",
+          "serialization_mode": "newline",
+          "raw_body_sha256": "2c00d510319099a3392f81842a323eb75dcd404dd44f78cdec831bd32cf2f1b7",
+          "applied_body_sha256": "2c00d510319099a3392f81842a323eb75dcd404dd44f78cdec831bd32cf2f1b7"
+        },
+        {
+          "tok": 210,
+          "type": "turn",
+          "n": 4,
+          "via": "eos"
+        },
+        {
+          "tok": 217,
+          "type": "test",
+          "n": 1,
+          "resolved": true
+        },
+        {
+          "tok": 217,
+          "type": "turn",
+          "n": 5,
+          "via": "test"
+        },
+        {
+          "tok": 224,
+          "type": "done_attempt",
+          "prefix_sha256": "d8b8aaf4277e695e75d30ddcb4408b6fecf32dc2632f5cedfe4810c7dabecfe1",
+          "source": "model"
+        }
+      ],
+      "stream_tail": "sistant\n<think>\n\n</think>\n\n<read path=\"pkg/units/udyilx.py\" lines=\"1-15\"/><|im_end|>\n<|im_start|>user\n<file path=\"pkg/units/udyilx.py\" lines=\"1-15\">\n   1| from pkg.base import Bvllhrzo\n   2| \n   3| \n   4| def _hhqhywu(value: int) -> int:\n   5|     return value * 24 + 13  # spec: value * 22 + 21\n   6| \n   7| \n   8| class Ckhfnrky(Bvllhrzo):\n   9|     def mwsfdyey(self, value: int) -> int:\n  10|         return _hhqhywu(value)\n  11| \n  12| \n  13| def _hqtbbff(value: int) -> int:\n  14|     return value * 5 + 72  # spec: value * 5 + 72\n  15| \n</file><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\nThe comment on line 5 indicates the spec is `value * 22 + 21`, but the code uses `value * 24 + 13`. Let me verify this is the correct implementation for token \"kxmejn\" by checking the factory/registry.\n\n<grep pat=\"kxmejn\"/><|im_end|>\n<|im_start|>user\n<grep pat=\"kxmejn\" hits=\"3\">\npkg/app.py:6: def execute(token: Literal[\"kxmejn\"], value: int) -> int:\npkg/factory.py:11: \"kxmejn\": Ckhfnrky,\npkg/factory.pyi:18: def make(token: Literal[\"kxmejn\"]) -> Ckhfnrky: ...\n</grep><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\nConfirmed: token \"kxmejn\" maps to class `Ckhfnrky` in `pkg/units/udyilx.py`, which calls `_hhqhywu`. The bug is on line 5 where the formula is wrong.\n\n<edit path=\"pkg/units/udyilx.py\" lines=\"5\">\n    return value * 22 + 21  # spec: value * 22 + 21\n</edit><|im_end|>\n<|im_start|>user\nRun <test/> to check whether your edit fixed the tests.\n\nCurrent `pkg/units/udyilx.py` (edit against THIS exact text):\n  1| from pkg.base import Bvllhrzo\n  2| \n  3| \n  4| def _hhqhywu(value: int) -> int:\n  5|     return value * 22 + 21  # spec: value * 22 + 21\n  6| \n  7| \n  8| class Ckhfnrky(Bvllhrzo):\n  9|     def mwsfdyey(self, value: int) -> int:\n 10|         return _hhqhywu(value)\n 11| \n 12| \n 13| def _hqtbbff(value: int) -> int:\n 14|     return value * 5 + 72  # spec: value * 5 + 72\n 15| \n 16| \n 17| class Ceirizaq(Bvllhrzo):\n 18|     def mwsfdyey(self, value: int) -> int:\n 19|         return _hqtbbff(value)\n 20| \n 21| \n 22| def _hvqgoly(value: int) -> int:\n 23|     return value * 50 + 42  # spec: value * 50 + 42\n 24| \n 25| \n 26| class Cgupliap(Bvllhrzo):\n 27|     def mwsfdyey(self, value: int) -> int:\n 28|         return _hvqgoly(value)<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<test/><|im_end|>\n<|im_start|>user\n<test_result>\nALL TESTS PASS.\n</test_result>\nTests pass \u2014 emit <done/> if the fix is complete.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<done/>",
+      "outcome_category": "A_read_then_repair"
+    },
+    {
+      "task": "nav_readreq_pilot_67012",
+      "family": 67012,
+      "split": "readreq_pilot",
+      "variant": "typed",
+      "arm": "push_sufficient",
+      "seed": 0,
+      "flavour": "inline",
+      "template": "delegate_scale_offset",
+      "condition": "untrained",
+      "adapter": null,
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "repair_correct": true,
+      "held_out_pass_unpurged": true,
+      "stale_bytecode_suspected": false,
+      "bailed": false,
+      "in_tokens": 1343,
+      "out_tokens": 226,
+      "turns": 4,
+      "n_reads": 2,
+      "n_lsp": 0,
+      "n_tests": 1,
+      "n_edits": 1,
+      "wall_sec": 90.166,
+      "server_latency_ms": 0,
+      "server_errors": [],
+      "semantic_supplied_path": "pkg/units/udyilx.py",
+      "semantic_payload_sha256": "66f58fabacfeb8778b668b7b7262be64b62b93839962239843c702acd991fca4",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "helper": {
+        "name": "_hhqhywu",
+        "def_line": 4,
+        "return_line": 5,
+        "return_text": "    return value * 24 + 13  # spec: value * 22 + 21",
+        "source": "def _hhqhywu(value: int) -> int:\n    return value * 24 + 13  # spec: value * 22 + 21",
+        "multiplier": 22,
+        "buggy_multiplier": 24,
+        "offset": 21,
+        "buggy_offset": 13,
+        "delta": 2,
+        "offset_delta": -8,
+        "call_line": 10,
+        "flavour": "inline",
+        "gold_expression": "value * 22 + 21",
+        "buggy_expression": "value * 24 + 13",
+        "spec_comment": "  # spec: value * 22 + 21",
+        "inline_repair": {
+          "path": "pkg/units/udyilx.py",
+          "start": 10,
+          "end": 10,
+          "new_text": "        return value * 22 + 21"
+        }
+      },
+      "ambiguity_n": 18,
+      "ambiguity_n_distinct_heldout": 18,
+      "blind_guess_ceiling": 0.055556,
+      "n_heldout_read_attempts": 0,
+      "heldout_read_attempts": [],
+      "n_post_edit_redactions": 1,
+      "n_model_test_purges": 3,
+      "reread_defining_path": "pkg/units/udyilx.py",
+      "n_target_reads_total": 1,
+      "n_reads_after_span": 1,
+      "n_reads_after_span_whole": 0,
+      "n_reads_after_span_ranged": 1,
+      "read_after_span": true,
+      "first_found_defn_event_idx": null,
+      "n_defn_found": null,
+      "n_target_reads_before_first_edit": 1,
+      "n_target_reads_total_normalised": 1,
+      "n_target_greps_before_first_edit": 0,
+      "n_target_greps_total": 0,
+      "n_defn_blocked": 0,
+      "n_defn_blocked_before_first_edit": 0,
+      "n_probe_edits": 0,
+      "n_probe_edits_before_first_edit": 0,
+      "probe_edit": false,
+      "n_ranged_reads_covering_helper": 1,
+      "retrieved_missing_information": true,
+      "retrieved_missing_information_before_first_edit": true,
+      "sought_missing_information": true,
+      "sought_missing_information_before_first_edit": true,
+      "sought_component_read": true,
+      "sought_component_grep": false,
+      "sought_component_defn_blocked": false,
+      "sought_component_probe": false,
+      "read_ledger": [
+        {
+          "path": "pkg/units/udyilx.py",
+          "frames": [
+            "_read_range",
+            "run",
+            "main"
+          ],
+          "channel": "model_read_ranged",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/udyilx.py",
+          "frames": [
+            "_grep",
+            "run",
+            "main"
+          ],
+          "channel": "grep_scan",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/udyilx.py",
+          "frames": [
+            "run",
+            "main",
+            "<module>"
+          ],
+          "channel": "edit_normalisation",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/udyilx.py",
+          "frames": [
+            "apply_line_edit",
+            "apply_line_edit",
+            "apply_line_edit"
+          ],
+          "channel": "other:apply_line_edit<-apply_line_edit",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/udyilx.py",
+          "frames": [
+            "_file_view",
+            "<genexpr>",
+            "deliver_turn"
+          ],
+          "channel": "post_edit_view",
+          "n_edits_before": 1
+        }
+      ],
+      "read_ledger_channels": [
+        "model_read_ranged",
+        "grep_scan",
+        "edit_normalisation",
+        "other:apply_line_edit<-apply_line_edit",
+        "post_edit_view"
+      ],
+      "first_target_read_channel": "model_read_ranged",
+      "hidden_line_in_context": true,
+      "gold_expression_in_context": true,
+      "hidden_line_channel": "model_read_ranged",
+      "hidden_line_before_first_edit": true,
+      "multiplier_literal_in_stream": true,
+      "buggy_multiplier_literal_in_stream": true,
+      "correct_file_localized_before_first_edit": true,
+      "first_edit_path": "pkg/units/udyilx.py",
+      "wrong_file_edits": 0,
+      "semantic_then_target_read": true,
+      "generalization_pass": true,
+      "events": [
+        {
+          "tok": 20,
+          "type": "read",
+          "n": 1,
+          "path": "pkg/units/udyilx.py",
+          "ranged": true,
+          "response_chars": 606
+        },
+        {
+          "tok": 33,
+          "type": "grep",
+          "n": 2,
+          "pat": "kxmejn",
+          "nhits": 3,
+          "paths": [
+            "pkg/app.py",
+            "pkg/factory.py",
+            "pkg/factory.pyi"
+          ],
+          "response_chars": 219
+        },
+        {
+          "tok": 212,
+          "type": "line_edit",
+          "path": "pkg/units/udyilx.py",
+          "lines": "9-10",
+          "ok": true,
+          "info": "ok",
+          "fail_streak": 0,
+          "replace": "    def mwsfdyey(self, value: int) -> int:\n        return value * 22 + 21  # spec: value * 22 + 21",
+          "serialization_mode": "inline_exact_indentation",
+          "raw_body_sha256": "3138b77bbcf953ffcd9e927a2628dcb705a3b002308bf774f7b86310a7390a26",
+          "applied_body_sha256": "3138b77bbcf953ffcd9e927a2628dcb705a3b002308bf774f7b86310a7390a26"
+        },
+        {
+          "tok": 212,
+          "type": "turn",
+          "n": 3,
+          "via": "eos"
+        },
+        {
+          "tok": 219,
+          "type": "test",
+          "n": 1,
+          "resolved": true
+        },
+        {
+          "tok": 219,
+          "type": "turn",
+          "n": 4,
+          "via": "test"
+        },
+        {
+          "tok": 226,
+          "type": "done_attempt",
+          "prefix_sha256": "30f524f1fdd7452e9052f8aff445d94909ddebcba976391c3ccd6e3ce7178ede",
+          "source": "model"
+        }
+      ],
+      "stream_tail": "hywu(value: int) -> int:\n   5|     return value * 24 + 13  # spec: value * 22 + 21\n   6| \n   7| \n   8| class Ckhfnrky(Bvllhrzo):\n   9|     def mwsfdyey(self, value: int) -> int:\n  10|         return value * 24 + 13  # spec: value * 22 + 21\n  11| \n  12| \n  13| def _hqtbbff(value: int) -> int:\n  14|     return value * 5 + 72  # spec: value * 5 + 72\n  15| \n  16| \n  17| class Ceirizaq(Bvllhrzo):\n  18|     def mwsfdyey(self, value: int) -> int:\n  19|         return _hqtbbff(value)\n  20| \n</file><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<grep pat=\"kxmejn\"/><|im_end|>\n<|im_start|>user\n<grep pat=\"kxmejn\" hits=\"3\">\npkg/app.py:6: def execute(token: Literal[\"kxmejn\"], value: int) -> int:\npkg/factory.py:11: \"kxmejn\": Ckhfnrky,\npkg/factory.pyi:18: def make(token: Literal[\"kxmejn\"]) -> Ckhfnrky: ...\n</grep><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\nThe factory maps `\"kxmejn\"` to `Ckhfnrky`, which is in `pkg/units/udyilx.py`. The `mwsfdyey` method in `Ckhfnrky` uses `value * 24 + 13` but the comment says the spec is `value * 22 + 21`. Let me verify: `3 * 22 + 21 = 66 + 21 = 87`, which matches the expected output.\n\n<edit path=\"pkg/units/udyilx.py\" lines=\"9-10\">    def mwsfdyey(self, value: int) -> int:\n        return value * 22 + 21  # spec: value * 22 + 21</edit><|im_end|>\n<|im_start|>user\nRun <test/> to check whether your edit fixed the tests.\n\nCurrent `pkg/units/udyilx.py` (edit against THIS exact text):\n  1| from pkg.base import Bvllhrzo\n  2| \n  3| \n  4| def _hhqhywu(value: int) -> int:\n  5|     return ...  # (elided from this automatic post-edit view; use <read path=\"pkg/units/udyilx.py\"/> to see this line)\n  6| \n  7| \n  8| class Ckhfnrky(Bvllhrzo):\n  9|     def mwsfdyey(self, value: int) -> int:\n 10|         return value * 22 + 21  # spec: value * 22 + 21\n 11| \n 12| \n 13| def _hqtbbff(value: int) -> int:\n 14|     return value * 5 + 72  # spec: value * 5 + 72\n 15| \n 16| \n 17| class Ceirizaq(Bvllhrzo):\n 18|     def mwsfdyey(self, value: int) -> int:\n 19|         return _hqtbbff(value)\n 20| \n 21| \n 22| def _hvqgoly(value: int) -> int:\n 23|     return value * 50 + 42  # spec: value * 50 + 42\n 24| \n 25| \n 26| class Cgupliap(Bvllhrzo):\n 27|     def mwsfdyey(self, value: int) -> int:\n 28|         return _hvqgoly(value)<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<test/><|im_end|>\n<|im_start|>user\n<test_result>\nALL TESTS PASS.\n</test_result>\nTests pass \u2014 emit <done/> if the fix is complete.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<done/>",
+      "outcome_category": "A_read_then_repair"
+    },
+    {
+      "task": "nav_readreq_pilot_67014",
+      "family": 67014,
+      "split": "readreq_pilot",
+      "variant": "typed",
+      "arm": "push_insufficient",
+      "seed": 0,
+      "flavour": "hoisted",
+      "template": "delegate_scale_sub",
+      "condition": "untrained",
+      "adapter": null,
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "repair_correct": true,
+      "held_out_pass_unpurged": true,
+      "stale_bytecode_suspected": false,
+      "bailed": false,
+      "in_tokens": 1177,
+      "out_tokens": 215,
+      "turns": 5,
+      "n_reads": 3,
+      "n_lsp": 0,
+      "n_tests": 1,
+      "n_edits": 1,
+      "wall_sec": 85.814,
+      "server_latency_ms": 0,
+      "server_errors": [],
+      "semantic_supplied_path": "pkg/units/uffnha.py",
+      "semantic_payload_sha256": "c08aacc6444a44ac4adb998199b6d25aa66bf0c4ec791598ee22bb5f746a2989",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "helper": {
+        "name": "_hsojmfo",
+        "def_line": 13,
+        "return_line": 14,
+        "return_text": "    return value * 19 - 29  # spec: value * 28 - 32",
+        "source": "def _hsojmfo(value: int) -> int:\n    return value * 19 - 29  # spec: value * 28 - 32",
+        "multiplier": 28,
+        "buggy_multiplier": 19,
+        "offset": 32,
+        "buggy_offset": 29,
+        "delta": -9,
+        "offset_delta": -3,
+        "call_line": 19,
+        "flavour": "hoisted",
+        "gold_expression": "value * 28 - 32",
+        "buggy_expression": "value * 19 - 29",
+        "spec_comment": "  # spec: value * 28 - 32",
+        "inline_repair": {
+          "path": "pkg/units/uffnha.py",
+          "start": 19,
+          "end": 19,
+          "new_text": "        return value * 28 - 32"
+        }
+      },
+      "ambiguity_n": 20,
+      "ambiguity_n_distinct_heldout": 20,
+      "blind_guess_ceiling": 0.05,
+      "n_heldout_read_attempts": 0,
+      "heldout_read_attempts": [],
+      "n_post_edit_redactions": 0,
+      "n_model_test_purges": 3,
+      "reread_defining_path": "pkg/units/uffnha.py",
+      "n_target_reads_total": 1,
+      "n_reads_after_span": 1,
+      "n_reads_after_span_whole": 0,
+      "n_reads_after_span_ranged": 1,
+      "read_after_span": true,
+      "first_found_defn_event_idx": null,
+      "n_defn_found": null,
+      "n_target_reads_before_first_edit": 1,
+      "n_target_reads_total_normalised": 1,
+      "n_target_greps_before_first_edit": 1,
+      "n_target_greps_total": 1,
+      "n_defn_blocked": 0,
+      "n_defn_blocked_before_first_edit": 0,
+      "n_probe_edits": 0,
+      "n_probe_edits_before_first_edit": 0,
+      "probe_edit": false,
+      "n_ranged_reads_covering_helper": 1,
+      "retrieved_missing_information": true,
+      "retrieved_missing_information_before_first_edit": true,
+      "sought_missing_information": true,
+      "sought_missing_information_before_first_edit": true,
+      "sought_component_read": true,
+      "sought_component_grep": true,
+      "sought_component_defn_blocked": false,
+      "sought_component_probe": false,
+      "read_ledger": [
+        {
+          "path": "pkg/units/uffnha.py",
+          "frames": [
+            "_grep",
+            "run",
+            "main"
+          ],
+          "channel": "grep_scan",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uffnha.py",
+          "frames": [
+            "_read_range",
+            "run",
+            "main"
+          ],
+          "channel": "model_read_ranged",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uffnha.py",
+          "frames": [
+            "_grep",
+            "run",
+            "main"
+          ],
+          "channel": "grep_scan",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uffnha.py",
+          "frames": [
+            "run",
+            "main",
+            "<module>"
+          ],
+          "channel": "edit_normalisation",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uffnha.py",
+          "frames": [
+            "apply_line_edit",
+            "apply_line_edit",
+            "apply_line_edit"
+          ],
+          "channel": "other:apply_line_edit<-apply_line_edit",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uffnha.py",
+          "frames": [
+            "_file_view",
+            "<genexpr>",
+            "deliver_turn"
+          ],
+          "channel": "post_edit_view",
+          "n_edits_before": 1
+        }
+      ],
+      "read_ledger_channels": [
+        "grep_scan",
+        "model_read_ranged",
+        "grep_scan",
+        "edit_normalisation",
+        "other:apply_line_edit<-apply_line_edit",
+        "post_edit_view"
+      ],
+      "first_target_read_channel": "grep_scan",
+      "hidden_line_in_context": true,
+      "gold_expression_in_context": true,
+      "hidden_line_channel": "grep_scan",
+      "hidden_line_before_first_edit": true,
+      "multiplier_literal_in_stream": true,
+      "buggy_multiplier_literal_in_stream": true,
+      "correct_file_localized_before_first_edit": true,
+      "first_edit_path": "pkg/units/uffnha.py",
+      "wrong_file_edits": 0,
+      "semantic_then_target_read": true,
+      "generalization_pass": true,
+      "events": [
+        {
+          "tok": 11,
+          "type": "grep",
+          "n": 1,
+          "pat": "def _hsojmfo",
+          "nhits": 1,
+          "paths": [
+            "pkg/units/uffnha.py"
+          ],
+          "response_chars": 99
+        },
+        {
+          "tok": 36,
+          "type": "read",
+          "n": 2,
+          "path": "pkg/units/uffnha.py",
+          "ranged": true,
+          "response_chars": 284
+        },
+        {
+          "tok": 48,
+          "type": "grep",
+          "n": 3,
+          "pat": "kmfhft",
+          "nhits": 3,
+          "paths": [
+            "pkg/app.py",
+            "pkg/factory.py",
+            "pkg/factory.pyi"
+          ],
+          "response_chars": 219
+        },
+        {
+          "tok": 201,
+          "type": "line_edit",
+          "path": "pkg/units/uffnha.py",
+          "lines": "13-14",
+          "ok": true,
+          "info": "ok",
+          "fail_streak": 0,
+          "replace": "def _hsojmfo(value: int) -> int:\n    return value * 28 - 32",
+          "serialization_mode": "inline_exact_indentation",
+          "raw_body_sha256": "9c034160ea1e03120fce84b3f4a76d23b70c369c2910d87a60adcea168559d16",
+          "applied_body_sha256": "9c034160ea1e03120fce84b3f4a76d23b70c369c2910d87a60adcea168559d16"
+        },
+        {
+          "tok": 201,
+          "type": "turn",
+          "n": 4,
+          "via": "eos"
+        },
+        {
+          "tok": 208,
+          "type": "test",
+          "n": 1,
+          "resolved": true
+        },
+        {
+          "tok": 208,
+          "type": "turn",
+          "n": 5,
+          "via": "test"
+        },
+        {
+          "tok": 215,
+          "type": "done_attempt",
+          "prefix_sha256": "7262cde171eb45d6b7e7298f0aff63020b6c4d807aef61a67c0d11a0294162ae",
+          "source": "model"
+        }
+      ],
+      "stream_tail": "<grep pat=\"def _hsojmfo\"/><|im_end|>\n<|im_start|>user\n<grep pat=\"def _hsojmfo\" hits=\"1\">\npkg/units/uffnha.py:13: def _hsojmfo(value: int) -> int:\n</grep><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<read path=\"pkg/units/uffnha.py\" lines=\"13-19\"/><|im_end|>\n<|im_start|>user\n<file path=\"pkg/units/uffnha.py\" lines=\"13-19\">\n  13| def _hsojmfo(value: int) -> int:\n  14|     return value * 19 - 29  # spec: value * 28 - 32\n  15| \n  16| \n  17| class Ctunbboa(Bspzfgeq):\n  18|     def mofssbvg(self, value: int) -> int:\n  19|         return _hsojmfo(value)\n</file><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<grep pat=\"kmfhft\"/><|im_end|>\n<|im_start|>user\n<grep pat=\"kmfhft\" hits=\"3\">\npkg/app.py:6: def execute(token: Literal[\"kmfhft\"], value: int) -> int:\npkg/factory.py:14: \"kmfhft\": Ctunbboa,\npkg/factory.pyi:27: def make(token: Literal[\"kmfhft\"]) -> Ctunbboa: ...\n</grep><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\nThe comment on line 14 says `# spec: value * 28 - 32`. Let me verify: `3 * 28 - 32 = 84 - 32 = 52`. That matches the expected output. The current code uses `value * 19 - 29` which gives `3 * 19 - 29 = 57 - 29 = 28`, which is wrong.\n\n<edit path=\"pkg/units/uffnha.py\" lines=\"13-14\">def _hsojmfo(value: int) -> int:\n    return value * 28 - 32</edit><|im_end|>\n<|im_start|>user\nRun <test/> to check whether your edit fixed the tests.\n\nCurrent `pkg/units/uffnha.py` (edit against THIS exact text):\n  1| from pkg.base import Bspzfgeq\n  2| \n  3| \n  4| def _hdecsjv(value: int) -> int:\n  5|     return value * 53 - 70  # spec: value * 53 - 70\n  6| \n  7| \n  8| class Clbsnhlu(Bspzfgeq):\n  9|     def mofssbvg(self, value: int) -> int:\n 10|         return _hdecsjv(value)\n 11| \n 12| \n 13| def _hsojmfo(value: int) -> int:\n 14|     return value * 28 - 32\n 15| \n 16| \n 17| class Ctunbboa(Bspzfgeq):\n 18|     def mofssbvg(self, value: int) -> int:\n 19|         return _hsojmfo(value)\n 20| \n 21| \n 22| def _hhydobl(value: int) -> int:\n 23|     return value * 45 - 40  # spec: value * 45 - 40\n 24| \n 25| \n 26| class Cqrmsxgh(Bspzfgeq):\n 27|     def mofssbvg(self, value: int) -> int:\n 28|         return _hhydobl(value)<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<test/><|im_end|>\n<|im_start|>user\n<test_result>\nALL TESTS PASS.\n</test_result>\nTests pass \u2014 emit <done/> if the fix is complete.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<done/>",
+      "outcome_category": "A_read_then_repair"
+    },
+    {
+      "task": "nav_readreq_pilot_67014",
+      "family": 67014,
+      "split": "readreq_pilot",
+      "variant": "typed",
+      "arm": "push_sufficient",
+      "seed": 0,
+      "flavour": "inline",
+      "template": "delegate_scale_sub",
+      "condition": "untrained",
+      "adapter": null,
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "repair_correct": true,
+      "held_out_pass_unpurged": true,
+      "stale_bytecode_suspected": false,
+      "bailed": false,
+      "in_tokens": 1016,
+      "out_tokens": 104,
+      "turns": 3,
+      "n_reads": 1,
+      "n_lsp": 0,
+      "n_tests": 1,
+      "n_edits": 1,
+      "wall_sec": 45.799,
+      "server_latency_ms": 0,
+      "server_errors": [],
+      "semantic_supplied_path": "pkg/units/uffnha.py",
+      "semantic_payload_sha256": "5bac41984c5b8db4695424b8b17c6821cfc688ade7aeed0958dc772d8321803a",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "helper": {
+        "name": "_hsojmfo",
+        "def_line": 13,
+        "return_line": 14,
+        "return_text": "    return value * 19 - 29  # spec: value * 28 - 32",
+        "source": "def _hsojmfo(value: int) -> int:\n    return value * 19 - 29  # spec: value * 28 - 32",
+        "multiplier": 28,
+        "buggy_multiplier": 19,
+        "offset": 32,
+        "buggy_offset": 29,
+        "delta": -9,
+        "offset_delta": -3,
+        "call_line": 19,
+        "flavour": "inline",
+        "gold_expression": "value * 28 - 32",
+        "buggy_expression": "value * 19 - 29",
+        "spec_comment": "  # spec: value * 28 - 32",
+        "inline_repair": {
+          "path": "pkg/units/uffnha.py",
+          "start": 19,
+          "end": 19,
+          "new_text": "        return value * 28 - 32"
+        }
+      },
+      "ambiguity_n": 20,
+      "ambiguity_n_distinct_heldout": 20,
+      "blind_guess_ceiling": 0.05,
+      "n_heldout_read_attempts": 0,
+      "heldout_read_attempts": [],
+      "n_post_edit_redactions": 1,
+      "n_model_test_purges": 3,
+      "reread_defining_path": "pkg/units/uffnha.py",
+      "n_target_reads_total": 1,
+      "n_reads_after_span": 1,
+      "n_reads_after_span_whole": 0,
+      "n_reads_after_span_ranged": 1,
+      "read_after_span": true,
+      "first_found_defn_event_idx": null,
+      "n_defn_found": null,
+      "n_target_reads_before_first_edit": 1,
+      "n_target_reads_total_normalised": 1,
+      "n_target_greps_before_first_edit": 0,
+      "n_target_greps_total": 0,
+      "n_defn_blocked": 0,
+      "n_defn_blocked_before_first_edit": 0,
+      "n_probe_edits": 0,
+      "n_probe_edits_before_first_edit": 0,
+      "probe_edit": false,
+      "n_ranged_reads_covering_helper": 0,
+      "retrieved_missing_information": true,
+      "retrieved_missing_information_before_first_edit": true,
+      "sought_missing_information": true,
+      "sought_missing_information_before_first_edit": true,
+      "sought_component_read": true,
+      "sought_component_grep": false,
+      "sought_component_defn_blocked": false,
+      "sought_component_probe": false,
+      "read_ledger": [
+        {
+          "path": "pkg/units/uffnha.py",
+          "frames": [
+            "_read_range",
+            "run",
+            "main"
+          ],
+          "channel": "model_read_ranged",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uffnha.py",
+          "frames": [
+            "run",
+            "main",
+            "<module>"
+          ],
+          "channel": "edit_normalisation",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uffnha.py",
+          "frames": [
+            "apply_line_edit",
+            "apply_line_edit",
+            "apply_line_edit"
+          ],
+          "channel": "other:apply_line_edit<-apply_line_edit",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uffnha.py",
+          "frames": [
+            "_file_view",
+            "<genexpr>",
+            "deliver_turn"
+          ],
+          "channel": "post_edit_view",
+          "n_edits_before": 1
+        }
+      ],
+      "read_ledger_channels": [
+        "model_read_ranged",
+        "edit_normalisation",
+        "other:apply_line_edit<-apply_line_edit",
+        "post_edit_view"
+      ],
+      "first_target_read_channel": "model_read_ranged",
+      "hidden_line_in_context": true,
+      "gold_expression_in_context": true,
+      "hidden_line_channel": "model_read_ranged",
+      "hidden_line_before_first_edit": true,
+      "multiplier_literal_in_stream": true,
+      "buggy_multiplier_literal_in_stream": true,
+      "correct_file_localized_before_first_edit": true,
+      "first_edit_path": "pkg/units/uffnha.py",
+      "wrong_file_edits": 0,
+      "semantic_then_target_read": true,
+      "generalization_pass": true,
+      "events": [
+        {
+          "tok": 21,
+          "type": "read",
+          "n": 1,
+          "path": "pkg/units/uffnha.py",
+          "ranged": true,
+          "response_chars": 166
+        },
+        {
+          "tok": 90,
+          "type": "line_edit",
+          "path": "pkg/units/uffnha.py",
+          "lines": "18-19",
+          "ok": true,
+          "info": "ok",
+          "fail_streak": 0,
+          "replace": "    def mofssbvg(self, value: int) -> int:\n        return value * 28 - 32  # spec: value * 28 - 32",
+          "serialization_mode": "inline_exact_indentation",
+          "raw_body_sha256": "5272bf390dd398298036f3dcfb89a510050f41048a16a0bdb8224b59b53c93bb",
+          "applied_body_sha256": "5272bf390dd398298036f3dcfb89a510050f41048a16a0bdb8224b59b53c93bb"
+        },
+        {
+          "tok": 90,
+          "type": "turn",
+          "n": 2,
+          "via": "eos"
+        },
+        {
+          "tok": 97,
+          "type": "test",
+          "n": 1,
+          "resolved": true
+        },
+        {
+          "tok": 97,
+          "type": "turn",
+          "n": 3,
+          "via": "test"
+        },
+        {
+          "tok": 104,
+          "type": "done_attempt",
+          "prefix_sha256": "27c4a1c3b7063fde53dd9265a27439b7dac59ccf12312cb8060196d0a6edbfe1",
+          "source": "model"
+        }
+      ],
+      "stream_tail": "<read path=\"pkg/units/uffnha.py\" lines=\"18-19\"/><|im_end|>\n<|im_start|>user\n<file path=\"pkg/units/uffnha.py\" lines=\"18-19\">\n  18|     def mofssbvg(self, value: int) -> int:\n  19|         return value * 19 - 29  # spec: value * 28 - 32\n</file><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<edit path=\"pkg/units/uffnha.py\" lines=\"18-19\">    def mofssbvg(self, value: int) -> int:\n        return value * 28 - 32  # spec: value * 28 - 32</edit><|im_end|>\n<|im_start|>user\nRun <test/> to check whether your edit fixed the tests.\n\nCurrent `pkg/units/uffnha.py` (edit against THIS exact text):\n  1| from pkg.base import Bspzfgeq\n  2| \n  3| \n  4| def _hdecsjv(value: int) -> int:\n  5|     return value * 53 - 70  # spec: value * 53 - 70\n  6| \n  7| \n  8| class Clbsnhlu(Bspzfgeq):\n  9|     def mofssbvg(self, value: int) -> int:\n 10|         return _hdecsjv(value)\n 11| \n 12| \n 13| def _hsojmfo(value: int) -> int:\n 14|     return ...  # (elided from this automatic post-edit view; use <read path=\"pkg/units/uffnha.py\"/> to see this line)\n 15| \n 16| \n 17| class Ctunbboa(Bspzfgeq):\n 18|     def mofssbvg(self, value: int) -> int:\n 19|         return value * 28 - 32  # spec: value * 28 - 32\n 20| \n 21| \n 22| def _hhydobl(value: int) -> int:\n 23|     return value * 45 - 40  # spec: value * 45 - 40\n 24| \n 25| \n 26| class Cqrmsxgh(Bspzfgeq):\n 27|     def mofssbvg(self, value: int) -> int:\n 28|         return _hhydobl(value)<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<test/><|im_end|>\n<|im_start|>user\n<test_result>\nALL TESTS PASS.\n</test_result>\nTests pass \u2014 emit <done/> if the fix is complete.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<done/>",
+      "outcome_category": "A_read_then_repair"
+    },
+    {
+      "task": "nav_readreq_pilot_67017",
+      "family": 67017,
+      "split": "readreq_pilot",
+      "variant": "typed",
+      "arm": "push_insufficient",
+      "seed": 0,
+      "flavour": "hoisted",
+      "template": "delegate_xor_offset",
+      "condition": "untrained",
+      "adapter": null,
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "repair_correct": true,
+      "held_out_pass_unpurged": true,
+      "stale_bytecode_suspected": false,
+      "bailed": false,
+      "in_tokens": 1099,
+      "out_tokens": 204,
+      "turns": 4,
+      "n_reads": 2,
+      "n_lsp": 0,
+      "n_tests": 1,
+      "n_edits": 1,
+      "wall_sec": 80.655,
+      "server_latency_ms": 0,
+      "server_errors": [],
+      "semantic_supplied_path": "pkg/units/uusnrl.py",
+      "semantic_payload_sha256": "be8daa1af5ac57690f5401d36589437ead7a20ce8331aec12a23583a072e2004",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "helper": {
+        "name": "_hiygszy",
+        "def_line": 22,
+        "return_line": 23,
+        "return_text": "    return (value ^ 17) + 82  # spec: (value ^ 11) + 83",
+        "source": "def _hiygszy(value: int) -> int:\n    return (value ^ 17) + 82  # spec: (value ^ 11) + 83",
+        "multiplier": 11,
+        "buggy_multiplier": 17,
+        "offset": 83,
+        "buggy_offset": 82,
+        "delta": 6,
+        "offset_delta": -1,
+        "call_line": 28,
+        "flavour": "hoisted",
+        "gold_expression": "(value ^ 11) + 83",
+        "buggy_expression": "(value ^ 17) + 82",
+        "spec_comment": "  # spec: (value ^ 11) + 83",
+        "inline_repair": {
+          "path": "pkg/units/uusnrl.py",
+          "start": 28,
+          "end": 28,
+          "new_text": "        return (value ^ 11) + 83"
+        }
+      },
+      "ambiguity_n": 33,
+      "ambiguity_n_distinct_heldout": 15,
+      "blind_guess_ceiling": 0.090909,
+      "n_heldout_read_attempts": 0,
+      "heldout_read_attempts": [],
+      "n_post_edit_redactions": 0,
+      "n_model_test_purges": 3,
+      "reread_defining_path": "pkg/units/uusnrl.py",
+      "n_target_reads_total": 1,
+      "n_reads_after_span": 1,
+      "n_reads_after_span_whole": 0,
+      "n_reads_after_span_ranged": 1,
+      "read_after_span": true,
+      "first_found_defn_event_idx": null,
+      "n_defn_found": null,
+      "n_target_reads_before_first_edit": 1,
+      "n_target_reads_total_normalised": 1,
+      "n_target_greps_before_first_edit": 1,
+      "n_target_greps_total": 1,
+      "n_defn_blocked": 0,
+      "n_defn_blocked_before_first_edit": 0,
+      "n_probe_edits": 0,
+      "n_probe_edits_before_first_edit": 0,
+      "probe_edit": false,
+      "n_ranged_reads_covering_helper": 1,
+      "retrieved_missing_information": true,
+      "retrieved_missing_information_before_first_edit": true,
+      "sought_missing_information": true,
+      "sought_missing_information_before_first_edit": true,
+      "sought_component_read": true,
+      "sought_component_grep": true,
+      "sought_component_defn_blocked": false,
+      "sought_component_probe": false,
+      "read_ledger": [
+        {
+          "path": "pkg/units/uusnrl.py",
+          "frames": [
+            "_grep",
+            "run",
+            "main"
+          ],
+          "channel": "grep_scan",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uusnrl.py",
+          "frames": [
+            "_read_range",
+            "run",
+            "main"
+          ],
+          "channel": "model_read_ranged",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uusnrl.py",
+          "frames": [
+            "run",
+            "main",
+            "<module>"
+          ],
+          "channel": "edit_normalisation",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uusnrl.py",
+          "frames": [
+            "apply_line_edit",
+            "apply_line_edit",
+            "apply_line_edit"
+          ],
+          "channel": "other:apply_line_edit<-apply_line_edit",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uusnrl.py",
+          "frames": [
+            "_file_view",
+            "<genexpr>",
+            "deliver_turn"
+          ],
+          "channel": "post_edit_view",
+          "n_edits_before": 1
+        }
+      ],
+      "read_ledger_channels": [
+        "grep_scan",
+        "model_read_ranged",
+        "edit_normalisation",
+        "other:apply_line_edit<-apply_line_edit",
+        "post_edit_view"
+      ],
+      "first_target_read_channel": "grep_scan",
+      "hidden_line_in_context": true,
+      "gold_expression_in_context": true,
+      "hidden_line_channel": "grep_scan",
+      "hidden_line_before_first_edit": true,
+      "multiplier_literal_in_stream": true,
+      "buggy_multiplier_literal_in_stream": true,
+      "correct_file_localized_before_first_edit": true,
+      "first_edit_path": "pkg/units/uusnrl.py",
+      "wrong_file_edits": 0,
+      "semantic_then_target_read": true,
+      "generalization_pass": true,
+      "events": [
+        {
+          "tok": 11,
+          "type": "grep",
+          "n": 1,
+          "pat": "def _hiygszy",
+          "nhits": 1,
+          "paths": [
+            "pkg/units/uusnrl.py"
+          ],
+          "response_chars": 99
+        },
+        {
+          "tok": 36,
+          "type": "read",
+          "n": 2,
+          "path": "pkg/units/uusnrl.py",
+          "ranged": true,
+          "response_chars": 288
+        },
+        {
+          "tok": 190,
+          "type": "line_edit",
+          "path": "pkg/units/uusnrl.py",
+          "lines": "22-23",
+          "ok": true,
+          "info": "ok",
+          "fail_streak": 0,
+          "replace": "def _hiygszy(value: int) -> int:\n    return (value ^ 11) + 83",
+          "serialization_mode": "inline_exact_indentation",
+          "raw_body_sha256": "300782c518d856ef85beee0ff507f218ec0f528b39afa4c7d384e6d55f3cbcd0",
+          "applied_body_sha256": "300782c518d856ef85beee0ff507f218ec0f528b39afa4c7d384e6d55f3cbcd0"
+        },
+        {
+          "tok": 190,
+          "type": "turn",
+          "n": 3,
+          "via": "eos"
+        },
+        {
+          "tok": 197,
+          "type": "test",
+          "n": 1,
+          "resolved": true
+        },
+        {
+          "tok": 197,
+          "type": "turn",
+          "n": 4,
+          "via": "test"
+        },
+        {
+          "tok": 204,
+          "type": "done_attempt",
+          "prefix_sha256": "4ef460555e8c140c789aabd00b900497d18f95464bcf138c400c7fbaed819492",
+          "source": "model"
+        }
+      ],
+      "stream_tail": "<grep pat=\"def _hiygszy\"/><|im_end|>\n<|im_start|>user\n<grep pat=\"def _hiygszy\" hits=\"1\">\npkg/units/uusnrl.py:22: def _hiygszy(value: int) -> int:\n</grep><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<read path=\"pkg/units/uusnrl.py\" lines=\"22-28\"/><|im_end|>\n<|im_start|>user\n<file path=\"pkg/units/uusnrl.py\" lines=\"22-28\">\n  22| def _hiygszy(value: int) -> int:\n  23|     return (value ^ 17) + 82  # spec: (value ^ 11) + 83\n  24| \n  25| \n  26| class Ckfzmxnk(Bznhnplq):\n  27|     def mzmeybyb(self, value: int) -> int:\n  28|         return _hiygszy(value)\n</file><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\nThe comment on line 23 shows the spec: `(value ^ 11) + 83`. Let me verify: `4 ^ 11 = 15`, `15 + 83 = 98`. That matches the expected output. The current code uses `(value ^ 17) + 82` which gives `4 ^ 17 = 21`, `21 + 82 = 103`.\n\n<edit path=\"pkg/units/uusnrl.py\" lines=\"22-23\">def _hiygszy(value: int) -> int:\n    return (value ^ 11) + 83</edit><|im_end|>\n<|im_start|>user\nRun <test/> to check whether your edit fixed the tests.\n\nCurrent `pkg/units/uusnrl.py` (edit against THIS exact text):\n  1| from pkg.base import Bznhnplq\n  2| \n  3| \n  4| def _hgycfak(value: int) -> int:\n  5|     return (value ^ 23) + 88  # spec: (value ^ 23) + 88\n  6| \n  7| \n  8| class Cabqrpkh(Bznhnplq):\n  9|     def mzmeybyb(self, value: int) -> int:\n 10|         return _hgycfak(value)\n 11| \n 12| \n 13| def _hgavgpb(value: int) -> int:\n 14|     return (value ^ 38) + 65  # spec: (value ^ 38) + 65\n 15| \n 16| \n 17| class Cuftnwqb(Bznhnplq):\n 18|     def mzmeybyb(self, value: int) -> int:\n 19|         return _hgavgpb(value)\n 20| \n 21| \n 22| def _hiygszy(value: int) -> int:\n 23|     return (value ^ 11) + 83\n 24| \n 25| \n 26| class Ckfzmxnk(Bznhnplq):\n 27|     def mzmeybyb(self, value: int) -> int:\n 28|         return _hiygszy(value)<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<test/><|im_end|>\n<|im_start|>user\n<test_result>\nALL TESTS PASS.\n</test_result>\nTests pass \u2014 emit <done/> if the fix is complete.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<done/>",
+      "outcome_category": "A_read_then_repair"
+    },
+    {
+      "task": "nav_readreq_pilot_67017",
+      "family": 67017,
+      "split": "readreq_pilot",
+      "variant": "typed",
+      "arm": "push_sufficient",
+      "seed": 0,
+      "flavour": "inline",
+      "template": "delegate_xor_offset",
+      "condition": "untrained",
+      "adapter": null,
+      "resolved": true,
+      "visible_pass": true,
+      "held_out_pass": true,
+      "repair_correct": true,
+      "held_out_pass_unpurged": true,
+      "stale_bytecode_suspected": false,
+      "bailed": false,
+      "in_tokens": 1146,
+      "out_tokens": 226,
+      "turns": 4,
+      "n_reads": 2,
+      "n_lsp": 0,
+      "n_tests": 1,
+      "n_edits": 1,
+      "wall_sec": 88.411,
+      "server_latency_ms": 0,
+      "server_errors": [],
+      "semantic_supplied_path": "pkg/units/uusnrl.py",
+      "semantic_payload_sha256": "b0fa241c3416a560e3ab8a6355a4994f588a64e3790875afd5d2e4b2416f6a82",
+      "span_usability_check": {
+        "meta_path_is_target": true,
+        "lsp_path_is_target": true,
+        "lsp_span_equals_metadata": true,
+        "no_lsp_errors": true,
+        "gold_not_in_span": true,
+        "span_has_numbered_lines": true,
+        "span_names_target_path": true
+      },
+      "helper": {
+        "name": "_hiygszy",
+        "def_line": 22,
+        "return_line": 23,
+        "return_text": "    return (value ^ 17) + 82  # spec: (value ^ 11) + 83",
+        "source": "def _hiygszy(value: int) -> int:\n    return (value ^ 17) + 82  # spec: (value ^ 11) + 83",
+        "multiplier": 11,
+        "buggy_multiplier": 17,
+        "offset": 83,
+        "buggy_offset": 82,
+        "delta": 6,
+        "offset_delta": -1,
+        "call_line": 28,
+        "flavour": "inline",
+        "gold_expression": "(value ^ 11) + 83",
+        "buggy_expression": "(value ^ 17) + 82",
+        "spec_comment": "  # spec: (value ^ 11) + 83",
+        "inline_repair": {
+          "path": "pkg/units/uusnrl.py",
+          "start": 28,
+          "end": 28,
+          "new_text": "        return (value ^ 11) + 83"
+        }
+      },
+      "ambiguity_n": 33,
+      "ambiguity_n_distinct_heldout": 15,
+      "blind_guess_ceiling": 0.090909,
+      "n_heldout_read_attempts": 0,
+      "heldout_read_attempts": [],
+      "n_post_edit_redactions": 1,
+      "n_model_test_purges": 3,
+      "reread_defining_path": "pkg/units/uusnrl.py",
+      "n_target_reads_total": 1,
+      "n_reads_after_span": 1,
+      "n_reads_after_span_whole": 0,
+      "n_reads_after_span_ranged": 1,
+      "read_after_span": true,
+      "first_found_defn_event_idx": null,
+      "n_defn_found": null,
+      "n_target_reads_before_first_edit": 1,
+      "n_target_reads_total_normalised": 1,
+      "n_target_greps_before_first_edit": 0,
+      "n_target_greps_total": 0,
+      "n_defn_blocked": 0,
+      "n_defn_blocked_before_first_edit": 0,
+      "n_probe_edits": 0,
+      "n_probe_edits_before_first_edit": 0,
+      "probe_edit": false,
+      "n_ranged_reads_covering_helper": 0,
+      "retrieved_missing_information": true,
+      "retrieved_missing_information_before_first_edit": true,
+      "sought_missing_information": true,
+      "sought_missing_information_before_first_edit": true,
+      "sought_component_read": true,
+      "sought_component_grep": false,
+      "sought_component_defn_blocked": false,
+      "sought_component_probe": false,
+      "read_ledger": [
+        {
+          "path": "pkg/units/uusnrl.py",
+          "frames": [
+            "_read_range",
+            "run",
+            "main"
+          ],
+          "channel": "model_read_ranged",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uusnrl.py",
+          "frames": [
+            "_grep",
+            "run",
+            "main"
+          ],
+          "channel": "grep_scan",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uusnrl.py",
+          "frames": [
+            "run",
+            "main",
+            "<module>"
+          ],
+          "channel": "edit_normalisation",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uusnrl.py",
+          "frames": [
+            "apply_line_edit",
+            "apply_line_edit",
+            "apply_line_edit"
+          ],
+          "channel": "other:apply_line_edit<-apply_line_edit",
+          "n_edits_before": 0
+        },
+        {
+          "path": "pkg/units/uusnrl.py",
+          "frames": [
+            "_file_view",
+            "<genexpr>",
+            "deliver_turn"
+          ],
+          "channel": "post_edit_view",
+          "n_edits_before": 1
+        }
+      ],
+      "read_ledger_channels": [
+        "model_read_ranged",
+        "grep_scan",
+        "edit_normalisation",
+        "other:apply_line_edit<-apply_line_edit",
+        "post_edit_view"
+      ],
+      "first_target_read_channel": "model_read_ranged",
+      "hidden_line_in_context": true,
+      "gold_expression_in_context": true,
+      "hidden_line_channel": "model_read_ranged",
+      "hidden_line_before_first_edit": true,
+      "multiplier_literal_in_stream": true,
+      "buggy_multiplier_literal_in_stream": true,
+      "correct_file_localized_before_first_edit": true,
+      "first_edit_path": "pkg/units/uusnrl.py",
+      "wrong_file_edits": 0,
+      "semantic_then_target_read": true,
+      "generalization_pass": true,
+      "events": [
+        {
+          "tok": 21,
+          "type": "read",
+          "n": 1,
+          "path": "pkg/units/uusnrl.py",
+          "ranged": true,
+          "response_chars": 209
+        },
+        {
+          "tok": 33,
+          "type": "grep",
+          "n": 2,
+          "pat": "koylsa",
+          "nhits": 3,
+          "paths": [
+            "pkg/app.py",
+            "pkg/factory.py",
+            "pkg/factory.pyi"
+          ],
+          "response_chars": 219
+        },
+        {
+          "tok": 212,
+          "type": "line_edit",
+          "path": "pkg/units/uusnrl.py",
+          "lines": "27-28",
+          "ok": true,
+          "info": "ok",
+          "fail_streak": 0,
+          "replace": "    def mzmeybyb(self, value: int) -> int:\n        return (value ^ 11) + 83",
+          "serialization_mode": "inline_exact_indentation",
+          "raw_body_sha256": "ba3b4ad4942d094c8004e370931ad4c560741d3654496153745a8921d4443e89",
+          "applied_body_sha256": "ba3b4ad4942d094c8004e370931ad4c560741d3654496153745a8921d4443e89"
+        },
+        {
+          "tok": 212,
+          "type": "turn",
+          "n": 3,
+          "via": "eos"
+        },
+        {
+          "tok": 219,
+          "type": "test",
+          "n": 1,
+          "resolved": true
+        },
+        {
+          "tok": 219,
+          "type": "turn",
+          "n": 4,
+          "via": "test"
+        },
+        {
+          "tok": 226,
+          "type": "done_attempt",
+          "prefix_sha256": "c50aad9b53ce0d00e7c04f2f2a134da2bf5678aa2c7b9a4afa5674d72e0d0ee3",
+          "source": "model"
+        }
+      ],
+      "stream_tail": "<read path=\"pkg/units/uusnrl.py\" lines=\"25-30\"/><|im_end|>\n<|im_start|>user\n<file path=\"pkg/units/uusnrl.py\" lines=\"25-28\">\n  25| \n  26| class Ckfzmxnk(Bznhnplq):\n  27|     def mzmeybyb(self, value: int) -> int:\n  28|         return (value ^ 17) + 82  # spec: (value ^ 11) + 83\n</file><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<grep pat=\"koylsa\"/><|im_end|>\n<|im_start|>user\n<grep pat=\"koylsa\" hits=\"3\">\npkg/app.py:6: def execute(token: Literal[\"koylsa\"], value: int) -> int:\npkg/factory.py:19: \"koylsa\": Ckfzmxnk,\npkg/factory.pyi:42: def make(token: Literal[\"koylsa\"]) -> Ckfzmxnk: ...\n</grep><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\nThe comment in the source indicates the spec is `(value ^ 11) + 83`, but the code implements `(value ^ 17) + 82`. Let me verify: `execute('koylsa', 4)` should return 98.\n\nWith the current code: `(4 ^ 17) + 82 = 21 + 82 = 103` \u274c\nWith the spec: `(4 ^ 11) + 83 = 15 + 83 = 98` \u2713\n\n<edit path=\"pkg/units/uusnrl.py\" lines=\"27-28\">    def mzmeybyb(self, value: int) -> int:\n        return (value ^ 11) + 83</edit><|im_end|>\n<|im_start|>user\nRun <test/> to check whether your edit fixed the tests.\n\nCurrent `pkg/units/uusnrl.py` (edit against THIS exact text):\n  1| from pkg.base import Bznhnplq\n  2| \n  3| \n  4| def _hgycfak(value: int) -> int:\n  5|     return (value ^ 23) + 88  # spec: (value ^ 23) + 88\n  6| \n  7| \n  8| class Cabqrpkh(Bznhnplq):\n  9|     def mzmeybyb(self, value: int) -> int:\n 10|         return _hgycfak(value)\n 11| \n 12| \n 13| def _hgavgpb(value: int) -> int:\n 14|     return (value ^ 38) + 65  # spec: (value ^ 38) + 65\n 15| \n 16| \n 17| class Cuftnwqb(Bznhnplq):\n 18|     def mzmeybyb(self, value: int) -> int:\n 19|         return _hgavgpb(value)\n 20| \n 21| \n 22| def _hiygszy(value: int) -> int:\n 23|     return ...  # (elided from this automatic post-edit view; use <read path=\"pkg/units/uusnrl.py\"/> to see this line)\n 24| \n 25| \n 26| class Ckfzmxnk(Bznhnplq):\n 27|     def mzmeybyb(self, value: int) -> int:\n 28|         return (value ^ 11) + 83<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<test/><|im_end|>\n<|im_start|>user\n<test_result>\nALL TESTS PASS.\n</test_result>\nTests pass \u2014 emit <done/> if the fix is complete.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<done/>",
+      "outcome_category": "A_read_then_repair"
+    }
+  ]
+}

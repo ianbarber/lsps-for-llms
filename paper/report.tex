@@ -132,7 +132,9 @@ nothing. The compact span came from a static definition-span tool, not a
 live server. It cut total tokens 3.3--4.1x against whole-file retrieval
 and less against competent grep plus ranged reads, but only where it
 replaced the read. Pushing, instructing and self-election did not
-produce that replacement; training did. On twelve seeded defects, a
+produce that replacement; training did, and produced a conditional
+policy rather than a blanket one --- the trained model still read every
+time the span did not contain the defect. On twelve seeded defects, a
 submission-boundary checker moved accepted-correct outcomes from 1/12 to
 11/12; the same checker after every edit changed nothing, on a channel
 that fired in one of twelve.
@@ -366,6 +368,50 @@ reproduced it: reread 12/12 untrained against 1/12 trained (11 removed,
 saving of 1.725x, and held-out pass 12/12 to 11/12
 (\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c35}{C35}).
 
+What the training produced is a conditional policy, not suppression.
+Twelve further instances hoist each override's arithmetic into a
+module-level helper, so the span live Pyrefly returns for the call site
+is the complete definition of the method that binds and the bug sits
+outside it; a byte-paired twin differing in one line restores
+sufficiency, and a third arm leaves the repo identical and delivers a
+second genuine lookup at the helper
+(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c36}{C36}):
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2000}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2667}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2667}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2667}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Reads after span
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Span insufficient
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Span sufficient
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Helper also delivered
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Untrained & 12/12 & 12/12 & 11/12 \\
+Trained & 12/12 & 2/12 & 0/12 \\
+\end{longtable}
+}
+
+Both conditions repaired 12/12 in every arm, visible and held-out, so
+this is retrieval behaviour at fixed correctness. The trained model read
+a mean of 1.00 times where reading was required against the untrained
+model's 3.42, and 0.17 and 0.00 times where it was not against 1.58 and
+1.75; mean input tokens were lower in every arm (1,224 against 1,490;
+924 against 1,158; 950 against 1,181). An adversary over seventeen
+one-parameter repair forms found none that reached held-out without
+retrieval, and the harness's post-edit file view was redacted because it
+would otherwise have handed over the hidden line with no read.
+
 \subsubsection{3.3 Does the moment the diagnostic arrives change the
 outcome?}\label{does-the-moment-the-diagnostic-arrives-change-the-outcome}
 
@@ -470,8 +516,14 @@ ratios are measured against was rare there, so the achievable regime is
 the smaller one. Relabel training removed the reread where instruction
 and election could not, on one model at one seed and again on a
 pre-registered confirmation set built from templates the training never
-saw; what it trained is blanket suppression of the post-span read,
-untested where the span is insufficient.
+saw. What it trained is conditional rather than blanket: on twelve
+instances whose delivered span is genuine but does not contain the
+defect, the trained model read every time, and once rather than the
+untrained model's three times, while reading on two of twelve when the
+span sufficed and none of twelve when the missing definition was itself
+delivered. Correctness sat at ceiling in all six cells, so what training
+changed is when the agent retrieves, not whether it succeeds --- and it
+learned that from demonstrations none of which required a read.
 
 \subsubsection{4.3 Timing}\label{timing}
 
@@ -533,10 +585,12 @@ Wire a hook & Gate submission on the checker, requiring repair and
 retest before acceptance; after-every-edit firing is untested
 (\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c32}{C32})
 & Your checker covers behavior, or your model edits repeatedly \\
-Fine-tune & Fine-tune only with weights you control; it buys blanket
-suppression of the post-span read, not a conditional policy
-(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c33}{C33})
-& Read-required boundaries are trained \\
+Fine-tune & Fine-tune only with weights you control; it buys a
+conditional policy --- the trained model still read every time the span
+did not contain the defect, and once rather than three times
+(\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c33}{C33},
+\href{https://github.com/ianbarber/lsps-for-llms/blob/main/evidence/claim_ledger.md\#c36}{C36})
+& Your insufficiency looks unlike a delegation \\
 \end{longtable}
 }
 
@@ -557,11 +611,14 @@ resolution
 The hidden-type effect is one apparatus at one model: fifteen
 constructed tasks whose type is redacted rather than hidden as real code
 hides types, so transfer to generated stubs, vendored packages or
-compiled boundaries is untested. A read-required boundary case, absent
-from training, would test whether blanket suppression can be
-conditional. Repeated in-loop edits would exercise the after-every-edit
-channel. Rejection precision needs a gate run over drafts other than the
-defect's own gold.
+compiled boundaries is untested. The conditional retrieval policy is
+established against one form of insufficiency, a delegation to a hoisted
+helper in the same module; whether it holds when the missing information
+sits behind an import, a base class or a generated stub is untested, and
+a policy that keys on the span's shape rather than on its sufficiency
+would fail there. Repeated in-loop edits would exercise the
+after-every-edit channel. Rejection precision needs a gate run over
+drafts other than the defect's own gold.
 
 Real-repository substitution frequency and live-server latency are
 unmeasured; six four-seed files lack their seed-2/3 shards and no
