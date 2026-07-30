@@ -3,24 +3,25 @@
 Experiments on whether language-server tooling makes a coding agent better, measured against a
 capable text baseline of grep, ranged reads and a shell.
 
-**The short answer.** A language server helped where it changed what the agent did. Making one
-available changed nothing on its own, and each operation needed its own mechanism before it paid.
-Correct, visible type annotations helped regardless of tooling; they are what the agent navigated
-on when it had them.
-Go-to-definition earned its place only where working out a receiver's type meant leaving the source
-already in front of the agent, and then only when the agent was told to use it. A compact
-definition span cost less than reading the file only when it replaced the read, which mostly it did
-not until the model was fine-tuned. A type checker paid off as a blocking gate at the end of the
-turn, and the gain came from refusing the submission rather than from the moment the diagnostic
-arrived; a live channel that interrupted the agent and told it to fix each diagnostic on arrival
-did worse than saying nothing.
+**The short answer.** Making a language server available changed nothing on its own: agents largely
+declined the operations they were offered, and the gains came from a prompt, from fine-tuning, or
+from a gate that blocked the work.
 
-Installing the tool is not the intervention. When trying any of this, measure whether the service
-changes what the agent does, not how often it gets called.
+Correct, visible type annotations helped regardless of tooling, and are what the agent navigated on
+when it had them. Go-to-definition helped only where working out a receiver's type meant leaving the
+source already in front of the agent, and only when the agent was told to use it. A compact
+definition span cost less than reading the file when it replaced that read, which it mostly did not
+until the model was fine-tuned. A type checker worked best as a blocking gate at the end of the
+turn, where the gain came from refusing the submission rather than from the moment the diagnostic
+arrived. A live channel that interrupted the agent and told it to fix each diagnostic on arrival did
+worse than no checker at all.
+
+If you try any of this, measure whether the service changes what the agent does. Invocation counts
+alone will not show it.
 
 **Read the report:** [**REPORT.md**](REPORT.md), or the same thing typeset as a preprint,
-[**paper/report.pdf**](paper/report.pdf). What we asked, how we tested it, what happened, and what
-follows for someone using a coding agent. Everything below is about the repository.
+[**paper/report.pdf**](paper/report.pdf). It covers the method, the results and what they mean for
+someone using a coding agent. Everything below is about the repository.
 
 ## Where the evidence lives
 
@@ -31,8 +32,8 @@ follows for someone using a coding agent. Everything below is about the reposito
 | [`evidence/protocols.md`](evidence/protocols.md) | Experiment protocols, stopping gates and execution status. |
 | [`evidence/manifest.json`](evidence/manifest.json) | Hashes, model metadata, integration modes and provenance warnings. |
 
-The ledger is the place to look before trusting a number. It records what each claim is actually
-rated as supporting, and it keeps rows for results that turned out to be wrong.
+Check the ledger before trusting a number. It records what each claim is rated as supporting, and
+keeps rows for results that turned out to be wrong.
 
 ## Reproduce the analysis
 

@@ -9,9 +9,9 @@ moment the report changes. Run `make` after editing it.
 
 | File | Role |
 |---|---|
-| `Makefile` | One-command build: `pandoc` (Markdown→LaTeX) then `tectonic` (LaTeX→PDF). |
+| `Makefile` | One-command build: `pandoc` (Markdown to LaTeX) then `tectonic` (LaTeX to PDF). |
 | `arxiv.sty` | Vendored arXiv single-column preprint style (George Kour, NeurIPS-based). Self-contained; no network needed for the style. |
-| `report-filters.lua` | Pandoc Lua filter: title from H1, `## Abstract`→`\begin{abstract}`, rewrites in-repo links to GitHub URLs, and converts the links listed in `LINK_CITE` into real `\citep` citations. A link whose URL is not in that table stays a bare hyperlink in the PDF, so add new citations there as well as to the bibliography. |
+| `report-filters.lua` | Pandoc Lua filter: title from H1, `## Abstract` becomes `\begin{abstract}`, rewrites in-repo links to GitHub URLs, and converts the links listed in `LINK_CITE` into real `\citep` citations. A link whose URL is not in that table stays a bare hyperlink in the PDF, so add new citations there as well as to the bibliography. |
 | `preamble.tex` | LaTeX injected into pandoc's template: loads `arxiv.sty` + `natbib`, maps Unicode glyphs, shrinks/wraps wide tables. |
 | `references.tex` | Emits the `References` section (`\nocite{*}` + `natbib`). |
 | `metadata.yaml` | Author, date, link colors. (Title is auto-taken from the report H1.) |
@@ -73,16 +73,16 @@ the committed `report.tex`.
 - **Unicode.** tectonic runs XeTeX with the Times text font, which lacks a few
   glyphs; `preamble.tex` maps `→ — – … −` to LaTeX equivalents (zero
   "Missing character" warnings).
-- **Bibliography.** `docs/bibliography_efficiency.bib` is wired in via `natbib`.
-  The current draft cites related work with inline hyperlinks, so `references.tex`
-  uses `\nocite{*}` to list all entries. **To switch to real citations:** in
-  `REPORT.md` replace an inline link, e.g. `[Typed Holes](https://arxiv.org/abs/2409.00921)`,
-  with plain text, cite it with `\citep{blinn2024typedholes}` (keys are in the
-  `.bib`), and drop `\nocite{*}` from `references.tex`.
+- **Bibliography.** `docs/bibliography_efficiency.bib` is wired in via `natbib`,
+  and the References list holds only works the report actually cites. `REPORT.md`
+  writes each citation as an ordinary Markdown link so it stays clickable on
+  GitHub; `report-filters.lua` looks the URL up in `LINK_CITE`, keeps the visible
+  name and appends a real `\citep`, discarding the hyperlink. To add one, put the
+  entry in the `.bib` and the URL in `LINK_CITE`. Miss the second step and the
+  link renders as a bare URL in the PDF while looking cited on GitHub.
 
 ## Known manual step
 
-None for the build itself. For a **camera-ready** pass you would: convert the
-inline related-work hyperlinks to `\citep{…}` and remove `\nocite{*}`; verify the
-DAgger (2011) and other flagged `.bib` entries (see the notes in the `.bib`).
-The author block in `metadata.yaml` carries no affiliation, which is deliberate.
+None for the build itself. For a **camera-ready** pass, verify the DAgger (2011)
+and other flagged `.bib` entries (see the notes in the `.bib`). The author block
+in `metadata.yaml` carries no affiliation, which is deliberate.
