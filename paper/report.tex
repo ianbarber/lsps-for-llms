@@ -281,7 +281,7 @@ go-to-definition resolved 14 unprompted and 15 prompted, and stayed at
 only a type-aware server can resolve the receiver statically. The agent
 grepped about 0.3 times per task, read the type wherever it appeared,
 and opened the buggy override first. The type being present and correct
-in the source is what carries resolution; the server only queries it.
+in the code is what carries resolution; the server only queries it.
 
 On matched successes, cost was flat too: 1.03 times text search when
 lookup was merely available, 0.96 when prompted, 0.94 to 1.06 across
