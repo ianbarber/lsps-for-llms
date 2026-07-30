@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "git_revision_at_generation": "e63a21c8d7e05085f819ad201414e08744a07865",
+  "git_revision_at_generation": "4739014db28b746dbf58ab499a19fc2cd4bc60fa",
   "git_worktree_dirty_at_generation": true,
   "platform_at_generation": "Linux-6.17.0-1026-nvidia-aarch64-with-glibc2.39",
   "results": [
@@ -2889,7 +2889,8 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
-        "scaffold/stream_agent.py"
+        "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py"
       ]
     },
     {
@@ -3159,7 +3160,10 @@
         "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
         "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
-      }
+      },
+      "current_protocol_source_mismatches": [
+        "scripts/validate_pyrefly_lsp.py"
+      ]
     },
     {
       "path": "runs/confirmation/navigation_v2_reread_confirmation_trained.json",
@@ -3251,7 +3255,10 @@
         "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
         "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
-      }
+      },
+      "current_protocol_source_mismatches": [
+        "scripts/validate_pyrefly_lsp.py"
+      ]
     },
     {
       "path": "runs/pilot/checker_case_series_qwen36_27b_6a9e13bd.json",
@@ -3935,7 +3942,8 @@
         "scripts/experiments/navigation_tasks.py",
         "scripts/experiments/run_navigation.py",
         "scripts/analysis/analyze_navigation.py",
-        "scaffold/stream_agent.py"
+        "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py"
       ]
     },
     {
@@ -3995,7 +4003,8 @@
         "scripts/experiments/navigation_tasks.py",
         "scripts/experiments/run_navigation.py",
         "scripts/analysis/analyze_navigation.py",
-        "scaffold/stream_agent.py"
+        "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py"
       ]
     },
     {
@@ -4055,7 +4064,8 @@
         "scripts/experiments/navigation_tasks.py",
         "scripts/experiments/run_navigation.py",
         "scripts/analysis/analyze_navigation.py",
-        "scaffold/stream_agent.py"
+        "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py"
       ]
     },
     {
@@ -4115,7 +4125,8 @@
         "scripts/experiments/navigation_tasks.py",
         "scripts/experiments/run_navigation.py",
         "scripts/analysis/analyze_navigation.py",
-        "scaffold/stream_agent.py"
+        "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py"
       ]
     },
     {
@@ -4181,6 +4192,7 @@
         "scripts/run_navigation_pilot.sh",
         "scripts/run_navigation_confirmation.sh",
         "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py",
         "evidence/protocols.md"
       ]
     },
@@ -4244,6 +4256,7 @@
       "current_protocol_source_mismatches": [
         "scripts/analysis/analyze_navigation.py",
         "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py",
         "evidence/protocols.md"
       ]
     },
@@ -4307,6 +4320,7 @@
       "current_protocol_source_mismatches": [
         "scripts/analysis/analyze_navigation.py",
         "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py",
         "evidence/protocols.md"
       ]
     },
@@ -4370,6 +4384,7 @@
       "current_protocol_source_mismatches": [
         "scripts/analysis/analyze_navigation.py",
         "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py",
         "evidence/protocols.md"
       ]
     },
@@ -4438,6 +4453,7 @@
       "current_protocol_source_mismatches": [
         "scripts/analysis/analyze_navigation.py",
         "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py",
         "evidence/protocols.md"
       ]
     },
@@ -4501,6 +4517,7 @@
       "current_protocol_source_mismatches": [
         "scripts/analysis/analyze_navigation.py",
         "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py",
         "evidence/protocols.md"
       ]
     },
@@ -4564,6 +4581,7 @@
       "current_protocol_source_mismatches": [
         "scripts/analysis/analyze_navigation.py",
         "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py",
         "evidence/protocols.md"
       ]
     },
@@ -4750,7 +4768,10 @@
         "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
         "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
-      }
+      },
+      "current_protocol_source_mismatches": [
+        "scripts/validate_pyrefly_lsp.py"
+      ]
     },
     {
       "path": "runs/pilot/navigation_v2_reread_qwen36_27b_apparatus.json",
@@ -4806,7 +4827,8 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
-        "scaffold/stream_agent.py"
+        "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py"
       ]
     },
     {
@@ -4866,7 +4888,8 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
-        "scaffold/stream_agent.py"
+        "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py"
       ]
     },
     {
@@ -4961,7 +4984,8 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
-        "scaffold/stream_agent.py"
+        "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py"
       ]
     },
     {
@@ -5027,6 +5051,7 @@
         "scripts/run_navigation_pilot.sh",
         "scripts/run_navigation_confirmation.sh",
         "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py",
         "evidence/protocols.md"
       ]
     },
@@ -5139,6 +5164,24 @@
       },
       "current_protocol_source_mismatches": [
         "scaffold/stream_agent.py"
+      ]
+    },
+    {
+      "path": "runs/protocol/ast_resolver_vs_pyrefly_agreement.json",
+      "sha256": "f268192596acda3b50ff97a3f23552164be7aae881c1e5e499505969dfd914f4",
+      "bytes": 1897,
+      "model": null,
+      "temperature": null,
+      "model_meta": null,
+      "pyrefly": "pyrefly 1.0.0",
+      "config": {},
+      "declared_seeds": null,
+      "actual_seeds": [],
+      "n_rows": 12,
+      "integration_mode": "static_ast_definition_retrieval",
+      "artifact_role": "ast_resolver_vs_live_pyrefly_agreement",
+      "source_run_files": [
+        "runs/protocol/ast_resolver_vs_pyrefly_agreement.json"
       ]
     },
     {
@@ -5511,7 +5554,8 @@
         "scripts/analysis/analyze_navigation.py",
         "scripts/run_navigation_pilot.sh",
         "scripts/run_navigation_confirmation.sh",
-        "scaffold/stream_agent.py"
+        "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py"
       ]
     },
     {
@@ -5642,7 +5686,8 @@
         "scripts/analysis/analyze_navigation.py",
         "scripts/run_navigation_pilot.sh",
         "scripts/run_navigation_confirmation.sh",
-        "scaffold/stream_agent.py"
+        "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py"
       ]
     },
     {
@@ -5700,7 +5745,8 @@
         "scripts/analysis/analyze_navigation.py",
         "scripts/run_navigation_pilot.sh",
         "scripts/run_navigation_confirmation.sh",
-        "scaffold/stream_agent.py"
+        "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py"
       ]
     },
     {
@@ -5772,6 +5818,7 @@
       },
       "current_protocol_source_mismatches": [
         "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py",
         "evidence/protocols.md"
       ]
     },
@@ -5841,7 +5888,10 @@
         "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
         "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
-      }
+      },
+      "current_protocol_source_mismatches": [
+        "scripts/validate_pyrefly_lsp.py"
+      ]
     },
     {
       "path": "runs/protocol/navigation_v2_confirmation_validation.json",
@@ -5912,6 +5962,7 @@
       },
       "current_protocol_source_mismatches": [
         "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py",
         "evidence/protocols.md"
       ]
     },
@@ -5967,6 +6018,7 @@
       },
       "current_protocol_source_mismatches": [
         "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py",
         "evidence/protocols.md"
       ]
     },
@@ -6031,7 +6083,10 @@
         "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
         "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
-      }
+      },
+      "current_protocol_source_mismatches": [
+        "scripts/validate_pyrefly_lsp.py"
+      ]
     },
     {
       "path": "runs/protocol/navigation_v2_readreq_validation.json",
@@ -6112,7 +6167,10 @@
         "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
         "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
-      }
+      },
+      "current_protocol_source_mismatches": [
+        "scripts/validate_pyrefly_lsp.py"
+      ]
     },
     {
       "path": "runs/protocol/navigation_v2_substrain_validation.json",
@@ -6181,7 +6239,8 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
-        "scaffold/stream_agent.py"
+        "scaffold/stream_agent.py",
+        "scripts/validate_pyrefly_lsp.py"
       ]
     },
     {
@@ -6304,7 +6363,10 @@
         "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
         "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
-      }
+      },
+      "current_protocol_source_mismatches": [
+        "scripts/validate_pyrefly_lsp.py"
+      ]
     },
     {
       "path": "runs/readreq/navigation_v2_c36_main_untrained.json",
@@ -6363,7 +6425,10 @@
         "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
         "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
-      }
+      },
+      "current_protocol_source_mismatches": [
+        "scripts/validate_pyrefly_lsp.py"
+      ]
     },
     {
       "path": "runs/readreq/navigation_v2_c36_pilot_untrained.json",
@@ -6422,7 +6487,10 @@
         "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
         "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
-      }
+      },
+      "current_protocol_source_mismatches": [
+        "scripts/validate_pyrefly_lsp.py"
+      ]
     },
     {
       "path": "runs/realbench/candidates.json",
@@ -6981,7 +7049,7 @@
     },
     {
       "path": "scripts/analysis/reproduce_all.py",
-      "sha256": "c9bda52879cde997af45056ec40c8dbac9d71a7ba8929f1a242aa407be6834b8"
+      "sha256": "8174ac957dec84c56a5952e7316cb8aac352a45fed1019098f13da422f04e235"
     },
     {
       "path": "scripts/analysis/stats.py",
@@ -7043,7 +7111,7 @@
     },
     {
       "path": "scripts/validate_pyrefly_lsp.py",
-      "sha256": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81"
+      "sha256": "d8937c955fa1d0d8daf80cf9d06708a21628c5389781ae9da41ce43c6859f967"
     },
     {
       "path": "scripts/synth_tasks_authoring.py",

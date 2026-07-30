@@ -1,0 +1,85 @@
+{
+  "kind": "ast_resolver_vs_live_pyrefly_agreement",
+  "question": "does scaffold/mock_env.py::MultiFileEnv.goto_definition, the static AST resolver backing <defn>, return the same definition as a live `pyrefly lsp` daemon answering textDocument/definition at a use site?",
+  "criterion": "same file AND the LSP defining line falls inside the AST span",
+  "pyrefly": "pyrefly 1.0.0",
+  "n": 12,
+  "agree": 12,
+  "disagree": 0,
+  "lsp_error": 0,
+  "rows": [
+    {
+      "task": "effic_account_defn",
+      "symbol": "Account",
+      "status": "AGREE",
+      "detail": ""
+    },
+    {
+      "task": "effic_transfer_defn",
+      "symbol": "transfer",
+      "status": "AGREE",
+      "detail": ""
+    },
+    {
+      "task": "effic_queue_defn",
+      "symbol": "WorkQueue",
+      "status": "AGREE",
+      "detail": ""
+    },
+    {
+      "task": "effic_span_defn",
+      "symbol": "Span",
+      "status": "AGREE",
+      "detail": ""
+    },
+    {
+      "task": "effic_store_defn",
+      "symbol": "Store",
+      "status": "AGREE",
+      "detail": ""
+    },
+    {
+      "task": "effic_point_defn",
+      "symbol": "make_point",
+      "status": "AGREE",
+      "detail": ""
+    },
+    {
+      "task": "effic_config_defn",
+      "symbol": "read_setting",
+      "status": "AGREE",
+      "detail": ""
+    },
+    {
+      "task": "effic_cache_defn",
+      "symbol": "Cache",
+      "status": "AGREE",
+      "detail": ""
+    },
+    {
+      "task": "effic_matrix_defn",
+      "symbol": "cell",
+      "status": "AGREE",
+      "detail": ""
+    },
+    {
+      "task": "effic_lexer_defn",
+      "symbol": "Lexer",
+      "status": "AGREE",
+      "detail": ""
+    },
+    {
+      "task": "effic_clamp_defn",
+      "symbol": "clamp",
+      "status": "AGREE",
+      "detail": ""
+    },
+    {
+      "task": "effic_color_defn",
+      "symbol": "pack",
+      "status": "AGREE",
+      "detail": ""
+    }
+  ],
+  "passed": true
+}

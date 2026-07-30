@@ -197,13 +197,17 @@ Most experiments ran in a custom harness: a model drives a fixed loop of
 six actions over a Python workspace (grep, ranged read, whole-file read,
 line edit, run tests, submit), and each arm adds or withholds one
 semantic operation. The definition operation in the retrieval
-experiments is a static AST resolver, not a live language server; live
-Pyrefly served the dispatch lookup arms and one 7B run. A case study ran
-the off-the-shelf shell agent mini-swe-agent with Claude Sonnet 4.5 on 3
-SWE-bench tasks (sympy, astropy, sphinx) with an AST-backed definition
-command, one seed and a 60-step cap. Nothing was tested through an MCP
-server, skill or editor plugin, so these experiments compare operations,
-not delivery surfaces.
+experiments is a static AST resolver rather than a live language server,
+and we checked that this does not matter: on the 12 synthetic symbols a
+live Pyrefly daemon answering \texttt{textDocument/definition} at the
+use site agrees with the resolver 12 times out of 12, and on 22 paired
+real-library cells the two backends produce the same outcome and
+byte-identical token counts on every cell. Live Pyrefly also served the
+dispatch lookup arms directly. A case study ran the off-the-shelf shell
+agent mini-swe-agent with Claude Sonnet 4.5 on 3 SWE-bench tasks (sympy,
+astropy, sphinx) with an AST-backed definition command, one seed and a
+60-step cap. Nothing was tested through an MCP server, skill or editor
+plugin, so these experiments compare operations, not delivery surfaces.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}

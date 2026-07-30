@@ -339,6 +339,33 @@ def main():
     print()
     print(f"SUMMARY: {agree}/{len(TASKS)} agree, "
           f"{disagree} disagree, {lsperr} lsp-error")
+
+    # Emit a committed artifact. Without this the agreement check exists only as
+    # console output, so the claim that the AST resolver stands in for a live
+    # server is unreproducible from the repository.
+    out = os.environ.get("VALIDATE_PYREFLY_OUT")
+    if out:
+        version = subprocess.run([pyrefly_or_name(), "--version"],
+                                 capture_output=True, text=True).stdout.strip()
+        payload = {
+            "kind": "ast_resolver_vs_live_pyrefly_agreement",
+            "question": ("does scaffold/mock_env.py::MultiFileEnv.goto_definition, the static AST "
+                         "resolver backing <defn>, return the same definition as a live "
+                         "`pyrefly lsp` daemon answering textDocument/definition at a use site?"),
+            "criterion": ("same file AND the LSP defining line falls inside the AST span"),
+            "pyrefly": version,
+            "n": len(TASKS),
+            "agree": agree, "disagree": disagree, "lsp_error": lsperr,
+            "rows": [{"task": n, "symbol": sy, "status": st, "detail": d}
+                     for n, sy, st, d in rows],
+            "passed": disagree == 0 and lsperr == 0,
+        }
+        os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
+        with open(out, "w") as f:
+            json.dump(payload, f, indent=2)
+            f.write("\n")
+        print(f"-> {out}")
+
     return 0 if lsperr == 0 and disagree == 0 else (1 if agree == 0 else 0)
 
 

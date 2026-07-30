@@ -83,6 +83,7 @@ def main() -> None:
             "--validation-out", str(Path(tmp) / "retrieval_validation.json"))
         run(py, "scripts/experiments/checker_hidden.py",
             str(Path(tmp) / "checker_hidden.json"))
+    run(py, "scripts/analysis/stats_delivery.py")
     run(py, "scripts/build_manifest.py", "--check")
     run(py, "-m", "pytest", "-q")
     print("\nAll fast analyses and artifact checks passed.")
