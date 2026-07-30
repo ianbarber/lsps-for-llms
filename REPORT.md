@@ -8,9 +8,7 @@ Making the tool available rarely helped by itself. Go-to-definition changed noth
 
 Compact definition spans cost less than reading the file, 3.35x to 4.12x less than a whole-file read and 1.30x less than grep with ranged reads, but only when the span replaces the read. Usually it did not. Handed a definition, models opened the file anyway on 35 of 36 instances, and neither telling them the span was complete nor letting them ask for it themselves changed that. Training did. After 39 demonstrations a 27B model stopped rereading, and what it learned was conditional: where the span lacked the defect it still went looking every time, and once where the untrained model went three times.
 
-Running a type checker at the end of the agent's turn, as a gate that rejects a defective submission and asks for a repair, took accepted correct outcomes from 1 of 12 to 11 of 12 on seeded defects. The same diagnostic delivered during editing changed nothing, on a channel the model exercised in 1 of 12 tasks.
-
-Installing the server is not the intervention.
+Running a type checker at the end of the agent's turn, as a gate that rejects a defective submission and asks for a repair, took accepted correct outcomes from 1 of 12 to 11 of 12 on seeded defects. The same diagnostic delivered during editing changed nothing, on a channel the model exercised in 1 of 12 tasks. Across all three services the benefit tracked whether the agent's behaviour changed, and making the tool available did not by itself change it.
 
 ## Introduction
 
