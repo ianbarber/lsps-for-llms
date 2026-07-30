@@ -23,9 +23,13 @@ TECTONIC ?= tectonic
 
 # --columns=72 (pandoc default) also drives table-width detection: wide tables
 # get proportional wrapping p-columns, so they fit \textwidth.
+#
+# +lists_without_preceding_blankline matches GitHub. Plain `markdown` needs a
+# blank line above a list; GitHub does not, so a list written without one
+# renders on GitHub and comes out as literal asterisks in the PDF.
 PANDOC_FLAGS := \
   --standalone \
-  --from=markdown \
+  --from=markdown+lists_without_preceding_blankline \
   --to=latex \
   --no-highlight \
   --columns=72 \
