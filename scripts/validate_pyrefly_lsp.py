@@ -13,9 +13,13 @@ For each of the 12 `effic` task symbols we:
   6. compare: SAME file AND the LSP range's defining line falls inside the AST
      span (overlap). Record agree / disagree / lsp-error.
 
-DEADLOCK GOTCHA: concurrent pyrefly daemons have deadlocked in this environment.
-Runs are strictly sequential, and the client terminates only the daemon it owns.
-Every JSON-RPC read has a generous timeout so a hang fails loudly.
+DEADLOCK GOTCHA: concurrent pyrefly daemons have deadlocked in this environment,
+so tasks run strictly sequentially. Every JSON-RPC read has a generous timeout so a
+hang fails loudly.
+
+CAUTION: after each task this script runs `pkill -9 -f "pyrefly lsp"`, which kills
+EVERY pyrefly language-server process on the machine, not only the one it started.
+Do not run it alongside other work that depends on a pyrefly daemon.
 
 Run:
   HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \

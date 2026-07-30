@@ -8,6 +8,6 @@
   `syntax_gate`, `rich_signal`; plus SFT label-mask capture (`sft_input_ids`/
   `sft_labels`, observation tokens masked).
 - `mock_env.py` — single-file task environment with the real Pyrefly checker
-  (apply-or-reject line edits, behavioural tests, rework accounting). NOTE: the
-  pyrefly binary path is currently hardcoded near the top — point it at your own
-  pyrefly install to run.
+  (apply-or-reject line edits, behavioural tests, rework accounting). The pyrefly
+  binary is discovered by `scaffold/tooling.py`, which checks `STREAMS_PYREFLY`,
+  `PYREFLY_BIN`, `PATH`, `.venv/bin` and `.venv-streams/bin`.

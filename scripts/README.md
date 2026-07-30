@@ -1,53 +1,25 @@
 # scripts/
 
-The fast artifact command is:
+What lives where. Findings are in [`REPORT.md`](../REPORT.md); which artifact backs which claim is in
+[`evidence/claim_ledger.md`](../evidence/claim_ledger.md); the commands to run things are in the
+[top-level README](../README.md).
 
-```bash
-python3 scripts/analysis/reproduce_all.py
-```
+| Path | Purpose |
+|---|---|
+| `analysis/` | Analyzers and reproducers. `reproduce_all.py` is the fast no-model entry point |
+| `experiments/` | Task generators and experiment drivers for navigation, substitution, retrieval and the checker |
+| `realbench/` | Real-repository scanning and the dispatch ladder |
+| `run_*.sh` | Local-model drivers. One experiment each, GPU or API required |
+| `synth_tasks_*.py` | Task-suite generators |
+| `build_manifest.py` | Records hashes, configs, seeds and provenance into `evidence/manifest.json` |
+| `validate_pyrefly_lsp.py` | Checks the AST resolver against a live pyrefly daemon. Kills every pyrefly process on the machine when it finishes |
 
-It makes no model/API calls. It verifies the evidence manifest, reruns the historical analyzers and
-task-level reanalysis, audits the checker artifacts, and revalidates the navigation manipulation splits.
+Conventions worth knowing before you add anything:
 
-## New causal protocols
-
-- `experiments/navigation_tasks.py` generates deterministic typed/erased stub pairs over byte-identical
-  runtime code and enforces all-key contract, type-cleanliness, widening, gold, leakage, override-count,
-  and strict live-Pyrefly manipulation gates.
-- `experiments/run_navigation.py` runs the core automatic-result cells, the metadata-supplied buggy-span
-  actionability control, and typed deployment/election cells, recording localization, substitution, tokens,
-  calls, turns, and latency.
-- `experiments/diagnostics.py` provides uncapped structured, target-scoped Pyrefly diagnostic deltas.
-- `experiments/checker_paired.py` generates or imports frozen natural drafts, then forks identical control,
-  coherent-patch diagnostic, gate, and noisy checker revisions.
-- `run_navigation_pilot.sh`, `run_navigation_confirmation.sh`, and `run_checker_paired.sh` are separate
-  local-model drivers. The confirmation script is intentionally not part of fast reproduction.
-
-## Historical suites and analyzers
-
-- `synth_tasks_effic*.py`, `synth_mf.py`, `sft_lora.py`, and `grpo_cost.py` implement the controlled
-  whole-file versus compact-definition retrieval and policy-training studies.
-- `realbench/dispatch_tasks.py` and `realbench/local_dispatch.py` implement the historical leaky dispatch
-  suite. It is preserved but no longer treated as a valid typed/erased causal experiment.
-- `synth_tasks_authoring.py` implements the historical unpaired authoring suite; its after-every-edit arm
-  is retained only as a noisy integration baseline.
-- `synth_tasks_gapd2.py` and `synth_tasks_runtime.py` provide the checker-inference and execution ceilings.
-- `analysis/stats.py` reproduces the 7B retrieval/training tables.
-- `analysis/effic_real_stats.py` handles local and API schemas, drops sign-test ties, and reports task
-  direction; `analysis/task_level_effects.py` averages seeds within task and bootstraps tasks.
-- `analysis/analyze_dispatch.py`, `analyze_authoring.py`, `analyze_inference.py`, and
-  `../analyze_runtime.py` reproduce scoped historical observations.
-- `analysis/analyze_navigation.py` implements paired task effects and the preregistered 0.90–1.10
-  task-weighted token-ratio equivalence test. `analyze_checker_paired.py` separates coherent-draft revision
-  efficacy from end-to-end yield over all natural drafts and includes task-weighted total draft-plus-revision
-  cost per accepted correct patch.
-
-## Drivers and tools
-
-Every `run_*.sh` sources `common.sh`, derives the repository root from its own path, and honors
-`PYTHON`. Cache/offline variables are caller-controlled. Pyrefly discovery is implemented in
-`scaffold/tooling.py`; `realbench/pyrefly_nav.py` remains self-contained because it is copied alone into
-SWE-bench containers.
-
-`build_manifest.py` records hashes, raw configs, actual seeds, integration modes, source-run provenance,
-and known metadata warnings. Historical result JSON is never silently rewritten.
+- Every `run_*.sh` sources `common.sh`, derives the repository root from its own path, and honours
+  `PYTHON`. Cache and offline variables are left to the caller.
+- Drivers refuse to overwrite an existing output file. Delete it deliberately or pick a new path.
+- Pyrefly is discovered by `scaffold/tooling.py`. The exception is `realbench/pyrefly_nav.py`, which
+  stays self-contained because it is copied alone into SWE-bench containers.
+- `build_manifest.py` never rewrites historical result JSON; it only records what is there. Adding a
+  results directory means adding it to the scan list, or its files are silently unmanifested.

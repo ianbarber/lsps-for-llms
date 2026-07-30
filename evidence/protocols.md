@@ -150,8 +150,11 @@ No paid API run is authorized by this protocol. The executed development regimes
 Qwen2.5-Coder 7B/14B, Qwen3.5-27B, and Qwen3.6-27B models. The pilot is two navigation instances across a gold-copy control, a buggy-span
 actionability control, four core cells, and two incremental deployment cells (typed baseline/automatic are
 shared), followed by three checker development tasks. Monetary cap is **$0**. The frozen navigation
-confirmation is twelve instances across three templates x six unique cells x three nested seeds; it remains
-unrun until the pilot clears every gate. Any OpenRouter or other paid confirmation requires a separate
+confirmation is twelve instances across three templates x six unique cells x three nested seeds. It was
+never run for navigation: the uniform-ceiling gate in `scripts/run_navigation_confirmation.sh` blocks it
+permanently, because every core row of the accepted pilot passes held-out. Those twelve reserved instances
+were subsequently spent, once, as the pre-registered confirmation of the substitution-training result
+(ledger C35). Any OpenRouter or other paid confirmation requires a separate
 model/cell/cost proposal. The v6 controlled extension adds three defect/clean pairs across control and gate
 (12 local-model cells) under the same $0 monetary cap.
 
@@ -162,7 +165,8 @@ The historical `navigation-v1` 7B run is invalid because its factory contract is
 repair, pinned Qwen3.6-27B clears gold-copy and buggy-span controls 2/2 and runs the matrix. All 12 cells pass;
 the typed token ratio falls within the margin on these two pilot tasks only, erased automatic context adds
 cost, automatic payloads always precede target reads, and composed resolution adds about six seconds per
-task. Confirmation remains blocked by the uniform-ceiling gate.
+task. Confirmation remains blocked by the uniform-ceiling gate; the reserved split it would have used was spent
+on the substitution confirmation instead (C35).
 Fresh checker calibration still misses the opportunity band. The separately selected two-task checker-
 positive case-series replay is invalid for cleanup claims because ambiguous inline edit serialization creates
 the observed syntax-state difference. All arms remain 1/2 jointly. The unresolved gate trajectory never

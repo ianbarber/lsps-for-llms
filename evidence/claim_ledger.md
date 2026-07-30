@@ -50,6 +50,16 @@ generalization unit; many historical exact tests used `(task, seed)` cells and a
 
 ## Provenance discrepancies
 
+- `scripts/validate_pyrefly_lsp.py` and `evidence/protocols.md` were edited on 2026-07-30 and no longer
+  match the `protocol_source_sha256` recorded in ten frozen navigation validation artifacts. Both edits
+  are documentation or optional output: the script gained an artifact-emission block that runs only when
+  `VALIDATE_PYREFLY_OUT` is set, and a docstring correction (it claimed to kill only its own pyrefly
+  daemon; it runs `pkill -9 -f "pyrefly lsp"`, which kills all of them). `protocols.md` was corrected
+  where it described the navigation confirmation split as reserved and unrun, which C35 superseded. The
+  script is on a behavioural path, since `scaffold/real_env.py` loads it at runtime to reuse its LSP
+  client, so the mismatch is recorded rather than dismissed; the reused entry points (`LspClient`,
+  `lsp_definition_for_task`) are untouched and both modules still import and run.
+
 - Six four-seed files declare two seeds: `er2_27b_{base,readonly}.json` and all four frontier
   `fr_*_{withdefn,readonly}.json` files. They contain seeds 0–3; the seed-2/3 source shards are missing.
 - Older report prose says tool-value/election temperature 0.0, but those six JSON configs and drivers say

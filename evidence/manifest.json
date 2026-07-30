@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "git_revision_at_generation": "4739014db28b746dbf58ab499a19fc2cd4bc60fa",
+  "git_revision_at_generation": "3501c6af626e61dc326ca4221166e41e79d03875",
   "git_worktree_dirty_at_generation": true,
   "platform_at_generation": "Linux-6.17.0-1026-nvidia-aarch64-with-glibc2.39",
   "results": [
@@ -2890,7 +2890,8 @@
       },
       "current_protocol_source_mismatches": [
         "scaffold/stream_agent.py",
-        "scripts/validate_pyrefly_lsp.py"
+        "scripts/validate_pyrefly_lsp.py",
+        "evidence/protocols.md"
       ]
     },
     {
@@ -3162,7 +3163,8 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
-        "scripts/validate_pyrefly_lsp.py"
+        "scripts/validate_pyrefly_lsp.py",
+        "evidence/protocols.md"
       ]
     },
     {
@@ -3257,7 +3259,8 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
-        "scripts/validate_pyrefly_lsp.py"
+        "scripts/validate_pyrefly_lsp.py",
+        "evidence/protocols.md"
       ]
     },
     {
@@ -4770,7 +4773,8 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
-        "scripts/validate_pyrefly_lsp.py"
+        "scripts/validate_pyrefly_lsp.py",
+        "evidence/protocols.md"
       ]
     },
     {
@@ -4828,7 +4832,8 @@
       },
       "current_protocol_source_mismatches": [
         "scaffold/stream_agent.py",
-        "scripts/validate_pyrefly_lsp.py"
+        "scripts/validate_pyrefly_lsp.py",
+        "evidence/protocols.md"
       ]
     },
     {
@@ -4889,7 +4894,8 @@
       },
       "current_protocol_source_mismatches": [
         "scaffold/stream_agent.py",
-        "scripts/validate_pyrefly_lsp.py"
+        "scripts/validate_pyrefly_lsp.py",
+        "evidence/protocols.md"
       ]
     },
     {
@@ -4985,7 +4991,8 @@
       },
       "current_protocol_source_mismatches": [
         "scaffold/stream_agent.py",
-        "scripts/validate_pyrefly_lsp.py"
+        "scripts/validate_pyrefly_lsp.py",
+        "evidence/protocols.md"
       ]
     },
     {
@@ -5890,7 +5897,8 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
-        "scripts/validate_pyrefly_lsp.py"
+        "scripts/validate_pyrefly_lsp.py",
+        "evidence/protocols.md"
       ]
     },
     {
@@ -6085,7 +6093,8 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
-        "scripts/validate_pyrefly_lsp.py"
+        "scripts/validate_pyrefly_lsp.py",
+        "evidence/protocols.md"
       ]
     },
     {
@@ -6169,7 +6178,8 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
-        "scripts/validate_pyrefly_lsp.py"
+        "scripts/validate_pyrefly_lsp.py",
+        "evidence/protocols.md"
       ]
     },
     {
@@ -6240,7 +6250,8 @@
       },
       "current_protocol_source_mismatches": [
         "scaffold/stream_agent.py",
-        "scripts/validate_pyrefly_lsp.py"
+        "scripts/validate_pyrefly_lsp.py",
+        "evidence/protocols.md"
       ]
     },
     {
@@ -6365,7 +6376,8 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
-        "scripts/validate_pyrefly_lsp.py"
+        "scripts/validate_pyrefly_lsp.py",
+        "evidence/protocols.md"
       ]
     },
     {
@@ -6427,7 +6439,8 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
-        "scripts/validate_pyrefly_lsp.py"
+        "scripts/validate_pyrefly_lsp.py",
+        "evidence/protocols.md"
       ]
     },
     {
@@ -6489,7 +6502,8 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
-        "scripts/validate_pyrefly_lsp.py"
+        "scripts/validate_pyrefly_lsp.py",
+        "evidence/protocols.md"
       ]
     },
     {
@@ -7111,7 +7125,7 @@
     },
     {
       "path": "scripts/validate_pyrefly_lsp.py",
-      "sha256": "d8937c955fa1d0d8daf80cf9d06708a21628c5389781ae9da41ce43c6859f967"
+      "sha256": "18938bf5d5f11dc879df1118c28b8ea7b7de5dca86d5452ccd392e1fa7a9eb84"
     },
     {
       "path": "scripts/synth_tasks_authoring.py",
