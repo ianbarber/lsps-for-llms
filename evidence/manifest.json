@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "git_revision_at_generation": "0ec87cc1e30c0a6ab49f6ad703cf79a8c895be79",
+  "git_revision_at_generation": "e63a21c8d7e05085f819ad201414e08744a07865",
   "git_worktree_dirty_at_generation": true,
   "platform_at_generation": "Linux-6.17.0-1026-nvidia-aarch64-with-glibc2.39",
   "results": [
@@ -2890,6 +2890,218 @@
       },
       "current_protocol_source_mismatches": [
         "scaffold/stream_agent.py"
+      ]
+    },
+    {
+      "path": "runs/agent/synth_ac_s6.json",
+      "sha256": "f9f0deba022379c9681864a0baad30d1b467b1e4cc4c65bbdb3ce501fb3d5998",
+      "bytes": 1276219,
+      "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "temperature": null,
+      "model_meta": null,
+      "pyrefly": null,
+      "config": {},
+      "declared_seeds": null,
+      "actual_seeds": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "n_rows": 84,
+      "integration_mode": "static_ast_definition_retrieval",
+      "artifact_role": "committed_model_result",
+      "source_run_files": [
+        "runs/agent/synth_ac_s6.json"
+      ]
+    },
+    {
+      "path": "runs/agent/synth_ceager.json",
+      "sha256": "48b205089bc23e4ed0d4df2a2b1f284a52232557fdd82d80d4148d151726ea97",
+      "bytes": 731800,
+      "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "temperature": null,
+      "model_meta": null,
+      "pyrefly": null,
+      "config": {},
+      "declared_seeds": null,
+      "actual_seeds": [],
+      "n_rows": 0,
+      "integration_mode": "static_ast_definition_retrieval",
+      "artifact_role": "committed_model_result",
+      "source_run_files": [
+        "runs/agent/synth_ceager.json"
+      ]
+    },
+    {
+      "path": "runs/agent/synth_ceager_s6.json",
+      "sha256": "98473f260a3f1dbf1234e6164d95898b724e8fe8b611553dc9537f1b78240d52",
+      "bytes": 882320,
+      "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "temperature": null,
+      "model_meta": null,
+      "pyrefly": null,
+      "config": {},
+      "declared_seeds": null,
+      "actual_seeds": [],
+      "n_rows": 0,
+      "integration_mode": "static_ast_definition_retrieval",
+      "artifact_role": "committed_model_result",
+      "source_run_files": [
+        "runs/agent/synth_ceager_s6.json"
+      ]
+    },
+    {
+      "path": "runs/agent/synth_delivery_provenance.json",
+      "sha256": "40c4cbdcd4b3d39b246643467426880e3d4d42e1112ab0cfe158e9f9c35656c2",
+      "bytes": 10669,
+      "model": null,
+      "temperature": null,
+      "model_meta": null,
+      "pyrefly": null,
+      "config": {},
+      "declared_seeds": null,
+      "actual_seeds": [],
+      "n_rows": 0,
+      "integration_mode": "static_ast_definition_retrieval",
+      "artifact_role": "committed_model_result",
+      "source_run_files": [
+        "runs/agent/synth_delivery_provenance.json"
+      ]
+    },
+    {
+      "path": "runs/agent/synth_dgate.json",
+      "sha256": "89b90d8f1fa91912d58f1653b0f43f9a5cb0de46c50d016b0ad7693c3c04a1d7",
+      "bytes": 556263,
+      "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "temperature": null,
+      "model_meta": null,
+      "pyrefly": null,
+      "config": {},
+      "declared_seeds": null,
+      "actual_seeds": [],
+      "n_rows": 0,
+      "integration_mode": "static_ast_definition_retrieval",
+      "artifact_role": "committed_model_result",
+      "source_run_files": [
+        "runs/agent/synth_dgate.json"
+      ]
+    },
+    {
+      "path": "runs/agent/synth_dgate_reproduction_check.json",
+      "sha256": "7eb5c344f7d295e61567ad6fb19d1c73a5f7f6af6ef1a833c862f7b923e36333",
+      "bytes": 39856,
+      "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "temperature": null,
+      "model_meta": null,
+      "pyrefly": null,
+      "config": {},
+      "declared_seeds": null,
+      "actual_seeds": [],
+      "n_rows": 0,
+      "integration_mode": "static_ast_definition_retrieval",
+      "artifact_role": "committed_model_result",
+      "source_run_files": [
+        "runs/agent/synth_dgate_reproduction_check.json"
+      ]
+    },
+    {
+      "path": "runs/agent/synth_dgate_s6.json",
+      "sha256": "9b1055992f082fbda10475642ea3748ba09faf2e21ba4e960ae7b8e28d95111a",
+      "bytes": 587083,
+      "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "temperature": null,
+      "model_meta": null,
+      "pyrefly": null,
+      "config": {},
+      "declared_seeds": null,
+      "actual_seeds": [],
+      "n_rows": 0,
+      "integration_mode": "static_ast_definition_retrieval",
+      "artifact_role": "committed_model_result",
+      "source_run_files": [
+        "runs/agent/synth_dgate_s6.json"
+      ]
+    },
+    {
+      "path": "runs/agent/synth_dnaive_s6.json",
+      "sha256": "b9167094bd94f83b4bc4590a0b750134063e7354d9447f82db7b4540eda60bb0",
+      "bytes": 835144,
+      "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "temperature": null,
+      "model_meta": null,
+      "pyrefly": null,
+      "config": {},
+      "declared_seeds": null,
+      "actual_seeds": [],
+      "n_rows": 0,
+      "integration_mode": "static_ast_definition_retrieval",
+      "artifact_role": "committed_model_result",
+      "source_run_files": [
+        "runs/agent/synth_dnaive_s6.json"
+      ]
+    },
+    {
+      "path": "runs/agent/synth_dplain.json",
+      "sha256": "12dc06f77288f61763acab50f054765640698c20db088c4de33a075a9f876a8c",
+      "bytes": 664299,
+      "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "temperature": null,
+      "model_meta": null,
+      "pyrefly": null,
+      "config": {},
+      "declared_seeds": null,
+      "actual_seeds": [],
+      "n_rows": 0,
+      "integration_mode": "static_ast_definition_retrieval",
+      "artifact_role": "committed_model_result",
+      "source_run_files": [
+        "runs/agent/synth_dplain.json"
+      ]
+    },
+    {
+      "path": "runs/agent/synth_dplain_s6.json",
+      "sha256": "72f76d82a172915decbfa674bb6f02e7971123b342e4c0f6ef86ceddae1c3a52",
+      "bytes": 629273,
+      "model": null,
+      "temperature": null,
+      "model_meta": null,
+      "pyrefly": null,
+      "config": {},
+      "declared_seeds": null,
+      "actual_seeds": [],
+      "n_rows": 0,
+      "integration_mode": "static_ast_definition_retrieval",
+      "artifact_role": "committed_model_result",
+      "source_run_files": [
+        "runs/agent/synth_dplain_s6.json"
+      ]
+    },
+    {
+      "path": "runs/agent/synth_power.json",
+      "sha256": "c33b7e776d804fbaa60eb4d361b5e227aeb7aabb98e0f783438edd01f1227efc",
+      "bytes": 1924601,
+      "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "temperature": null,
+      "model_meta": null,
+      "pyrefly": null,
+      "config": {},
+      "declared_seeds": null,
+      "actual_seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "n_rows": 84,
+      "integration_mode": "static_ast_definition_retrieval",
+      "artifact_role": "committed_model_result",
+      "source_run_files": [
+        "runs/agent/synth_power.json"
       ]
     },
     {
@@ -6774,6 +6986,10 @@
     {
       "path": "scripts/analysis/stats.py",
       "sha256": "b4a5e1d01c33fa7b4ad7557f85998e9ae86f9671a0f5fa2a5260f1f590e35437"
+    },
+    {
+      "path": "scripts/analysis/stats_delivery.py",
+      "sha256": "2d25f77d00e577d80ab474483c717c7cf32618bde1d248db35fee2b7546c4712"
     },
     {
       "path": "scripts/analysis/task_level_effects.py",
