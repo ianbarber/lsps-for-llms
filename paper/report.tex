@@ -141,29 +141,29 @@
 \maketitle
 \begin{abstract}
 Coding agents are increasingly given language-server tooling on the
-assumption that better code intelligence makes a better agent. We tested
-that assumption against a capable text baseline of grep, ranged reads
-and a shell, across 7 models. Across all three operations, benefit
-tracked whether the agent's behaviour changed; availability alone did
-not change it. Go-to-definition helped only where resolving the
-receiver's type cost a retrieval step rather than being already in
-context, and only when the agent was told to use it. Definition spans
-saved tokens only when they replaced the file read; models reread on 35
-of 36 instances, and training removed the habit. A type checker gating
-submission took accepted correct outcomes from 1 of 12 to 11 of 12, and
-its advantage came from refusing the submission rather than from the
-moment it spoke: across six delivery points on a separate authoring
-suite, timing made no difference, and the one channel that instructed
-the agent to fix each diagnostic on arrival did worse than no feedback
-at all.
+assumption that better code intelligence makes a better agent. We
+explored that assumption against a capable baseline of grep, ranged
+reads and a shell, across 7 models. Making LSP tools available changed
+nothing: agents largely declined to use the operations they were
+offered, and every gain required a prompt, training, or a gate that
+blocked the work. Go-to-definition helped when resolving the receiver's
+type required a retrieval step rather than being already in context, and
+only when the agent was instructed to use it. Definition spans saved
+tokens only when they replaced the file read, and models reread on 35 of
+36 pushed spans, and telling them to avoid only removed 2: adjusting the
+behavior required fine-tuning. On 12 seeded defects, a type checker
+gating submission took accepted correct outcomes from 1 to 11. Earlier
+delivery of type errors made no difference, and actively guiding the
+model to respond to earlier diagnostics did worse than no feedback at
+all.
 
 \begin{quote}
 \textbf{If you use a coding agent:} run your type checker at the end of
-the turn as a blocking gate; skip navigation tools where a receiver's
-type is written beside the code that uses it, and add one, with an
-instruction to use it, where resolving a type means reaching into a
-stub, a generated client or a compiled boundary; do not assume a
-definition tool saves tokens until the agent stops reading the file.
+the turn as a blocking gate; add navigation tools only as the codebase
+gets larger, with an instruction to use it, and expect the most gains
+when resolving a type means reaching into a stub, a generated client or
+a compiled boundary; expect to save tokens only once the agent stops
+reading the file, so measure that before counting the saving.
 \end{quote}
 \end{abstract}
 
@@ -172,24 +172,21 @@ definition tool saves tokens until the agent stops reading the file.
 A language server answers questions about code. An agent with grep,
 ranged reads and a shell already answers most of them itself, so what a
 server adds depends on whether it answers a question the agent cannot
-(IF), whether its answer is cheaper (FORM), and whether it arrives at a
-better moment (WHEN). Prior work rarely measures against an agent that
-already reads code well; that baseline is used throughout.
+(IF), whether its answer is cheaper in tokens (FORM), and whether it
+arrives at a better moment (WHEN). There is significant prior work, but
+it rarely measures against an agent that already reads code well; that
+baseline is used throughout.
 
 \textbf{IF.} Typed Holes~\citep{blinn2024typedholes} and
 LSPRAG~\citep{go2025lsprag} push types and definitions into context on
-the premise the information is missing; a yes is the semantic arm
-reaching targets the text arm misses.
+the premise the information is missing.
 
 \textbf{FORM.} CodeStruct~\citep{kim2026codestruct} argues structured
-reads and edits beat whole-file handling; a yes is fewer total tokens at
-unchanged success.
+reads and edits use fewer tokens than whole-file handling.
 
 \textbf{WHEN.} STALL+~\citep{liu2024stallplus} finds static-analysis
 value varying with integration phase; CoCoGen~\citep{bi2024cocogen}
-checks a coherent draft before retrieving context to repair it. A yes is
-the same diagnostic producing a different accepted result depending only
-on when it fires.
+checks a coherent draft before retrieving context to repair it
 
 \section{Method}\label{method}
 
@@ -207,7 +204,8 @@ dispatch lookup arms directly. A case study ran the off-the-shelf shell
 agent mini-swe-agent with Claude Sonnet 4.5 on 3 SWE-bench tasks (sympy,
 astropy, sphinx) with an AST-backed definition command, one seed and a
 60-step cap. Nothing was tested through an MCP server, skill or editor
-plugin, so these experiments compare operations, not delivery surfaces.
+plugin, so these experiments compare operations rather than delivery
+surfaces.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
