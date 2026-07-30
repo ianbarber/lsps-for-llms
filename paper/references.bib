@@ -163,6 +163,45 @@
   note    = {Preprint (under review).}
 }
 
+% --- Apparatus: the benchmark and the off-the-shelf agent used in the Method ---
+% Confirmed by fetching the arXiv abstract pages and the GitHub repository on 2026-07-30.
+
+% Design provenance for the live (mid-generation) delivery channels in the
+% delivery-timing grid. NOT a training reference: those arms ran on stock
+% Qwen2.5-Coder-7B-Instruct with adapter=null (see C37 in evidence/claim_ledger.md).
+@article{hooper2026speculative,
+  title   = {Speculative Interaction Agents: Building Real-Time Agents with Asynchronous {I/O} and Speculative Tool Calling},
+  author  = {Hooper, Coleman and Kang, Minwoo and Moon, Suhong and Lee, Nicholas and Wen, Eric and Wawrzynek, John and Mahoney, Michael W. and Shao, Yakun Sophia and Gholami, Amir and Keutzer, Kurt},
+  journal = {arXiv preprint arXiv:2605.13360},
+  year    = {2026}
+}
+
+@inproceedings{jimenez2024swebench,
+  title     = {{SWE-bench}: Can Language Models Resolve Real-World {GitHub} Issues?},
+  author    = {Jimenez, Carlos E. and Yang, John and Wettig, Alexander and Yao, Shunyu and Pei, Kexin and Press, Ofir and Narasimhan, Karthik},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2024},
+  note      = {arXiv:2310.06770}
+}
+
+@inproceedings{yang2024sweagent,
+  title     = {{SWE-agent}: Agent-Computer Interfaces Enable Automated Software Engineering},
+  author    = {Yang, John and Jimenez, Carlos E. and Wettig, Alexander and Lieret, Kilian and Yao, Shunyu and Narasimhan, Karthik and Press, Ofir},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2024},
+  note      = {arXiv:2405.15793}
+}
+
+% mini-swe-agent has no paper of its own; its README directs citers to the
+% SWE-agent paper above, so REPORT.md cites the pair.
+@misc{minisweagent,
+  title        = {{mini-swe-agent}},
+  author       = {{SWE-agent Team}},
+  year         = {2025},
+  howpublished = {\url{https://github.com/SWE-agent/mini-swe-agent}},
+  note         = {Software, MIT license; built by the Princeton and Stanford team behind SWE-bench and SWE-agent}
+}
+
 % --- Cited in the lit-review plan but NOT load-bearing in the current draft; verify if promoted into the paper ---
 % pi-Distill / OPSD: "Privileged Information Distillation for Language Models", arXiv:2602.04942 (2026) -- flagged
 %   UNVERIFIED by the lit-review pass; check the abstract + the exact OPSD objective before citing.

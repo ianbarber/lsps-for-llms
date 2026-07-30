@@ -15,12 +15,13 @@ local stringify = pandoc.utils.stringify
 -- Base URL for in-repo files that are NOT part of the PDF.
 local GH_BASE = "https://github.com/ianbarber/lsps-for-llms/blob/main/"
 
--- Related-work arXiv links -> bib keys. Each of these appears once in the
--- "Related work" table as [Name](arXiv URL). We keep the visible Name and
--- append a real numbered citation, so it renders as "Name [n]" tied to the
--- References list (rather than a bare hyperlink). Verified against the .bib
--- arXiv IDs.
-local ARXIV_CITE = {
+-- Cited link URLs -> bib keys. Each appears once in REPORT.md as [Name](URL):
+-- the related-work entries in the "Related work" table, plus the benchmark and
+-- agent named in the Method. We keep the visible Name and append a real
+-- numbered citation, so it renders as "Name [n]" tied to the References list
+-- (rather than a bare hyperlink). Verified against the .bib arXiv IDs.
+-- A value may name several keys; it is spliced into \citep{...} verbatim.
+local LINK_CITE = {
   ["https://arxiv.org/abs/2409.00921"] = "blinn2024typedholes",       -- Typed Holes
   ["https://arxiv.org/abs/2510.22210"] = "go2025lsprag",              -- LSPRAG
   ["https://arxiv.org/abs/2406.10018"] = "liu2024stallplus",          -- STALL+
@@ -29,15 +30,19 @@ local ARXIV_CITE = {
   ["https://arxiv.org/abs/2203.05132"] = "wang2022compcoder",         -- CompCoder
   ["https://arxiv.org/abs/2504.09246"] = "mundler2025typeconstrained",-- type-constrained generation
   ["https://arxiv.org/abs/2510.22907"] = "zhang2025rlcsf",            -- RLCSF v2
+  ["https://arxiv.org/abs/2310.06770"] = "jimenez2024swebench",       -- SWE-bench
+  ["https://arxiv.org/abs/2605.13360"] = "hooper2026speculative",     -- live-delivery design
+  -- mini-swe-agent has no paper; its README asks citers to cite SWE-agent.
+  ["https://github.com/SWE-agent/mini-swe-agent"] = "minisweagent,yang2024sweagent",
 }
 
 -- 1) Link rewriting.
---    a. Mapped arXiv links become "visible name + \citep{key}".
+--    a. Mapped links become "visible name + \citep{key}".
 --    b. Other external links (URI scheme or #fragment) are left as hyperlinks.
 --    c. In-repo relative paths are rebased onto GitHub.
 function Link(el)
   local t = el.target
-  local key = ARXIV_CITE[t]
+  local key = LINK_CITE[t]
   if key then
     local out = {}
     for _, x in ipairs(el.content) do out[#out + 1] = x end   -- keep the work name
