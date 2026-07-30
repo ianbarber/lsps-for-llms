@@ -84,5 +84,5 @@ the committed `report.tex`.
 
 None for the build itself. For a **camera-ready** pass you would: convert the
 inline related-work hyperlinks to `\citep{…}` and remove `\nocite{*}`; verify the
-DAgger (2011) and other flagged `.bib` entries (see the notes in the `.bib`); and
-set a real affiliation in `metadata.yaml` (currently a placeholder).
+DAgger (2011) and other flagged `.bib` entries (see the notes in the `.bib`).
+The author block in `metadata.yaml` carries no affiliation, which is deliberate.

@@ -154,8 +154,13 @@ def main() -> int:
     # substitution-training retest: load a LoRA adapter on top of the base model. Absent (the
     # default) the run is byte-identical to the untrained baseline arms.
     parser.add_argument("--adapter", default=None)
-    # the reserved confirmation split is not offered: apparatus/pilot only (C15).
-    parser.add_argument("--split", choices=("pilot", "apparatus"), default="apparatus")
+    # "confirmation" SPENDS the reserved 41xxx split, once, as the pre-registered confirmation of
+    # the substitution-training result (C33). It was reserved for the navigation-v2 typed/erased
+    # confirmation, which is permanently blocked by its own ceiling gate in
+    # scripts/run_navigation_confirmation.sh (that script refuses to run when every core pilot row
+    # passes held-out, and all 8 do), so the seeds could never be spent on their original purpose.
+    # Validated by: runs/protocol/navigation_v2_confirmation_substitution_validation.json (12/12).
+    parser.add_argument("--split", choices=("pilot", "apparatus", "confirmation"), default="apparatus")
     parser.add_argument("--arms", default="auto_neutral,auto_sufficient,framed_elective")
     parser.add_argument("--names", default=None)
     parser.add_argument("--seed", type=int, default=0)

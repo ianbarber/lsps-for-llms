@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "git_revision_at_generation": "f5226c423a795eea9a02f5c625c14e7e29ffbb6f",
+  "git_revision_at_generation": "0ec87cc1e30c0a6ab49f6ad703cf79a8c895be79",
   "git_worktree_dirty_at_generation": true,
-  "platform_at_generation": "Linux-6.11.0-1016-nvidia-aarch64-with-glibc2.39",
+  "platform_at_generation": "Linux-6.17.0-1026-nvidia-aarch64-with-glibc2.39",
   "results": [
     {
       "path": "runs/agent/27b_base.json",
@@ -2893,6 +2893,155 @@
       ]
     },
     {
+      "path": "runs/confirmation/navigation_v2_reread_confirmation_baseline.json",
+      "sha256": "b9a98c3f933a146b629937ee71b25e4d235526d98b0217618add734894fe7295",
+      "bytes": 72403,
+      "model": "Qwen/Qwen3.6-27B",
+      "temperature": 0.0,
+      "model_meta": {
+        "adapter": null,
+        "adapter_meta": null,
+        "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+        "transformers": "5.9.0",
+        "torch": "2.11.0+cu128",
+        "dtype": "torch.bfloat16"
+      },
+      "pyrefly": {
+        "path": "/home/ianbarber/Projects/Streams/.venv-streams/bin/pyrefly",
+        "version": "pyrefly 1.0.0"
+      },
+      "config": {
+        "out": "runs/confirmation/navigation_v2_reread_confirmation_baseline.json",
+        "model": "Qwen/Qwen3.6-27B",
+        "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+        "adapter": null,
+        "split": "confirmation",
+        "arms": "auto_neutral",
+        "names": null,
+        "seed": 0,
+        "temperature": 0.0,
+        "max_new": 1000,
+        "max_turns": 12,
+        "max_reads": 12,
+        "gpu_only": true,
+        "tmp_root": "/tmp/streams_nav_reread_conf_base"
+      },
+      "declared_seeds": null,
+      "actual_seeds": [
+        0
+      ],
+      "n_rows": 12,
+      "integration_mode": "mixed_navigation_integrations",
+      "artifact_role": "committed_model_result",
+      "source_run_files": [
+        "runs/confirmation/navigation_v2_reread_confirmation_baseline.json"
+      ],
+      "recorded_protocol_source_sha256": {
+        "scripts/experiments/navigation_tasks.py": "f860fd07fdeb2d4f78d89a047c6804d79cc3babd60fab7e0a06e839679692d97",
+        "scripts/experiments/run_navigation.py": "319743150b0b49a86e8c52d5264f5736d887a396e89bb5bfa7280fdce4ea72b8",
+        "scripts/analysis/analyze_navigation.py": "c48d2c7b696244107665c0b07f2cd6c4fc2febb7b6f6d67b931ea02cc9be5a77",
+        "scripts/run_navigation_pilot.sh": "727d6780ae7d3fbac35b88e02ddbe554b3a6687293e329a1f11d05a62f2adb77",
+        "scripts/run_navigation_confirmation.sh": "af48c93caf45c9047828d5a7b76eed7977419290ad6863917a1df88fa50a1d56",
+        "scaffold/stream_agent.py": "0267afa17a22c5f0eea77bce82927b5d25890dea0500312163d2a1e2e1f40b79",
+        "scaffold/real_env.py": "a1b38f3d228d659a37329eb9088a80de20422f07712de9bdd9b3c7ad694ae70b",
+        "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
+        "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
+        "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
+      }
+    },
+    {
+      "path": "runs/confirmation/navigation_v2_reread_confirmation_trained.json",
+      "sha256": "87003f70aeb267cab71704050d449c855f4fa04c413b8f4537e8fbbd6686c319",
+      "bytes": 49024,
+      "model": "Qwen/Qwen3.6-27B",
+      "temperature": 0.0,
+      "model_meta": {
+        "adapter": "runs/sft/substitution_lora_27b",
+        "adapter_meta": {
+          "config": {
+            "harvest": [
+              "runs/agent/substitution_harvest_qwen36_27b.json"
+            ],
+            "model": "Qwen/Qwen3.6-27B",
+            "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+            "filter": "sft_keep",
+            "out": "runs/sft/substitution_lora_27b",
+            "epochs": 3.0,
+            "lr": 0.0001,
+            "bs": 1,
+            "accum": 4,
+            "max_len": 4096,
+            "rank": 16,
+            "alpha": 32,
+            "min_train_tokens": 5
+          },
+          "n_examples": 39,
+          "n_rows_scanned": 48,
+          "by_task": {
+            "nav_substrain_53003": 3,
+            "nav_substrain_53017": 3,
+            "nav_substrain_53023": 2,
+            "nav_substrain_53029": 3,
+            "nav_substrain_53047": 4,
+            "nav_substrain_53051": 4,
+            "nav_substrain_53063": 4,
+            "nav_substrain_53069": 1,
+            "nav_substrain_53077": 4,
+            "nav_substrain_53087": 4,
+            "nav_substrain_53093": 4,
+            "nav_substrain_53101": 3
+          },
+          "torch": "2.11.0+cu128"
+        },
+        "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+        "transformers": "5.9.0",
+        "torch": "2.11.0+cu128",
+        "dtype": "torch.bfloat16"
+      },
+      "pyrefly": {
+        "path": "/home/ianbarber/Projects/Streams/.venv-streams/bin/pyrefly",
+        "version": "pyrefly 1.0.0"
+      },
+      "config": {
+        "out": "runs/confirmation/navigation_v2_reread_confirmation_trained.json",
+        "model": "Qwen/Qwen3.6-27B",
+        "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+        "adapter": "runs/sft/substitution_lora_27b",
+        "split": "confirmation",
+        "arms": "auto_neutral",
+        "names": null,
+        "seed": 0,
+        "temperature": 0.0,
+        "max_new": 1000,
+        "max_turns": 12,
+        "max_reads": 12,
+        "gpu_only": true,
+        "tmp_root": "/tmp/streams_nav_reread_conf_trained"
+      },
+      "declared_seeds": null,
+      "actual_seeds": [
+        0
+      ],
+      "n_rows": 12,
+      "integration_mode": "mixed_navigation_integrations",
+      "artifact_role": "committed_model_result",
+      "source_run_files": [
+        "runs/confirmation/navigation_v2_reread_confirmation_trained.json"
+      ],
+      "recorded_protocol_source_sha256": {
+        "scripts/experiments/navigation_tasks.py": "f860fd07fdeb2d4f78d89a047c6804d79cc3babd60fab7e0a06e839679692d97",
+        "scripts/experiments/run_navigation.py": "319743150b0b49a86e8c52d5264f5736d887a396e89bb5bfa7280fdce4ea72b8",
+        "scripts/analysis/analyze_navigation.py": "c48d2c7b696244107665c0b07f2cd6c4fc2febb7b6f6d67b931ea02cc9be5a77",
+        "scripts/run_navigation_pilot.sh": "727d6780ae7d3fbac35b88e02ddbe554b3a6687293e329a1f11d05a62f2adb77",
+        "scripts/run_navigation_confirmation.sh": "af48c93caf45c9047828d5a7b76eed7977419290ad6863917a1df88fa50a1d56",
+        "scaffold/stream_agent.py": "0267afa17a22c5f0eea77bce82927b5d25890dea0500312163d2a1e2e1f40b79",
+        "scaffold/real_env.py": "a1b38f3d228d659a37329eb9088a80de20422f07712de9bdd9b3c7ad694ae70b",
+        "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
+        "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
+        "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
+      }
+    },
+    {
       "path": "runs/pilot/checker_case_series_qwen36_27b_6a9e13bd.json",
       "sha256": "84c70a081a1e6a30aa78b827aba86ce3f029346acc24c259c6056d54018fe7c2",
       "bytes": 9494,
@@ -5415,6 +5564,74 @@
       ]
     },
     {
+      "path": "runs/protocol/navigation_v2_confirmation_substitution_validation.json",
+      "sha256": "7f0aa06313cfec2d2dd553a8358bb10a50efa1172a2c2cb8d5fd2104bb51f7dc",
+      "bytes": 50028,
+      "model": null,
+      "temperature": null,
+      "model_meta": null,
+      "pyrefly": {
+        "path": "/home/ianbarber/Projects/Streams/.venv-streams/bin/pyrefly",
+        "version": "pyrefly 1.0.0"
+      },
+      "config": {
+        "protocol": "navigation-v2",
+        "split": "confirmation",
+        "seeds": [
+          41011,
+          41017,
+          41023,
+          41039,
+          41047,
+          41051,
+          41057,
+          41077,
+          41081,
+          41083,
+          41099,
+          41113
+        ],
+        "templates": [
+          "modulo",
+          "square_offset",
+          "negate_offset"
+        ]
+      },
+      "declared_seeds": [
+        41011,
+        41017,
+        41023,
+        41039,
+        41047,
+        41051,
+        41057,
+        41077,
+        41081,
+        41083,
+        41099,
+        41113
+      ],
+      "actual_seeds": [],
+      "n_rows": 12,
+      "integration_mode": "strict_live_language_server_manipulation_check",
+      "artifact_role": "mechanical_manipulation_and_leakage_validation",
+      "source_run_files": [
+        "runs/protocol/navigation_v2_confirmation_substitution_validation.json"
+      ],
+      "recorded_protocol_source_sha256": {
+        "scripts/experiments/navigation_tasks.py": "f860fd07fdeb2d4f78d89a047c6804d79cc3babd60fab7e0a06e839679692d97",
+        "scripts/experiments/run_navigation.py": "319743150b0b49a86e8c52d5264f5736d887a396e89bb5bfa7280fdce4ea72b8",
+        "scripts/analysis/analyze_navigation.py": "c48d2c7b696244107665c0b07f2cd6c4fc2febb7b6f6d67b931ea02cc9be5a77",
+        "scripts/run_navigation_pilot.sh": "727d6780ae7d3fbac35b88e02ddbe554b3a6687293e329a1f11d05a62f2adb77",
+        "scripts/run_navigation_confirmation.sh": "af48c93caf45c9047828d5a7b76eed7977419290ad6863917a1df88fa50a1d56",
+        "scaffold/stream_agent.py": "0267afa17a22c5f0eea77bce82927b5d25890dea0500312163d2a1e2e1f40b79",
+        "scaffold/real_env.py": "a1b38f3d228d659a37329eb9088a80de20422f07712de9bdd9b3c7ad694ae70b",
+        "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
+        "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
+        "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
+      }
+    },
+    {
       "path": "runs/protocol/navigation_v2_confirmation_validation.json",
       "sha256": "8b7a542434811e2b16d5248a0f0766481e6f50d78e0d9ff43214374f15c92e6d",
       "bytes": 48820,
@@ -5542,6 +5759,150 @@
       ]
     },
     {
+      "path": "runs/protocol/navigation_v2_readreq_pilot_validation.json",
+      "sha256": "f0dcc012b5c6dee58136d8822cffeb8841630864360bcdee8f83762469993d07",
+      "bytes": 159789,
+      "model": null,
+      "temperature": null,
+      "model_meta": null,
+      "pyrefly": {
+        "path": "/home/ianbarber/Projects/Streams/.venv-streams/bin/pyrefly",
+        "version": "pyrefly 1.0.0"
+      },
+      "config": {
+        "protocol": "navigation-v2",
+        "split": "readreq_pilot",
+        "seeds": [
+          67001,
+          67003,
+          67009,
+          67012,
+          67014,
+          67017
+        ],
+        "templates": [
+          "delegate_scale_offset",
+          "delegate_scale_sub",
+          "delegate_xor_offset"
+        ]
+      },
+      "declared_seeds": [
+        67001,
+        67003,
+        67009,
+        67012,
+        67014,
+        67017
+      ],
+      "actual_seeds": [
+        67001,
+        67003,
+        67009,
+        67012,
+        67014,
+        67017
+      ],
+      "n_rows": 6,
+      "integration_mode": "strict_live_language_server_manipulation_check",
+      "artifact_role": "mechanical_manipulation_and_leakage_validation",
+      "source_run_files": [
+        "runs/protocol/navigation_v2_readreq_pilot_validation.json"
+      ],
+      "recorded_protocol_source_sha256": {
+        "scripts/experiments/navigation_tasks.py": "f860fd07fdeb2d4f78d89a047c6804d79cc3babd60fab7e0a06e839679692d97",
+        "scripts/experiments/run_navigation.py": "319743150b0b49a86e8c52d5264f5736d887a396e89bb5bfa7280fdce4ea72b8",
+        "scripts/analysis/analyze_navigation.py": "c48d2c7b696244107665c0b07f2cd6c4fc2febb7b6f6d67b931ea02cc9be5a77",
+        "scripts/run_navigation_pilot.sh": "727d6780ae7d3fbac35b88e02ddbe554b3a6687293e329a1f11d05a62f2adb77",
+        "scripts/run_navigation_confirmation.sh": "af48c93caf45c9047828d5a7b76eed7977419290ad6863917a1df88fa50a1d56",
+        "scaffold/stream_agent.py": "0267afa17a22c5f0eea77bce82927b5d25890dea0500312163d2a1e2e1f40b79",
+        "scaffold/real_env.py": "a1b38f3d228d659a37329eb9088a80de20422f07712de9bdd9b3c7ad694ae70b",
+        "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
+        "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
+        "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
+      }
+    },
+    {
+      "path": "runs/protocol/navigation_v2_readreq_validation.json",
+      "sha256": "6f66e5d5bdb1c6b3c1b29d13b1ec3c745fe87e5e72f1c7c0c0b4afd06fb5b9cd",
+      "bytes": 302553,
+      "model": null,
+      "temperature": null,
+      "model_meta": null,
+      "pyrefly": {
+        "path": "/home/ianbarber/Projects/Streams/.venv-streams/bin/pyrefly",
+        "version": "pyrefly 1.0.0"
+      },
+      "config": {
+        "protocol": "navigation-v2",
+        "split": "readreq",
+        "seeds": [
+          71005,
+          71012,
+          71053,
+          71057,
+          71060,
+          71116,
+          71121,
+          71124,
+          71175,
+          71191,
+          71195,
+          71262
+        ],
+        "templates": [
+          "delegate_scale_offset",
+          "delegate_scale_sub",
+          "delegate_xor_offset"
+        ]
+      },
+      "declared_seeds": [
+        71005,
+        71012,
+        71053,
+        71057,
+        71060,
+        71116,
+        71121,
+        71124,
+        71175,
+        71191,
+        71195,
+        71262
+      ],
+      "actual_seeds": [
+        71005,
+        71012,
+        71053,
+        71057,
+        71060,
+        71116,
+        71121,
+        71124,
+        71175,
+        71191,
+        71195,
+        71262
+      ],
+      "n_rows": 12,
+      "integration_mode": "strict_live_language_server_manipulation_check",
+      "artifact_role": "mechanical_manipulation_and_leakage_validation",
+      "source_run_files": [
+        "runs/protocol/navigation_v2_readreq_validation.json"
+      ],
+      "recorded_protocol_source_sha256": {
+        "scripts/experiments/navigation_tasks.py": "f860fd07fdeb2d4f78d89a047c6804d79cc3babd60fab7e0a06e839679692d97",
+        "scripts/experiments/run_navigation.py": "319743150b0b49a86e8c52d5264f5736d887a396e89bb5bfa7280fdce4ea72b8",
+        "scripts/analysis/analyze_navigation.py": "c48d2c7b696244107665c0b07f2cd6c4fc2febb7b6f6d67b931ea02cc9be5a77",
+        "scripts/run_navigation_pilot.sh": "727d6780ae7d3fbac35b88e02ddbe554b3a6687293e329a1f11d05a62f2adb77",
+        "scripts/run_navigation_confirmation.sh": "af48c93caf45c9047828d5a7b76eed7977419290ad6863917a1df88fa50a1d56",
+        "scaffold/stream_agent.py": "0267afa17a22c5f0eea77bce82927b5d25890dea0500312163d2a1e2e1f40b79",
+        "scaffold/real_env.py": "a1b38f3d228d659a37329eb9088a80de20422f07712de9bdd9b3c7ad694ae70b",
+        "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
+        "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
+        "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
+      }
+    },
+    {
       "path": "runs/protocol/navigation_v2_substrain_validation.json",
       "sha256": "739e23180c8043930438bc108ebaed148ced484bfb8d565b34723eaa33706a7e",
       "bytes": 48078,
@@ -5638,6 +5999,218 @@
       "current_protocol_source_mismatches": [
         "scaffold/stream_agent.py"
       ]
+    },
+    {
+      "path": "runs/readreq/navigation_v2_c36_main_trained.json",
+      "sha256": "7c421b1ce3fd1464e2c07e5f1e00b5d1034549ea8c146757e49ee86e173e9c7b",
+      "bytes": 301514,
+      "model": "Qwen/Qwen3.6-27B",
+      "temperature": 0.0,
+      "model_meta": {
+        "adapter": "runs/sft/substitution_lora_27b",
+        "adapter_meta": {
+          "config": {
+            "harvest": [
+              "runs/agent/substitution_harvest_qwen36_27b.json"
+            ],
+            "model": "Qwen/Qwen3.6-27B",
+            "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+            "filter": "sft_keep",
+            "out": "runs/sft/substitution_lora_27b",
+            "epochs": 3.0,
+            "lr": 0.0001,
+            "bs": 1,
+            "accum": 4,
+            "max_len": 4096,
+            "rank": 16,
+            "alpha": 32,
+            "min_train_tokens": 5
+          },
+          "n_examples": 39,
+          "n_rows_scanned": 48,
+          "by_task": {
+            "nav_substrain_53003": 3,
+            "nav_substrain_53017": 3,
+            "nav_substrain_53023": 2,
+            "nav_substrain_53029": 3,
+            "nav_substrain_53047": 4,
+            "nav_substrain_53051": 4,
+            "nav_substrain_53063": 4,
+            "nav_substrain_53069": 1,
+            "nav_substrain_53077": 4,
+            "nav_substrain_53087": 4,
+            "nav_substrain_53093": 4,
+            "nav_substrain_53101": 3
+          },
+          "torch": "2.11.0+cu128"
+        },
+        "condition": "trained",
+        "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+        "transformers": "5.9.0",
+        "torch": "2.11.0+cu128",
+        "dtype": "torch.bfloat16"
+      },
+      "pyrefly": {
+        "path": "/home/ianbarber/Projects/Streams/.venv-streams/bin/pyrefly",
+        "version": "pyrefly 1.0.0"
+      },
+      "config": {
+        "out": "runs/readreq/navigation_v2_c36_main_trained.json",
+        "model": "Qwen/Qwen3.6-27B",
+        "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+        "adapter": "runs/sft/substitution_lora_27b",
+        "split": "readreq",
+        "arms": "push_insufficient,push_sufficient,push_chained",
+        "names": null,
+        "seed": 0,
+        "temperature": 0.0,
+        "max_new": 1000,
+        "max_turns": 12,
+        "max_reads": 12,
+        "gpu_only": true,
+        "tmp_root": null,
+        "validation": "runs/protocol/navigation_v2_readreq_validation.json"
+      },
+      "declared_seeds": null,
+      "actual_seeds": [
+        0
+      ],
+      "n_rows": 36,
+      "integration_mode": "static_ast_definition_retrieval",
+      "artifact_role": "committed_model_result",
+      "source_run_files": [
+        "runs/readreq/navigation_v2_c36_main_trained.json"
+      ],
+      "recorded_protocol_source_sha256": {
+        "scripts/experiments/navigation_tasks.py": "f860fd07fdeb2d4f78d89a047c6804d79cc3babd60fab7e0a06e839679692d97",
+        "scripts/experiments/run_navigation.py": "319743150b0b49a86e8c52d5264f5736d887a396e89bb5bfa7280fdce4ea72b8",
+        "scripts/analysis/analyze_navigation.py": "c48d2c7b696244107665c0b07f2cd6c4fc2febb7b6f6d67b931ea02cc9be5a77",
+        "scripts/run_navigation_pilot.sh": "727d6780ae7d3fbac35b88e02ddbe554b3a6687293e329a1f11d05a62f2adb77",
+        "scripts/run_navigation_confirmation.sh": "af48c93caf45c9047828d5a7b76eed7977419290ad6863917a1df88fa50a1d56",
+        "scaffold/stream_agent.py": "0267afa17a22c5f0eea77bce82927b5d25890dea0500312163d2a1e2e1f40b79",
+        "scaffold/real_env.py": "a1b38f3d228d659a37329eb9088a80de20422f07712de9bdd9b3c7ad694ae70b",
+        "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
+        "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
+        "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
+      }
+    },
+    {
+      "path": "runs/readreq/navigation_v2_c36_main_untrained.json",
+      "sha256": "628574bf1f773d59b94b9f89a420eaf28f37420a2cdbfbfb17906352082b79f7",
+      "bytes": 339943,
+      "model": "Qwen/Qwen3.6-27B",
+      "temperature": 0.0,
+      "model_meta": {
+        "adapter": null,
+        "adapter_meta": null,
+        "condition": "untrained",
+        "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+        "transformers": "5.9.0",
+        "torch": "2.11.0+cu128",
+        "dtype": "torch.bfloat16"
+      },
+      "pyrefly": {
+        "path": "/home/ianbarber/Projects/Streams/.venv-streams/bin/pyrefly",
+        "version": "pyrefly 1.0.0"
+      },
+      "config": {
+        "out": "runs/readreq/navigation_v2_c36_main_untrained.json",
+        "model": "Qwen/Qwen3.6-27B",
+        "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+        "adapter": null,
+        "split": "readreq",
+        "arms": "push_insufficient,push_sufficient,push_chained",
+        "names": null,
+        "seed": 0,
+        "temperature": 0.0,
+        "max_new": 1000,
+        "max_turns": 12,
+        "max_reads": 12,
+        "gpu_only": true,
+        "tmp_root": null,
+        "validation": "runs/protocol/navigation_v2_readreq_validation.json"
+      },
+      "declared_seeds": null,
+      "actual_seeds": [
+        0
+      ],
+      "n_rows": 36,
+      "integration_mode": "static_ast_definition_retrieval",
+      "artifact_role": "committed_model_result",
+      "source_run_files": [
+        "runs/readreq/navigation_v2_c36_main_untrained.json"
+      ],
+      "recorded_protocol_source_sha256": {
+        "scripts/experiments/navigation_tasks.py": "f860fd07fdeb2d4f78d89a047c6804d79cc3babd60fab7e0a06e839679692d97",
+        "scripts/experiments/run_navigation.py": "319743150b0b49a86e8c52d5264f5736d887a396e89bb5bfa7280fdce4ea72b8",
+        "scripts/analysis/analyze_navigation.py": "c48d2c7b696244107665c0b07f2cd6c4fc2febb7b6f6d67b931ea02cc9be5a77",
+        "scripts/run_navigation_pilot.sh": "727d6780ae7d3fbac35b88e02ddbe554b3a6687293e329a1f11d05a62f2adb77",
+        "scripts/run_navigation_confirmation.sh": "af48c93caf45c9047828d5a7b76eed7977419290ad6863917a1df88fa50a1d56",
+        "scaffold/stream_agent.py": "0267afa17a22c5f0eea77bce82927b5d25890dea0500312163d2a1e2e1f40b79",
+        "scaffold/real_env.py": "a1b38f3d228d659a37329eb9088a80de20422f07712de9bdd9b3c7ad694ae70b",
+        "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
+        "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
+        "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
+      }
+    },
+    {
+      "path": "runs/readreq/navigation_v2_c36_pilot_untrained.json",
+      "sha256": "cfadabed589fcd3af9fde70ef5e2996b85f4693a738589cf5c5398de2e52729d",
+      "bytes": 114235,
+      "model": "Qwen/Qwen3.6-27B",
+      "temperature": 0.0,
+      "model_meta": {
+        "adapter": null,
+        "adapter_meta": null,
+        "condition": "untrained",
+        "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+        "transformers": "5.9.0",
+        "torch": "2.11.0+cu128",
+        "dtype": "torch.bfloat16"
+      },
+      "pyrefly": {
+        "path": "/home/ianbarber/Projects/Streams/.venv-streams/bin/pyrefly",
+        "version": "pyrefly 1.0.0"
+      },
+      "config": {
+        "out": "runs/readreq/navigation_v2_c36_pilot_untrained.json",
+        "model": "Qwen/Qwen3.6-27B",
+        "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+        "adapter": null,
+        "split": "readreq_pilot",
+        "arms": "push_insufficient,push_sufficient",
+        "names": null,
+        "seed": 0,
+        "temperature": 0.0,
+        "max_new": 1000,
+        "max_turns": 12,
+        "max_reads": 12,
+        "gpu_only": true,
+        "tmp_root": null,
+        "validation": "runs/protocol/navigation_v2_readreq_pilot_validation.json"
+      },
+      "declared_seeds": null,
+      "actual_seeds": [
+        0
+      ],
+      "n_rows": 12,
+      "integration_mode": "static_ast_definition_retrieval",
+      "artifact_role": "committed_model_result",
+      "source_run_files": [
+        "runs/readreq/navigation_v2_c36_pilot_untrained.json"
+      ],
+      "recorded_protocol_source_sha256": {
+        "scripts/experiments/navigation_tasks.py": "f860fd07fdeb2d4f78d89a047c6804d79cc3babd60fab7e0a06e839679692d97",
+        "scripts/experiments/run_navigation.py": "319743150b0b49a86e8c52d5264f5736d887a396e89bb5bfa7280fdce4ea72b8",
+        "scripts/analysis/analyze_navigation.py": "c48d2c7b696244107665c0b07f2cd6c4fc2febb7b6f6d67b931ea02cc9be5a77",
+        "scripts/run_navigation_pilot.sh": "727d6780ae7d3fbac35b88e02ddbe554b3a6687293e329a1f11d05a62f2adb77",
+        "scripts/run_navigation_confirmation.sh": "af48c93caf45c9047828d5a7b76eed7977419290ad6863917a1df88fa50a1d56",
+        "scaffold/stream_agent.py": "0267afa17a22c5f0eea77bce82927b5d25890dea0500312163d2a1e2e1f40b79",
+        "scaffold/real_env.py": "a1b38f3d228d659a37329eb9088a80de20422f07712de9bdd9b3c7ad694ae70b",
+        "scaffold/tooling.py": "96d5c8a25940094ee81bde6570f03755b350d29758fde8c7aa790cd35222e3b5",
+        "scripts/validate_pyrefly_lsp.py": "80576a08180d61f987bb8f51cc582727f8575f15c2ebec45a428c2e31e353e81",
+        "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
+      }
     },
     {
       "path": "runs/realbench/candidates.json",
@@ -5783,6 +6356,57 @@
       ]
     },
     {
+      "path": "runs/realbench/dispatch/local_Qwen3.6-27B_hidden_powered.json",
+      "sha256": "c89b683e123ebe4d2b7957c85a3009dca9ea80f6538c3edf7449833263d954e8",
+      "bytes": 1114519,
+      "model": "Qwen/Qwen3.6-27B",
+      "temperature": 0.7,
+      "model_meta": {
+        "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+        "transformers": "5.9.0",
+        "torch": "2.11.0+cu128",
+        "dtype": "torch.bfloat16"
+      },
+      "pyrefly": null,
+      "config": {
+        "model": "Qwen/Qwen3.6-27B",
+        "adapter": null,
+        "conds": "grep_base,defn_avail,defn_prompt",
+        "seeds": 5,
+        "seed_start": 0,
+        "temp": 0.7,
+        "gpu_only": true,
+        "max_new": 2600,
+        "max_reads": 12,
+        "max_turns": 16,
+        "tmp_root": "/tmp/streams_dispatch_hidden_powered",
+        "typing": "annotated",
+        "visibility": "hidden",
+        "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+        "out": "runs/realbench/dispatch/local_Qwen3.6-27B_hidden_powered.json",
+        "names": null
+      },
+      "declared_seeds": 5,
+      "actual_seeds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "n_rows": 225,
+      "integration_mode": "mixed_textual_and_live_language_server_plus_enclosing_span",
+      "artifact_role": "committed_model_result",
+      "source_run_files": [
+        "runs/realbench/dispatch/local_Qwen3.6-27B_hidden_powered.json"
+      ],
+      "row_treatments": [
+        "defn_avail",
+        "defn_prompt",
+        "grep_base"
+      ]
+    },
+    {
       "path": "runs/realbench/dispatch/local_Qwen3.6-27B_indirection.json",
       "sha256": "320da11be6afbc29b783a7ed0317524c4eacb64183bced644e7ddd1bbe4f972d",
       "bytes": 176488,
@@ -5855,6 +6479,57 @@
       "artifact_role": "committed_model_result",
       "source_run_files": [
         "runs/realbench/dispatch/local_Qwen3.6-27B_stripped.json"
+      ],
+      "row_treatments": [
+        "defn_avail",
+        "defn_prompt",
+        "grep_base"
+      ]
+    },
+    {
+      "path": "runs/realbench/dispatch/local_Qwen3.6-27B_visible_powered.json",
+      "sha256": "60bbb9142aabfb50d3693907f672ec04da3772c3a9a0bdf5d2351cb0e786438b",
+      "bytes": 999326,
+      "model": "Qwen/Qwen3.6-27B",
+      "temperature": 0.7,
+      "model_meta": {
+        "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+        "transformers": "5.9.0",
+        "torch": "2.11.0+cu128",
+        "dtype": "torch.bfloat16"
+      },
+      "pyrefly": null,
+      "config": {
+        "model": "Qwen/Qwen3.6-27B",
+        "adapter": null,
+        "conds": "grep_base,defn_avail,defn_prompt",
+        "seeds": 5,
+        "seed_start": 0,
+        "temp": 0.7,
+        "gpu_only": true,
+        "max_new": 2600,
+        "max_reads": 12,
+        "max_turns": 16,
+        "tmp_root": "/tmp/streams_dispatch_visible_powered",
+        "typing": "annotated",
+        "visibility": "visible",
+        "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+        "out": "runs/realbench/dispatch/local_Qwen3.6-27B_visible_powered.json",
+        "names": null
+      },
+      "declared_seeds": 5,
+      "actual_seeds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "n_rows": 225,
+      "integration_mode": "mixed_textual_and_live_language_server_plus_enclosing_span",
+      "artifact_role": "committed_model_result",
+      "source_run_files": [
+        "runs/realbench/dispatch/local_Qwen3.6-27B_visible_powered.json"
       ],
       "row_treatments": [
         "defn_avail",
@@ -6071,6 +6746,10 @@
     {
       "path": "scripts/analysis/analyze_navigation.py",
       "sha256": "c48d2c7b696244107665c0b07f2cd6c4fc2febb7b6f6d67b931ea02cc9be5a77"
+    },
+    {
+      "path": "scripts/analysis/analyze_navigation_readreq.py",
+      "sha256": "2b0dfdc8e9ce4e97b952c46e3f411699b27643563474fe800f7feb973d918bb7"
     },
     {
       "path": "scripts/analysis/analyze_retrieval_paired.py",

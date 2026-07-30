@@ -67,6 +67,11 @@ function Inlines(inlines)
       local j = i + 1
       while j <= #t and t[j].t == "Space" do j = j + 1 end
       if j <= #t and t[j].t == "Str" and t[j].text == "relabel" then
+        -- Land the cite after the full noun phrase ("DAgger-style relabel run"),
+        -- not inside it: "relabel [4] run" splits the phrase and reads wrong.
+        local k = j + 1
+        while k <= #t and t[k].t == "Space" do k = k + 1 end
+        if k <= #t and t[k].t == "Str" and t[k].text == "run" then j = k end
         table.insert(t, j + 1, pandoc.RawInline("latex", "~\\citep{ross2011dagger}"))
         dagger_done = true
         return t
@@ -107,6 +112,14 @@ function Pandoc(doc)
 
   if #abstract > 0 then
     doc.meta.abstract = pandoc.MetaBlocks(abstract)
+  end
+
+  -- The H1 above became the title and left the body, so the surviving headers
+  -- start at level 2 and would render as \subsection ("0.1 Introduction").
+  -- Promote every one by a level now that the abstract has been split out, so
+  -- "## Introduction" is a numbered \section and "### ..." a \subsection.
+  for _, b in ipairs(body) do
+    if b.t == "Header" and b.level > 1 then b.level = b.level - 1 end
   end
 
   return pandoc.Pandoc(body, doc.meta)

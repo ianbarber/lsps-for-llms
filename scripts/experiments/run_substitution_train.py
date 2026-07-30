@@ -204,9 +204,11 @@ def kept_assistant_text(tok, ids: list[int], labels: list[int]) -> str:
 # validate
 # ---------------------------------------------------------------------------
 def cmd_validate(args: argparse.Namespace) -> int:
-    install_train_split()
+    split = getattr(args, "split", TRAIN_SPLIT)
+    if split == TRAIN_SPLIT:
+        install_train_split()
     root = args.tmp_root or str(Path(tempfile.gettempdir()) / "streams_substitution_train")
-    tasks = NT.build_tasks(Path(root) / TRAIN_SPLIT, TRAIN_SPLIT)
+    tasks = NT.build_tasks(Path(root) / split, split)
     rows = []
     for task in tasks:
         row = NT._validate_task(task)
@@ -219,18 +221,34 @@ def cmd_validate(args: argparse.Namespace) -> int:
     payload = {
         "protocol": NT.PROTOCOL_VERSION,
         "experiment": "substitution-training",
-        "split": TRAIN_SPLIT,
+        "split": split,
         "generator": "scripts/experiments/run_substitution_train.py",
-        "seeds": list(TRAIN_SEEDS),
-        "templates": list(TRAIN_TEMPLATES),
-        # The reserved confirmation split is deliberately NOT enumerated here: its seeds must not
-        # appear in any artifact of this experiment. It was never built (build_tasks is called for
-        # the substrain split only) and install_train_split() asserts non-collision with it.
+        "seeds": list(NT.SPLIT_SEEDS[split]),
+        "templates": list(NT.SPLIT_TEMPLATES[split]),
+        # For the substrain split the reserved confirmation seeds are deliberately NOT enumerated:
+        # they must not appear in any artifact of the training experiment, build_tasks is called for
+        # substrain only, and install_train_split() asserts non-collision with them.
+        # For split == "confirmation" the reservation is being deliberately SPENT; see the
+        # confirmation_note below.
         "disjoint_from": {
             "pilot": list(NT.SPLIT_SEEDS["pilot"]),
             "apparatus_heldout_retest": list(NT.SPLIT_SEEDS["apparatus"]),
-            "confirmation_reserved": "not built, not enumerated, asserted disjoint",
+            "substrain_training": list(TRAIN_SEEDS),
+            "confirmation_reserved": (
+                "not built, not enumerated, asserted disjoint" if split == TRAIN_SPLIT
+                else "SPENT by this run"
+            ),
         },
+        "confirmation_note": None if split == TRAIN_SPLIT else (
+            "The reserved 41xxx confirmation split is being consumed here, once, as the "
+            "pre-registered confirmation for the SUBSTITUTION training result (C33). It was "
+            "originally reserved for the navigation-v2 typed/erased confirmation "
+            "(scripts/run_navigation_confirmation.sh), which is permanently blocked by its own "
+            "ceiling gate: that script refuses to run when every core pilot row passes held-out, "
+            "and all 8 core rows in the accepted pilot do. The seeds could therefore never be "
+            "spent on their original purpose. Seeds and templates are disjoint from the substrain "
+            "harvest set and from the apparatus retest set."
+        ),
         "protocol_source_sha256": NT._protocol_hashes(),
         "pyrefly": {"path": pyrefly, "version": version},
         "rows": rows,
@@ -419,9 +437,12 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
 
-    v = sub.add_parser("validate", help="build + mechanically validate the fresh training split")
+    v = sub.add_parser("validate", help="build + mechanically validate a navigation-v2 split")
     v.add_argument("--out", default=None)
     v.add_argument("--tmp-root", default=None)
+    # "confirmation" SPENDS the reserved 41xxx split. Deliberate and one-way; see confirmation_note
+    # in the emitted payload for why the reservation could not be honoured for its original purpose.
+    v.add_argument("--split", choices=(TRAIN_SPLIT, "confirmation"), default=TRAIN_SPLIT)
     v.set_defaults(fn=cmd_validate)
 
     h = sub.add_parser("harvest", help="DAgger relabel harvest with the substitution oracle")

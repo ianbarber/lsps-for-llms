@@ -29,6 +29,7 @@ PANDOC_FLAGS := \
   --to=latex \
   --no-highlight \
   --columns=72 \
+  --number-sections \
   --lua-filter=report-filters.lua \
   --include-in-header=preamble.tex \
   --include-after-body=references.tex \
