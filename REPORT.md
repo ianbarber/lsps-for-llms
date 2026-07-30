@@ -8,7 +8,7 @@ Coding agents are increasingly given language-server tooling on the assumption t
 
 ## Introduction
 
-A language server answers questions about code. An agent with grep, ranged reads and a shell already answers most of them itself, so what a server adds depends on whether it answers a question the agent cannot (IF), whether its answer is cheaper in tokens (FORM), and whether it arrives at a better moment (WHEN). There is significant prior work, but it is rarely measured against an agent that already reads code well; that is the baseline we used throughout.
+A language server answers questions about code. An agent with grep, ranged reads and a shell already answers most of them itself, so what a server adds depends on whether it answers a question the agent cannot (IF), whether its answer is cheaper in tokens (FORM), and whether it arrives at a better moment (WHEN). Prior work on completion and test generation compares against retrieval rather than against an agent that can look things up for itself; work on agents compares whole interfaces at once. We hold the harness and the model fixed and add or withhold one operation at a time, against a baseline of grep, ranged reads and a shell.
 
 **IF.** [Typed Holes](https://arxiv.org/abs/2409.00921) and [LSPRAG](https://arxiv.org/abs/2510.22210) push types and definitions into context on the premise the information is missing.
 
@@ -33,9 +33,10 @@ Note: We did not use an MCP server, skill or editor plugin.
 | Checker grid | 12 defect/clean pairs | Revision task: model reviews a pre-written draft carrying a seeded defect that passes the visible test; clean controls are validated gold | 0 x 1 | Timing of one diagnostic |
 | Shell-agent case study | 3 SWE-bench tasks | sympy, astropy and sphinx, through off-the-shelf mini-swe-agent with Claude Sonnet 4.5 and an AST-backed definition command | one seed, 60-step cap | Whether the constructed findings show up in a real agent on real repositories |
 
-Local models were Qwen2.5-Coder-7B, Qwen3.5-27B and Qwen3.6-27B; Claude Sonnet 4.5, DeepSeek v3.1, GLM-4.6 and GPT-5.6 "Luna" ran through an API. Most runs were temperature 0.7 with repeated seeds; some held-out retests ran at temperature 0. Workspaces are small enough to read any file completely; we did not test dynamic behavior, wrong annotations and `Any`-heavy boundaries. Code and artifacts: https://github.com/ianbarber/lsps-for-llms.
+Local models were Qwen2.5-Coder-7B, Qwen3.5-27B and Qwen3.6-27B; Claude Sonnet 4.5, DeepSeek v3.1, GLM-4.6 and GPT-5.6 "Luna" ran through an API. Most runs were temperature 0.7 with repeated seeds; some held-out retests ran at temperature 0. Workspaces are small enough to read any file completely; we did not test dynamic behavior, wrong annotations and `Any`-heavy boundaries. On real repositories, [Codebase-Memory](https://arxiv.org/abs/2603.27277) reports the same shape from the other side: a file-exploration agent answered better than a structured graph tool, 92% against 83%, at roughly ten times the tokens. Code and artifacts: https://github.com/ianbarber/lsps-for-llms.
 
 Measures:
+
 * **Resolution**: fixed the intended target and passed a held-out test written against the specification, separate from the visible one.
 * **Cost**: total tokens, input plus output, over the whole trajectory.
 * **Election**: how often the agent chose an offered semantic operation.

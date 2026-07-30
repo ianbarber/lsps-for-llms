@@ -172,9 +172,12 @@ A language server answers questions about code. An agent with grep,
 ranged reads and a shell already answers most of them itself, so what a
 server adds depends on whether it answers a question the agent cannot
 (IF), whether its answer is cheaper in tokens (FORM), and whether it
-arrives at a better moment (WHEN). There is significant prior work, but
-it is rarely measured against an agent that already reads code well;
-that is the baseline we used throughout.
+arrives at a better moment (WHEN). Prior work on completion and test
+generation compares against retrieval rather than against an agent that
+can look things up for itself; work on agents compares whole interfaces
+at once. We hold the harness and the model fixed and add or withhold one
+operation at a time, against a baseline of grep, ranged reads and a
+shell.
 
 \textbf{IF.} Typed Holes~\citep{blinn2024typedholes} and
 LSPRAG~\citep{go2025lsprag} push types and definitions into context on
@@ -259,15 +262,29 @@ Sonnet 4.5, DeepSeek v3.1, GLM-4.6 and GPT-5.6 ``Luna'' ran through an
 API. Most runs were temperature 0.7 with repeated seeds; some held-out
 retests ran at temperature 0. Workspaces are small enough to read any
 file completely; we did not test dynamic behavior, wrong annotations and
-\texttt{Any}-heavy boundaries. Code and artifacts:
-https://github.com/ianbarber/lsps-for-llms.
+\texttt{Any}-heavy boundaries. On real repositories,
+Codebase-Memory~\citep{vogel2026codebasememory} reports the same shape
+from the other side: a file-exploration agent answered better than a
+structured graph tool, 92\% against 83\%, at roughly ten times the
+tokens. Code and artifacts: https://github.com/ianbarber/lsps-for-llms.
 
-Measures: * \textbf{Resolution}: fixed the intended target and passed a
-held-out test written against the specification, separate from the
-visible one. * \textbf{Cost}: total tokens, input plus output, over the
-whole trajectory. * \textbf{Election}: how often the agent chose an
-offered semantic operation. * \textbf{Substitution}: reads of the
-defining file after a span was delivered.
+Measures:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Resolution}: fixed the intended target and passed a held-out
+  test written against the specification, separate from the visible one.
+\item
+  \textbf{Cost}: total tokens, input plus output, over the whole
+  trajectory.
+\item
+  \textbf{Election}: how often the agent chose an offered semantic
+  operation.
+\item
+  \textbf{Substitution}: reads of the defining file after a span was
+  delivered.
+\end{itemize}
 
 Checker experiments also report wall time. Measurements are per-task;
 rollouts are grouped per task to get observations for intervals.

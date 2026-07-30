@@ -32,6 +32,7 @@ local LINK_CITE = {
   ["https://arxiv.org/abs/2510.22907"] = "zhang2025rlcsf",            -- RLCSF v2
   ["https://arxiv.org/abs/2310.06770"] = "jimenez2024swebench",       -- SWE-bench
   ["https://arxiv.org/abs/2605.13360"] = "hooper2026speculative",     -- live-delivery design
+  ["https://arxiv.org/abs/2603.27277"] = "vogel2026codebasememory",   -- real-repo corroboration
   -- mini-swe-agent has no paper; its README asks citers to cite SWE-agent.
   ["https://github.com/SWE-agent/mini-swe-agent"] = "minisweagent,yang2024sweagent",
 }

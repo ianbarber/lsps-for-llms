@@ -1,15 +1,12 @@
 # When Do Language Servers Help Coding Agents?
 
 Experiments on whether language-server tooling makes a coding agent better, measured against a
-capable text baseline of grep, ranged reads and a shell.
-
-**The short answer.** Making a language server available changed nothing on its own: agents largely
-declined the operations they were offered, and the gains came from a prompt, from fine-tuning, or
-from a gate that blocked the work.
+capable  baseline of grep, ranged reads and a shell.
 
 Correct, visible type annotations helped regardless of tooling, and are what the agent navigated on
-when it had them. Go-to-definition helped only where working out a receiver's type meant leaving the
-source already in front of the agent, and only when the agent was told to use it. A compact
+when it had them. 
+
+Go-to-definition helped only where working out a receiver's type meant leaving the source already in front of the agent, and only when the agent was told to use it. A compact
 definition span cost less than reading the file when it replaced that read, which it mostly did not
 until the model was fine-tuned. A type checker worked best as a blocking gate at the end of the
 turn, where the gain came from refusing the submission rather than from the moment the diagnostic
