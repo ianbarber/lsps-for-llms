@@ -170,9 +170,8 @@ Running a type checker at the end of the agent's turn, as a gate that
 rejects a defective submission and asks for a repair, took accepted
 correct outcomes from 1 of 12 to 11 of 12 on seeded defects. The same
 diagnostic delivered during editing changed nothing, on a channel the
-model exercised in 1 of 12 tasks. Across all three services the benefit
-tracked whether the agent's behaviour changed, and making the tool
-available did not by itself change it.
+model exercised in 1 of 12 tasks. In none of the three did making the
+tool available change what the agent did with it.
 \end{abstract}
 
 \section{Introduction}\label{introduction}
@@ -724,8 +723,9 @@ do cost less than reading a file, but only if the agent stops reading
 the file, and mostly it did not. Fine-tuning removed that habit on one
 model in one apparatus, which establishes that the behaviour is
 trainable without saying much about how to obtain it in an agent whose
-weights you do not control. Across all three, the tooling changed
-outcomes exactly where it changed what the agent did.
+weights you do not control. Each of the three needed its own mechanism
+to get the agent to use what it was given: an instruction for lookup, a
+blocking gate for the checker, fine-tuning for substitution.
 
 %% paper/references.tex
 %% Included after the document body (pandoc --include-after-body).
