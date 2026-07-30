@@ -2,9 +2,9 @@
 
 ## Abstract
 
-Coding agents are increasingly given language-server tooling on the assumption that better code intelligence makes a better agent. We tested that assumption against a capable text baseline of grep, ranged reads and a shell, across 7 models. Across all three operations, benefit tracked whether the agent's behaviour changed; availability alone did not change it. Go-to-definition helped only where the receiver's type could not be read in the source at hand, and only when the agent was told to use it. Definition spans saved tokens only when they replaced the file read; models reread on 35 of 36 instances, and training removed the habit. A type checker gating submission took accepted correct outcomes from 1 of 12 to 11 of 12, while the after-every-edit arm could not be exercised.
+Coding agents are increasingly given language-server tooling on the assumption that better code intelligence makes a better agent. We tested that assumption against a capable text baseline of grep, ranged reads and a shell, across 7 models. Across all three operations, benefit tracked whether the agent's behaviour changed; availability alone did not change it. Go-to-definition helped only where resolving the receiver's type cost a retrieval step rather than being already in context, and only when the agent was told to use it. Definition spans saved tokens only when they replaced the file read; models reread on 35 of 36 instances, and training removed the habit. A type checker gating submission took accepted correct outcomes from 1 of 12 to 11 of 12, while the after-every-edit arm could not be exercised.
 
-> **If you use a coding agent:** run your type checker at the end of the turn as a blocking gate; skip navigation tools where types are readable in the source the agent opens, and instruct the agent to use one where they are not; do not assume a definition tool saves tokens until the agent stops reading the file.
+> **If you use a coding agent:** run your type checker at the end of the turn as a blocking gate; skip navigation tools where a receiver's type is written beside the code that uses it, and add one, with an instruction to use it, where resolving a type means reaching into a stub, a generated client or a compiled boundary; do not assume a definition tool saves tokens until the agent stops reading the file.
 
 ## Introduction
 
@@ -23,7 +23,7 @@ Most experiments ran in a custom harness: a model drives a fixed loop of six act
 | Suite | N | Source | Temp x seeds | Isolates |
 |---|---|---|---|---|
 | Dispatch ladder | 15 tasks x 3 rungs | Synthetic; typed receiver, ~10 same-named overrides (one buggy); type moves from call-site annotation to construction site to factory indirection | 0 x 1 | Whether lookup reaches targets text search cannot |
-| Hidden rung + control | 15 tasks, 450 rollouts | Synthetic; application and test source withheld, receiver construction redacted | 0.7 x 5 | Lookup when the type cannot be read |
+| Hidden rung + control | 15 tasks, 450 rollouts | Synthetic; application and test source left on disk but not pasted into the prompt, receiver construction redacted in the quoted asserts | 0.7 x 5 | Lookup when the type costs a retrieval step |
 | Whole-file contrast | Synthetic set | Fully synthetic | 0.7 x 4 | Span cost vs a whole-file read |
 | Retrieval cost, paired | 11 tasks | Constructed misuse over vendored toolz 1.1.0, more-itertools 11.1.0 | 0 x 1 | Span cost vs grep and ranged reads |
 | Definition spans | 12 instances per arm | Mechanically validated | 0 x 1 | Whether the span displaces the read |
@@ -37,11 +37,11 @@ Local models were Qwen2.5-Coder-7B, Qwen3.5-27B and Qwen3.6-27B; Claude Sonnet 4
 
 ### IF: does delivering the semantic information change what the agent finds?
 
-Where the receiver's type was visible in the source, lookup made no difference. Text search resolved all 15 dispatch tasks; go-to-definition resolved 14 unprompted and 15 prompted, and stayed at 14 or 15 across the 3 rungs. That includes factory indirection, where only a type-aware server can resolve the receiver statically. The agent grepped about 0.3 times per task, read the type wherever it appeared, and opened the buggy override first. The type being present and correct in the source is what carries resolution; the server only queries it.
+The first three rungs paste the application and test source into the prompt, so the type is in the agent's context from the first token and the rungs vary only where within that source it sits. There, lookup made no difference. Text search resolved all 15 dispatch tasks; go-to-definition resolved 14 unprompted and 15 prompted, and stayed at 14 or 15 across the 3 rungs. That includes factory indirection, where only a type-aware server can resolve the receiver statically. The agent grepped about 0.3 times per task, read the type wherever it appeared, and opened the buggy override first. The type being present and correct in the source is what carries resolution; the server only queries it.
 
 On matched successes, cost was flat too: 1.03 times text search when lookup was merely available, 0.96 when prompted, 0.94 to 1.06 across rungs. The difference is displacement. The prompted agent swapped the span for its file read (0.07 whole-file reads per task against 1.00); the unprompted agent paid for both (1.00 reads plus 0.80 lookups). Part of that cost is advertisement rather than retrieval: describing the tool adds a one-time 45 tokens to the available arm and 95 to the prompted, and net of that the ratios are 1.00 and 0.90.
 
-When the type cannot be read, the answer changes. The fourth rung keeps it out of any source the agent can open and ran at 5 seeds per task against a matched visible control, in three arms: text search alone (grep_base), lookup available but unprompted (defn_avail), and lookup with an instruction to use it (defn_prompt).
+When resolving the type costs a retrieval step, the answer changes. The fourth rung stops pasting the application and test source into the prompt. Both stay on disk and either arm can fetch them, so the type is no longer free in context but remains reachable by read, grep or lookup alike; the text arm read the application file in all 75 rollouts. Both arms are also given the use-site line and column, without which the lookup could not be called before a read at all. The rung ran at 5 seeds per task against a matched visible control, in three arms: text search alone (grep_base), lookup available but unprompted (defn_avail), and lookup with an instruction to use it (defn_prompt).
 
 | Arm | Resolved | Difference vs grep | Greps | Whole-file reads |
 |---|---:|---|---:|---:|
@@ -51,7 +51,7 @@ When the type cannot be read, the answer changes. The fourth rung keeps it out o
 
 *Per-task resolution over 5 seeds at temperature 0.7; 95% task bootstrap intervals over 15 tasks; greps and reads are per-task means. In the matched visible control every arm resolved all 75 rollouts.*
 
-Prompting raised the resolution rate on 4 tasks and lowered it on none; availability raised it on 3 and lowered it on 2, indistinguishable from text search. Tokens barely moved (0.983 prompted, 1.005 available, on tasks both arms solved); the cost of hiding the type showed up in resolution. The rung is constructed, and it withholds source a real agent could usually open.
+Prompting raised the resolution rate on 4 tasks and lowered it on none; availability raised it on 3 and lowered it on 2, indistinguishable from text search. Tokens barely moved (0.983 prompted, 1.005 available, on tasks both arms solved); the cost of hiding the type showed up in resolution. The rung is constructed, and it keeps out of the prompt source a real agent would usually be given.
 
 A pilot isolated the resolver on repositories byte-identical apart from one stub. Typed lookup picked the intended override from 8 to 15 same-named candidates; the erased variant resolved to the base declaration every override shares; both type-checked cleanly. The precision made no difference at the agent level: all 12 task-condition cells passed, the typed automatic arm cost 1.037 times the textual ([0.988, 1.093], too wide to call equivalence), every automatic result was followed by a read of the target file, and lookup added about 6 seconds per task.
 
@@ -106,9 +106,9 @@ Defects had to be seeded because capable models rarely leave checker-detectable 
 
 **Run your type checker at the end of the agent's turn and make it blocking.** The clearest return here and the cheapest to wire; it costs nothing on clean work. Count how often it blocks, how often the repair passes, and how often it rejects clean work.
 
-**Skip a navigation tool if your types are written where the agent reads.** Open a file your agent works in; if you can tell what type a variable holds from the screen, so can the model.
+**Decide from where your types live, not from what the agent reads.** Where a receiver's type is written beside the code that uses it, in an annotated signature or a concrete construction, a navigation tool adds nothing: the model reads the annotation and finds the target itself. It earns its place where knowing the type means leaving that source, as with generated stubs, compiled extensions, vendored packages, or objects assembled by a factory, registry or container. Sample a dozen call sites where a method has several implementations and count how many you can resolve without opening a stub or a generated file; that fraction is what a lookup tool competes against, and you can measure it without running an agent.
 
-**Consider one where you cannot**: types living only in a generated stub, behind a compiled extension, inside a vendored package, or on an object assembled elsewhere. The merely-available arm performed like text search, so put the instruction to use it in your project instructions or tool description, and count invocations to confirm the agent elects it.
+**If you add one, tell the agent to use it.** The merely-available arm performed like text search, so put the instruction in your project instructions or tool description, and count invocations to confirm the agent elects it.
 
 **Do not assume a definition tool saves tokens until the agent stops reading.** Count reads of the defining file after the tool has returned it; above zero, the tool adds context on top of the read it should replace.
 
@@ -122,7 +122,7 @@ Defects had to be seeded because capable models rarely leave checker-detectable 
 
 **Tools co-designed with the agent.** Every tool tested was built for a human, who can ignore a diagnostic and choose what to ask. An agent inherits those defaults; hence the best option was one checker run at turn end. Could a checker decide when a diagnostic is worth interrupting for, and a server anticipate what the caller needs next? Whether a tool can learn when to interrupt is untested here.
 
-**Assessing a codebase in advance.** The discriminator, whether the type is readable in the source the agent opens, is a repository property no practitioner can yet compute. Annotation density, indirection depth between call site and binding definition, or the share of types resolving only through a stub or compiled boundary might predict what a server buys.
+**Assessing a codebase in advance.** The discriminator, whether resolving a receiver's type costs a retrieval step, is a repository property no practitioner can yet compute, and the sampling test above is only a proxy for it. Annotation density, indirection depth between call site and binding definition, or the share of types resolving only through a stub or compiled boundary might predict what a server buys.
 
 **Which tasks.** Everything here is dispatch ambiguity and small seeded defects in readable workspaces. Semantic tooling may matter in proportion to how much relevant context sits outside what the agent can afford to read: wide refactors, cross-module renames, API migrations. An agent that stops reading is cheaper until the thing it needed was in the part it skipped; we do not know which tasks that failure lands on.
 
