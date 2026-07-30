@@ -163,13 +163,13 @@ Installing the server is not the intervention.
 
 \section{Introduction}\label{introduction}
 
-A language server answers questions about code. So does a coding agent
-with grep, ranged reads and a shell, and it answers most of them without
-help. What a server adds therefore depends on three things: whether it
-answers a question the agent cannot, whether its answer is cheaper, and
-whether it arrives at a better moment. Prior work rarely measures
-against an agent that already reads code well, so that is the baseline
-we use throughout.
+A language server answers questions about code. A coding agent with
+grep, ranged reads and a shell already answers most of the same
+questions on its own. What a server adds therefore depends on three
+things: whether it answers a question the agent cannot, whether its
+answer is cheaper, and whether it arrives at a better moment. Prior work
+rarely measures against an agent that already reads code well, so that
+is the baseline we use throughout.
 
 IF: does delivering the semantic information change what the agent
 finds? Typed Holes~\citep{blinn2024typedholes} and
@@ -208,7 +208,7 @@ MCP server, a skill or an editor plugin, so these experiments can say
 which operation helps but cannot rank delivery surfaces against each
 other.
 
-We created four task suites. The dispatch suite has 15 synthetic tasks
+We created five task suites. The dispatch suite has 15 synthetic tasks
 in which a typed receiver calls one of roughly 10 identically named
 overrides, only one of which is buggy. It runs across a ladder that
 moves the receiver's type progressively further from the call site, from
@@ -217,16 +217,16 @@ indirection, and a fourth rung that hides the type altogether by
 withholding the application and test source and redacting the receiver
 construction. Two suites measure retrieval cost: one is fully synthetic,
 and the other builds constructed misuse tasks over vendored library
-source from toolz 1.1.0 and more-itertools 11.1.0. A fourth suite
-supplies mechanically validated definition-span instances for the
-substitution experiments. The checker suite has 12 pairs of seeded
-defects and clean controls, where each defect is coherent (the target
-file parses and leaves no unimplemented stub), passes the visible test,
-fails a held-out test, and carries a single semantic diagnostic in the
-target file, and each clean control is that defect's own validated gold.
-We built the tasks because a bounded scan of real repositories produced
-no candidate that passed all four screens: environment, leakage,
-ambiguity and discriminating lookup.
+source from toolz 1.1.0 and more-itertools 11.1.0. Another supplies
+mechanically validated definition-span instances for the substitution
+experiments. The checker suite has 12 pairs of seeded defects and clean
+controls, where each defect is coherent (the target file parses and
+leaves no unimplemented stub), passes the visible test, fails a held-out
+test, and carries a single semantic diagnostic in the target file, and
+each clean control is that defect's own validated gold. We built the
+tasks because a bounded scan of real repositories produced no candidate
+that passed all four screens: environment, leakage, ambiguity and
+discriminating lookup.
 
 The definition operation in the retrieval experiments is a static AST
 resolver rather than a live language server. Live Pyrefly served the
@@ -297,42 +297,23 @@ alone (grep\_base), lookup available but unprompted (defn\_avail), and
 lookup available with an instruction to use it (defn\_prompt).
 
 {\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1364}}
-  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1818}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1364}}
-  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1818}}
-  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1818}}
-  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1818}}@{}}
+\begin{longtable}[]{@{}lrlrr@{}}
 \toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Arm
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
-Hidden
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Paired difference vs grep
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
-Greps
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
-Whole-file reads
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
-Visible
-\end{minipage} \\
+Arm & Resolved & Difference vs grep & Greps & Whole-file reads \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-grep\_base & 70/75 & --- & 1.52 & 2.17 & 75/75 \\
-defn\_avail & 71/75 & +0.013 {[}−0.040, +0.067{]} & 1.47 & 2.04 &
-75/75 \\
-defn\_prompt & 75/75 & +0.067 {[}+0.013, +0.133{]} & 0.36 & 0.68 &
-75/75 \\
+grep\_base & 70/75 & --- & 1.52 & 2.17 \\
+defn\_avail & 71/75 & +0.013 {[}−0.040, +0.067{]} & 1.47 & 2.04 \\
+defn\_prompt & 75/75 & +0.067 {[}+0.013, +0.133{]} & 0.36 & 0.68 \\
 \end{longtable}
 }
 
 \emph{Per-task resolution rates over 5 seeds at temperature 0.7, with
 95\% task bootstrap intervals over the 15 tasks. Greps and whole-file
-reads are per-task means.}
+reads are per-task means. In the matched visible control every arm
+resolved all 75 rollouts.}
 
 Prompting the agent to use lookup improved 4 tasks and worsened none.
 Offering the same operation without prompting improved 3 and worsened 2,
@@ -369,8 +350,8 @@ real library source, Qwen3.5-27B spent 1,602 mean total tokens with text
 retrieval and 1,235 with definitions, a paired ratio of 1.297 with a
 bootstrap interval {[}1.093, 1.527{]}, and definitions were cheaper on
 10 of the 11. Both arms solved everything. It is also the case where the
-span actually replaced the read, with none of the 11 results followed by
-a reread, and that turned out to be the exception.
+span did replace the read, with none of the 11 results followed by a
+reread, and that turned out to be the exception.
 
 The saving therefore depends on two agent behaviours. The first is
 election, choosing the operation at all, and it is the tractable one. An
@@ -415,26 +396,27 @@ the span, it still reread on 9 of 9, 4 of 9 and 7 of 12. GLM-4.6 solved
 and the reread was counted independently of whether the task succeeded.
 
 The behaviour is not an artifact of the constructed apparatus. In the
-shell-agent case study, roughly 16 of 18 definition calls were followed
-by a read of the file just resolved, in one case 22 ranged reads of the
-same sympy module. The same agent took between 0 and 3 whole-file reads
-in 44 to 60 actions, which is why the large whole-file ratios above do
-not describe its situation.
+shell-agent case study, a manual cross-check of the trajectories matched
+about 16 of 18 definition calls to a later read of the file just
+resolved, in one case 22 ranged reads of the same sympy module. The same
+agent took between 0 and 3 whole-file reads in 44 to 60 actions, which
+is why the large whole-file ratios above do not describe its situation.
 
-Training is the only lever that worked. A DAgger-style relabel
-run~\citep{ross2011dagger} harvested 39 demonstrations, none of which
-required a read, and cut the reread from 11 of 12 to none on held-out
-instances built from different seeds and different templates, moving
-mean input from 1,157 to 748 tokens for a saving of 1.59x on tasks both
-arms solved. Held-out pass moved from 11 to 10 of 12: 1 rescue against 2
-losses that pass the visible test and fail the specification. At 12
-instances and one seed, that difference is not distinguishable from
-noise. We then ran a pre-registered confirmation on a reserved set of 12
-instances, disjoint from the harvest in both seeds and templates. It
-reproduced the effect: the reread fell from 12 of 12 to 1 of 12, with 11
-removed, 1 persisting and none induced, mean input fell from 1,223 to
-729 tokens for a saving of 1.72x on tasks both arms solved, and held-out
-pass moved from 12 to 11 of 12.
+Training was the only lever that moved substitution, and it moved it
+completely. A DAgger-style relabel run~\citep{ross2011dagger} harvested
+39 demonstrations, none of which required a read, and cut the reread
+from 11 of 12 to none on held-out instances built from different seeds
+and different templates, moving mean input from 1,157 to 748 tokens for
+a saving of 1.59x on tasks both arms solved. Held-out pass moved from 11
+to 10 of 12: 1 rescue against 2 losses that pass the visible test and
+fail the specification. At 12 instances and one seed, that difference is
+not distinguishable from noise. We then ran a pre-registered
+confirmation on a reserved set of 12 instances, disjoint from the
+harvest in both seeds and templates. It reproduced the effect: the
+reread fell from 12 of 12 to 1 of 12, with 11 removed, 1 persisting and
+none induced, mean input fell from 1,223 to 729 tokens for a saving of
+1.72x on tasks both arms solved, and held-out pass moved from 12 to 11
+of 12.
 
 Because every training example had a span that already contained the
 defect, this leaves open whether the model learned to judge sufficiency
@@ -552,15 +534,14 @@ from refusal: on one task the model received the diagnostic, made no
 edits, and submitted anyway, and only the gate's rejection forced a
 repair. Its single miss is instructive in the other direction, since the
 model self-repaired into a state that was type-clean and still failed
-the held-out test, which is the limit of any gate built on a type
-checker.
+the held-out test, which is something no type-checker gate can catch.
 
 Two caveats bound this. The zero false rejections on clean drafts are an
 apparatus check: each clean control is that defect's own validated gold
 and the checker is deterministic, so it could not have rejected them,
 and the rate on real work is unmeasured. The defects also had to be
 seeded because capable models rarely leave checker-detectable ones:
-frontier inference sat at ceiling, no natural 7B draft was coherent
+frontier models passed every attempt, no natural 7B draft was coherent
 enough to use, and the coherent 14B drafts were already type-clean. A
 separate grid on execution feedback, covering 2 frontier models, 14
 tasks, 3 seeds and 3 delivery modes, passed all 252 of its attempts.
@@ -576,23 +557,21 @@ code it had open, worked out which override the call bound to, and went
 to the right file on its own. The type being present and correct in the
 source is what carries resolution; the server only queries it.
 
-Navigation helps when the type is not in the code the agent can see:
-when it lives in a generated stub, behind a compiled extension, inside a
-vendored package, or on an object constructed somewhere the agent has
-not opened. The agent then has to fetch the type, and lookup resolved
-tasks that text search could not. Even there, availability was not
-enough. The agent had to be told to use the operation, and the arm that
-merely offered it performed like text search. Sound types also sharpen
-the resolver itself, picking the right override out of many that share a
-name, but that precision produced no gain at the agent level.
+Navigation helps when the type lives outside the source the agent can
+open, in a stub, a compiled extension or a vendored package. The agent
+then has to fetch the type, and lookup resolved tasks that text search
+could not. Even there, availability was not enough: the agent had to be
+told to use the operation before resolution moved. Sound types also
+sharpen the resolver itself, picking the right override out of many that
+share a name, but that precision produced no gain at the agent level.
 
 \subsection{Form}\label{form}
 
 A compact span is cheaper than a read only when it replaces the read,
 and whether it does is decided by the agent's policy. Against a
 whole-file read the span wins by a wide margin, but a real coding agent
-rarely reads a whole file in the first place, so the margin it actually
-works with is the narrow one against competent grep and ranged reads.
+rarely reads a whole file in the first place, so the margin it works
+with is the narrow one against competent grep and ranged reads.
 
 Two behaviours sit between the operation and the saving, and they proved
 very different. Election, choosing the operation at all, moves easily:
@@ -608,9 +587,9 @@ once on average where the untrained model read 3.42 times. Given a span
 that sufficed it mostly stopped, and given the missing definition as
 well it stopped entirely. Correctness did not change in any of these
 conditions, so what training bought is an agent that retrieves only when
-retrieval is warranted, tested against one form of insufficiency. It
-learned that distinction from demonstrations in which reading was never
-the right move.
+retrieval is warranted, though we tested that judgment against a single
+form of insufficiency. It learned that distinction from demonstrations
+in which reading was never the right move.
 
 \subsection{Timing}\label{timing}
 
@@ -620,15 +599,15 @@ because it charges only defective work: diagnostics at revision arrive
 whether or not the draft needs them, so every clean draft pays, while
 clean work behind the gate costs what it did without a checker.
 Delivering the same checker after every edit changed nothing on a
-channel that fired on 1 of 12 defects, which leaves that null
-uninformative.
+channel that fired on 1 of 12 defects, so that arm tells us nothing
+either way.
 
 The gate's ceiling is the checker behind it, since a submission can
 clear a type check and still be wrong, which is what happened on the one
 defect it let through. The opportunity is scarce in any case, because
 capable models rarely leave a checker-detectable defect at all. All of
-this is a limit of today's checkers, not a claim about timing in
-principle.
+this bounds the claim to today's checkers; whether a better-timed one
+could do more is open.
 
 \section{If you use a coding agent}\label{if-you-use-a-coding-agent}
 
@@ -674,7 +653,7 @@ because the clean-work cost here came from workspaces guaranteed clean.
 
 \section{Future work}\label{future-work}
 
-The line most worth following is retrieval calibration. A harvest of 39
+Retrieval calibration is the line most worth following. A harvest of 39
 demonstrations, none of which required a read, produced a model that
 goes looking when what it holds is inadequate and stops when it is not.
 That is a judgment about the sufficiency of retrieved context, learned
@@ -689,7 +668,7 @@ unlike the delegation tested here, or was the model reading a surface
 cue? Does it hold at other scales, outside a task-specific adapter, and
 on a real codebase, where sufficiency is a matter of degree?
 
-The second line is co-designing the tool with the agent. Every tool
+A second direction is co-designing the tool with the agent. Every tool
 tested here was built for a human in an editor. A type checker reports
 on every change because a person can glance at a squiggle and ignore it,
 and a language server answers the question it was asked because a person
@@ -701,21 +680,20 @@ interrupting for, suppressing what the agent is already about to fix and
 breaking in when it is heading somewhere expensive; a server built for
 an agent could anticipate what the caller needs next. The deeper
 question is whether the tool can learn when to speak. Nothing here tests
-that, and the gate result is the ceiling of what the human-facing
-version can do.
+that, and the gate result is as far as the human-facing version goes.
 
-The third question is whether a codebase can be assessed in advance. Our
-results say the discriminator is whether the type is readable in the
-source the agent already opens. That is a property of the repository,
-and yet a practitioner has no way to compute it. Something like
-annotation density, the depth of indirection between a call site and the
-definition that binds it, or the share of types that resolve only
-through a stub or a compiled boundary might predict how much a language
-server buys before anyone installs one. That would turn a per-workload
-measurement into a decision that can be read off the repository.
+Can a codebase be assessed in advance? Our results say the discriminator
+is whether the type is readable in the source the agent already opens.
+That is a property of the repository, and yet a practitioner has no way
+to compute it. Something like annotation density, the depth of
+indirection between a call site and the definition that binds it, or the
+share of types that resolve only through a stub or a compiled boundary
+might predict how much a language server buys before anyone installs
+one. That would turn a per-workload measurement into a decision that can
+be read off the repository.
 
-The fourth is which tasks semantic tooling helps most, and which it
-hurts. Everything here is dispatch ambiguity and small seeded defects in
+Finally, which tasks does semantic tooling help, and which does it hurt?
+Everything here is dispatch ambiguity and small seeded defects in
 workspaces small enough to read. The intuition worth testing is that
 semantic tooling matters in proportion to how much relevant context sits
 outside what the agent can afford to read, which would point at wide
@@ -727,25 +705,20 @@ that failure lands on.
 
 \section{Conclusion}\label{conclusion}
 
-Language servers help coding agents when two conditions hold together:
-the server supplies something the agent cannot cheaply work out for
-itself, and the agent's behaviour actually changes to use it. Most of
-what we tested failed one or the other.
-
-Go-to-definition usually fails the first. The agent reads the types it
-needs in the code already in front of it and finds the right definition
-unaided. Where those types are not in that code it does help, but only
-when the agent is told to use it; merely offering it changed nothing. A
-compact definition span fails the second. It costs less than reading the
-file only when it replaces that read, and models handed a span opened
-the file anyway; prompting did not change that and training did. A type
-check at the moment of submission satisfies both conditions, which is
-why it was the clearest result here. It catches what the model cannot
-see in its own work, and a blocking gate forces the behavioural change
-that prompting only requests.
-
-What moved the outcome in every thread was a change in what the agent
-did, not what it was given.
+Of the three services we tested, one paid off plainly. Running a type
+checker at the end of the agent's turn, as a gate that blocks a
+defective submission and asks for a repair, was cheap to wire, cost
+nothing on clean work, and turned most bad submissions into repaired
+ones. Go-to-definition mostly told the agent what it could already read,
+and earned its place only where the type sat outside the source at hand,
+and then only when the agent was prompted to reach for it. Compact spans
+do cost less than reading a file, but only if the agent stops reading
+the file, and mostly it did not. Fine-tuning removed that habit on one
+model in one apparatus, which establishes that the behaviour is
+trainable without saying much about how to obtain it in an agent whose
+weights you do not control. The common thread is that the tooling moved
+outcomes only where it changed what the agent did, and none of it
+changed that by being available.
 
 %% paper/references.tex
 %% Included after the document body (pandoc --include-after-body).
