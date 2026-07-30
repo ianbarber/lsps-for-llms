@@ -150,8 +150,12 @@ receiver's type cost a retrieval step rather than being already in
 context, and only when the agent was told to use it. Definition spans
 saved tokens only when they replaced the file read; models reread on 35
 of 36 instances, and training removed the habit. A type checker gating
-submission took accepted correct outcomes from 1 of 12 to 11 of 12,
-while the after-every-edit arm could not be exercised.
+submission took accepted correct outcomes from 1 of 12 to 11 of 12, and
+its advantage came from refusing the submission rather than from the
+moment it spoke: across six delivery points on a separate authoring
+suite, timing made no difference, and the one channel that instructed
+the agent to fix each diagnostic on arrival did worse than no feedback
+at all.
 
 \begin{quote}
 \textbf{If you use a coding agent:} run your type checker at the end of
@@ -239,6 +243,9 @@ toolz 1.1.0, more-itertools 11.1.0 & 0 x 1 & Span cost vs grep and
 ranged reads \\
 Definition spans & 12 instances per arm & Mechanically validated & 0 x 1
 & Whether the span displaces the read \\
+Delivery timing & 14 tasks x 6 arms, 168 rollouts per arm & Synthetic
+single-file authoring; no feedback, 2 batched and 3 live delivery points
+& 0.7 x 12 & When a diagnostic should arrive \\
 Checker grid & 12 defect/clean pairs & Revision task: model reviews a
 pre-written draft carrying a seeded defect that passes the visible test;
 clean controls are validated gold & 0 x 1 & Timing of one diagnostic \\
@@ -468,8 +475,9 @@ behind the gate (+0.375 {[}+0.250, +0.500{]}; +0.417 {[}+0.292,
 +0.125{]}). Left to itself the model rarely touched the draft, editing
 before submitting on 1 of 12 defects, so the checker fired once and 11
 of 12 defective drafts went through unchanged. That arm is unexercised
-rather than refuted: a diagnostic keyed to edits cannot fire when the
-agent makes none.
+rather than refuted in this grid: a diagnostic keyed to edits cannot
+fire when the agent makes none. A separate experiment, below, tested
+delivery timing directly.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -523,6 +531,24 @@ rejection forced a repair. Its single miss is a limit of the checker
 itself: a self-repair that was type-clean still failed the held-out
 test, which no gate can catch.
 
+On a task where the agent does write code, timing itself turns out not
+to matter. An earlier authoring suite put a 7B agent and a real type
+checker through six delivery points at 168 paired rollouts each: no
+feedback, batched at yield, batched after each edit, and three live
+channels that interrupt mid-generation. Five of the six are
+indistinguishable, spanning 0.458 to 0.530 resolved with no significant
+contrast between any pair (smallest p=0.119). The exception is a live
+channel carrying an instruction to fix each diagnostic on arrival, at
+0.339, worse than every other arm including no feedback at all (+0.143
+{[}+0.077, +0.208{]} for the no-feedback comparison, p=0.0043). Removing
+that instruction recovers most of the deficit (+0.119 {[}+0.036,
++0.202{]}). Gating the same channel so it speaks only when the file
+parses removes about 70\% of its messages, since most described the
+model's own half-finished edit, but barely moves the outcome (+0.024
+{[}−0.065, +0.137{]}). A 7B on single-file synthetic tasks is a
+different setting from the 27B revision grid above, so the two do not
+merge.
+
 Defects had to be seeded because capable models rarely leave
 checker-detectable ones: frontier models passed every attempt, no
 natural 7B draft was coherent enough, and coherent 14B drafts were
@@ -535,6 +561,14 @@ models, 14 tasks, 3 seeds, 3 delivery modes) passed all 252 attempts.
 blocking.} The clearest return here and the cheapest to wire; it costs
 nothing on clean work. Count how often it blocks, how often the repair
 passes, and how often it rejects clean work.
+
+\textbf{Do not wire a checker to nag during the work.} Timing itself
+bought nothing across six delivery points, but a live channel telling
+the agent to fix each diagnostic as it arrived did worse than no checker
+at all, mostly by interrupting with complaints about the agent's own
+half-written code. If you already stream diagnostics, drop any
+instruction to act on each one, and count how many fire against a file
+that does not yet parse.
 
 \textbf{Decide from where your types live, not from what the agent
 reads.} Where a receiver's type is written beside the code that uses it,
@@ -582,10 +616,15 @@ sufficiency is a matter of degree?
 
 \textbf{Tools co-designed with the agent.} Every tool tested was built
 for a human, who can ignore a diagnostic and choose what to ask. An
-agent inherits those defaults; hence the best option was one checker run
-at turn end. Could a checker decide when a diagnostic is worth
-interrupting for, and a server anticipate what the caller needs next?
-Whether a tool can learn when to interrupt is untested here.
+agent inherits those defaults, and the results suggest the inherited
+default that costs most is not the timing but the demand: interrupting
+mid-work was harmless once the agent was no longer told to act on each
+message, while gating the interruptions removed most of them and changed
+little. So the question is less when a checker should speak than what it
+should ask for, and whether it can learn to distinguish a diagnostic
+worth acting on now from one that will resolve itself. A server could
+likewise anticipate what the caller needs next rather than answering
+only what it was asked. Neither is tested here.
 
 \textbf{Assessing a codebase in advance.} The discriminator, whether
 resolving a receiver's type costs a retrieval step, is a repository
