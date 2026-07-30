@@ -27,7 +27,7 @@ Most experiments ran in a custom harness: a model drives a fixed loop of six act
 | Whole-file contrast | Synthetic set | Fully synthetic | 0.7 x 4 | Span cost vs a whole-file read |
 | Retrieval cost, paired | 11 tasks | Constructed misuse over vendored toolz 1.1.0, more-itertools 11.1.0 | 0 x 1 | Span cost vs grep and ranged reads |
 | Definition spans | 12 instances per arm | Mechanically validated | 0 x 1 | Whether the span displaces the read |
-| Checker grid | 12 defect/clean pairs | Seeded defects; clean controls are validated gold | 0 x 1 | Timing of one diagnostic |
+| Checker grid | 12 defect/clean pairs | Revision task: model reviews a pre-written draft carrying a seeded defect that passes the visible test; clean controls are validated gold | 0 x 1 | Timing of one diagnostic |
 
 Local models were Qwen2.5-Coder-7B, Qwen3.5-27B and Qwen3.6-27B; Claude Sonnet 4.5, DeepSeek v3.1, GLM-4.6 and GPT-5.6 "Luna" ran through an API. Temperature 0.7 with repeated seeds also covered the election and execution-feedback runs and the training harvest; the held-out retest ran at temperature 0. Tasks were constructed because a bounded scan of real repositories produced no candidate passing every screen (appendix). Workspaces are small enough to read any file under budget, so results apply where reading is cheap; static tooling reaches only what a type checker sees, which leaves out dynamic behaviour, wrong annotations and `Any`-heavy boundaries. Code and artifacts: https://github.com/ianbarber/lsps-for-llms.
 
@@ -84,7 +84,7 @@ The trained model went looking every time the span lacked the defect and largely
 
 ### WHEN: does the moment the diagnostic arrives change the outcome?
 
-We compared a diagnostic after every edit, one at revision, and a submission gate that rejects a defective draft and asks for repair, against a no-checker control. Accepted submissions both type-clean and correct on the held-out test rose from 1 of 12 to 10 of 12 at revision and 11 of 12 behind the gate (+0.375 [+0.250, +0.500]; +0.417 [+0.292, +0.500]). After-every-edit stayed at 1 of 12 (+0.000 [−0.125, +0.125]) but hardly ran: the model edited before submitting on only 1 of 12 defects, so the checker fired once. It is unexercised rather than refuted.
+The model is handed an existing draft that passes its visible test but fails a held-out one, and asked to review it and submit. We compared a diagnostic after every edit, one at revision, and a submission gate that rejects a defective draft and asks for repair, against a no-checker control. Accepted submissions both type-clean and correct on the held-out test rose from 1 of 12 to 10 of 12 at revision and 11 of 12 behind the gate (+0.375 [+0.250, +0.500]; +0.417 [+0.292, +0.500]). After-every-edit stayed at 1 of 12 (+0.000 [−0.125, +0.125]). Left to itself the model rarely touched the draft, editing before submitting on 1 of 12 defects, so the checker fired once and 11 of 12 defective drafts went through unchanged. That arm is unexercised rather than refuted: a diagnostic keyed to edits cannot fire when the agent makes none.
 
 | 12 seeded defect/clean pairs | Control | After every edit | One-shot | Gate |
 |---|---:|---:|---:|---:|
