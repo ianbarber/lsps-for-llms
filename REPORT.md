@@ -8,7 +8,7 @@ Coding agents are increasingly given language-server tooling on the assumption t
 
 ## Introduction
 
-A language server answers questions about code. An agent with grep, ranged reads and a shell already answers most of them itself, so what a server adds depends on whether it answers a question the agent cannot (IF), whether its answer is cheaper in tokens (FORM), and whether it arrives at a better moment (WHEN). Prior work on completion and test generation compares against retrieval rather than against an agent that can look things up for itself; work on agents compares whole interfaces at once. We hold the harness and the model fixed and add or withhold one operation at a time, against a baseline of grep, ranged reads and a shell.
+A language server answers questions about code. An agent with grep, ranged reads and a shell already answers most of them itself, so what a server adds depends on whether it answers a question the agent cannot (IF), whether its answer is cheaper in tokens (FORM), and whether it arrives at a better moment (WHEN). Prior work on completion and test generation compares against retrieval rather than against an agent that can look things up for itself; work on agents compares whole interfaces at once. We hold the harness and the model fixed and add or withhold one operation at a time.
 
 **IF.** [Typed Holes](https://arxiv.org/abs/2409.00921) and [LSPRAG](https://arxiv.org/abs/2510.22210) push types and definitions into context on the premise the information is missing.
 

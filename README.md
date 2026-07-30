@@ -1,36 +1,23 @@
 # When Do Language Servers Help Coding Agents?
 
 Experiments on whether language-server tooling makes a coding agent better, measured against a
-capable  baseline of grep, ranged reads and a shell.
+capable baseline of grep, ranged reads and a shell.
 
 Correct, visible type annotations helped regardless of tooling, and are what the agent navigated on
 when it had them. 
 
-Go-to-definition helped only where working out a receiver's type meant leaving the source already in front of the agent, and only when the agent was told to use it. A compact
-definition span cost less than reading the file when it replaced that read, which it mostly did not
-until the model was fine-tuned. A type checker worked best as a blocking gate at the end of the
-turn, where the gain came from refusing the submission rather than from the moment the diagnostic
-arrived. A live channel that interrupted the agent and told it to fix each diagnostic on arrival did
-worse than no checker at all.
+A type check worked best as a blocking gate at the end of the turn.
 
-If you try any of this, measure whether the service changes what the agent does. Invocation counts
-alone will not show it.
+Go-to-definition helped only when working out a receiver's type meant reading additional files, and when the agent was told to use it. 
+
+A compact definition span cost less than reading the file when it replaced that read, which it mostly did not
+until the model was fine-tuned. 
+
+If you try any of this, measure whether the service changes what the agent does. Invocation counts can be misleading.
 
 **Read the report:** [**REPORT.md**](REPORT.md), or the same thing typeset as a preprint,
 [**paper/report.pdf**](paper/report.pdf). It covers the method, the results and what they mean for
-someone using a coding agent. Everything below is about the repository.
-
-## Where the evidence lives
-
-| Path | What it holds |
-|---|---|
-| [`REPORT.md`](REPORT.md) | The report. The single source for findings and their scope. [`paper/report.pdf`](paper/report.pdf) is the same content as a preprint. |
-| [`evidence/claim_ledger.md`](evidence/claim_ledger.md) | Every material claim mapped to its artifacts and evidence status, including contradicted, superseded and excluded results. |
-| [`evidence/protocols.md`](evidence/protocols.md) | Experiment protocols, stopping gates and execution status. |
-| [`evidence/manifest.json`](evidence/manifest.json) | Hashes, model metadata, integration modes and provenance warnings. |
-
-Check the ledger before trusting a number. It records what each claim is rated as supporting, and
-keeps rows for results that turned out to be wrong.
+someone using a coding agent. 
 
 ## Reproduce the analysis
 
@@ -105,12 +92,15 @@ removed in the publication cleanup, and `scripts/synth_mf.py` now offers conditi
 `scripts/analysis/stats_delivery.py` works from the committed results and records the original
 invocations, the per-arm provenance and the self-checks it enforces.
 
-## Repository map
+## Repository layout
 
-| Path | Purpose |
+| Path | What it holds |
 |---|---|
-| `evidence/` | Claim ledger, protocols, manifest, hashes and provenance |
-| `paper/` | LaTeX build of the report (`make` needs pandoc and tectonic) |
+| [`REPORT.md`](REPORT.md) | The report. The single source for findings and their scope. |
+| [`paper/`](paper/) | LaTeX build of the report; [`report.pdf`](paper/report.pdf) is the preprint. `make` needs pandoc and tectonic |
+| [`evidence/claim_ledger.md`](evidence/claim_ledger.md) | Every material claim mapped to its artifacts and evidence status, including contradicted, superseded and excluded results |
+| [`evidence/protocols.md`](evidence/protocols.md) | Experiment protocols, stopping gates and execution status |
+| [`evidence/manifest.json`](evidence/manifest.json) | Hashes, model metadata, integration modes and provenance warnings |
 | `scripts/` | Shell drivers for the model runs, task generators, the manifest builder and `validate_pyrefly_lsp.py` |
 | `scripts/analysis/` | Reproducers and statistical analysis, including `reproduce_all.py` and `stats_delivery.py` |
 | `scripts/experiments/` | Retrieval, navigation, substitution and checker harnesses |
@@ -121,4 +111,7 @@ invocations, the per-arm provenance and the self-checks it enforces.
 | `runs/confirmation/`, `runs/readreq/` | Pre-registered confirmation and read-required boundary results |
 | `runs/realbench/` | Dispatch grids and the repository candidate scans |
 | `tests/` | Unit tests over the harness and the analyzers, run by the reproducer |
-| `docs/`, `log.md` | Chronological research logs, bibliography and the external-validity reconnaissance. Historical, not a claim source. |
+| `docs/`, `log.md` | Chronological research logs, bibliography and the external-validity reconnaissance. Historical, not a claim source |
+
+Check the ledger before trusting a number. It records what each claim is rated as supporting, and
+keeps rows for results that turned out to be wrong.
