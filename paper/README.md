@@ -1,9 +1,9 @@
 # paper/ — arXiv-style PDF build for REPORT.md
 
 Turns the project's top-level `REPORT.md` into an arXiv-preprint PDF
-(`report.pdf`) in one command. The report content is still being revised, so
-the durable deliverable here is the **re-runnable pipeline**; the committed
-`report.pdf` is just a first-pass proof that it works.
+(`report.pdf`) in one command. `REPORT.md` is the source of truth; `report.tex`
+and `report.pdf` are generated from it and committed, so both are stale the
+moment the report changes. Run `make` after editing it.
 
 ## What's here
 
@@ -11,12 +11,12 @@ the durable deliverable here is the **re-runnable pipeline**; the committed
 |---|---|
 | `Makefile` | One-command build: `pandoc` (Markdown→LaTeX) then `tectonic` (LaTeX→PDF). |
 | `arxiv.sty` | Vendored arXiv single-column preprint style (George Kour, NeurIPS-based). Self-contained; no network needed for the style. |
-| `report-filters.lua` | Pandoc Lua filter: title from H1, `## Abstract`→`\begin{abstract}`, rewrites in-repo links to GitHub URLs. |
+| `report-filters.lua` | Pandoc Lua filter: title from H1, `## Abstract`→`\begin{abstract}`, rewrites in-repo links to GitHub URLs, and converts the links listed in `LINK_CITE` into real `\citep` citations. A link whose URL is not in that table stays a bare hyperlink in the PDF, so add new citations there as well as to the bibliography. |
 | `preamble.tex` | LaTeX injected into pandoc's template: loads `arxiv.sty` + `natbib`, maps Unicode glyphs, shrinks/wraps wide tables. |
 | `references.tex` | Emits the `References` section (`\nocite{*}` + `natbib`). |
 | `metadata.yaml` | Author, date, link colors. (Title is auto-taken from the report H1.) |
 | `report.tex` | **Committed** generated LaTeX — lets a reviewer without pandoc build with tectonic alone. |
-| `report.pdf` | **Committed** first-pass PDF. |
+| `report.pdf` | **Committed** generated PDF — the preprint linked from the top-level README. |
 | `references.bib` | Build-time copy of `../docs/bibliography_efficiency.bib` (canonical source stays in `docs/`). |
 
 ## Prerequisites

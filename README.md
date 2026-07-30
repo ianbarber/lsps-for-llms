@@ -5,6 +5,8 @@ capable text baseline of grep, ranged reads and a shell.
 
 **The short answer.** A language server helped where it changed what the agent did. Making one
 available changed nothing on its own, and each operation needed its own mechanism before it paid.
+Correct, visible type annotations helped regardless of tooling; they are what the agent navigated
+on when it had them.
 Go-to-definition earned its place only where working out a receiver's type meant leaving the source
 already in front of the agent, and then only when the agent was told to use it. A compact
 definition span cost less than reading the file only when it replaced the read, which mostly it did
@@ -16,14 +18,15 @@ did worse than saying nothing.
 Installing the tool is not the intervention. When trying any of this, measure whether the service
 changes what the agent does, not how often it gets called.
 
-[**REPORT.md**](REPORT.md) is the technical report: what we asked, how we tested it, what happened,
-and what follows for someone using a coding agent. Everything below is about the repository.
+**Read the report:** [**REPORT.md**](REPORT.md), or the same thing typeset as a preprint,
+[**paper/report.pdf**](paper/report.pdf). What we asked, how we tested it, what happened, and what
+follows for someone using a coding agent. Everything below is about the repository.
 
 ## Where the evidence lives
 
 | Path | What it holds |
 |---|---|
-| [`REPORT.md`](REPORT.md) | The report. The single source for findings and their scope. |
+| [`REPORT.md`](REPORT.md) | The report. The single source for findings and their scope. [`paper/report.pdf`](paper/report.pdf) is the same content as a preprint. |
 | [`evidence/claim_ledger.md`](evidence/claim_ledger.md) | Every material claim mapped to its artifacts and evidence status, including contradicted, superseded and excluded results. |
 | [`evidence/protocols.md`](evidence/protocols.md) | Experiment protocols, stopping gates and execution status. |
 | [`evidence/manifest.json`](evidence/manifest.json) | Hashes, model metadata, integration modes and provenance warnings. |
@@ -97,7 +100,7 @@ substitution confirmation instead.
 | `scripts/run_navigation_readreq.sh` | Read-required boundary grid: hash gate, instance validation, an untrained pilot floor, then the three-arm grid untrained and trained |
 | `scripts/run_checker_gate_v3.sh` | Four-arm checker delivery grid |
 | `scripts/run_checker_paired.sh`, `run_checker_case_series.sh`, `run_checker_hidden.sh`, `run_checker_gate_v2.sh` | Earlier checker experiments, retained |
-| `scripts/realbench/local_dispatch.py` | Dispatch ladder and the hidden-type grid |
+| `scripts/realbench/local_dispatch.py` | Dispatch ladder and the hidden-source dispatch grid |
 
 The six delivery-timing arms have no driver left in the tree; the one that produced them was
 removed in the publication cleanup, and `scripts/synth_mf.py` now offers condition A only.
