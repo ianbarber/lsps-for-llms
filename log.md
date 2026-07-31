@@ -2360,3 +2360,41 @@ pair that had never been committed; the `--frame-defn` flag that produced them w
 now in tree. On the `effic` suite with Qwen2.5-Coder-7B, directing the model to prefer `<defn>` over reading
 moves election 2/48 to 14/48 (exact McNemar p=0.0042, discordant 14 vs 2) against a baseline that already
 advertises the tool as cheaper. No report sentence rests on this.
+
+## 2026-07-30 (later) — a code review found two more harness divergences; run restarted again
+
+A Fable review of the port turned up two pieces of post-June drift in `scaffold/stream_agent.py` that sit on
+the shared rollout path, affect all six arms, and were acknowledged nowhere. Both were found after the
+corrected-cap run had been going about 90 minutes; it was killed and restarted rather than left to finish.
+
+**A REGRESSION, FIXED.** The failed-edit nudge tells the model to use line numbers "from the CURRENT numbered
+view below", but the view is only attached for files in `changed_files`, and both edit handlers had come to add
+to it only when the edit applied. So after a failed edit the model was told to consult a view that was not
+there, precisely when it had just mis-addressed a line range. June refreshed the view after every attempt.
+**8.3% of June edit attempts failed** (677 of 8,172 across the 1008 rollouts), so this was routine, not a
+corner case. Restored to the June behaviour, with
+`test_failed_edits_still_refresh_the_numbered_file_view` pinning it; the test fails when the gate is put back.
+
+**A DIVERGENCE, KEPT AND DOCUMENTED.** A successful edit now clears `resolved`/`last_test`, which June did not
+do, so where June told a model that had just edited "tests are still failing", the port asks it to run
+`<test/>`. Clearing is the correct behaviour, since the edit invalidates the previous result, and the re-run is
+explicitly a re-test on a fixed harness rather than a bit-for-bit reproduction. Recorded in the runner
+docstring instead of silently changed.
+
+**WHAT THE RE-RUN CAN BE COMPARED ON.** The review quantified the June echo bug: **449 of 449** resolved June
+rollouts terminated within 2 tokens of their passing test, matching the literal `<done/>` inside the harness's
+own observation text, and a further **215** June test executions fired 1-2 tokens after an observation,
+triggered by the literal `<test/>` in that text rather than by the model. `out_tokens`, `n_tests` and `turns`
+from June are therefore partly artifacts of the echo and are not comparable; **resolve rate is the measure that
+carries over**. This is now in the runner docstring rather than only in a commit message.
+
+**ALSO PINNED.** `--temp` defaulted to 0.0 where every June arm ran 0.7, the same class of gap as the `max_new`
+cap and one the `--arm` selector was supposed to close; the sampling-defaults test now covers `temp` too, and
+handles the one recovered config that is a list of dicts rather than a dict (it was being silently skipped).
+The analyzer's `WITNESS` table is asserted equal to the runner's `ARM_WITNESS`, so a consistent rename across
+the runner and the agent can no longer leave the analyzer matching nothing.
+
+Reviewed and found clean: the ARMS table against every recovered config, the pinned `SYS_LINE_DELIVERY` and
+`build_prompt` output, the task suite against `779aa5c:scripts/synth_tasks.py`, the pyrefly config rewrite
+(byte-identical `pyrefly check` output), `enable_thinking=False` rendering, and the C/D delivery machinery
+line-for-line.

@@ -533,16 +533,54 @@ def test_delivery_sampling_defaults_match_the_published_arms():
     defaults against the configs recovered from the June checkpoints."""
     root = Path(__file__).resolve().parents[1]
     prov = json.loads((root / "runs" / "agent" / "synth_delivery_provenance.json").read_text())
-    configs = [c for f in prov["files"].values() if (c := f.get("config"))]
+    configs = []
+    for f in prov["files"].values():
+        c = f.get("config")
+        # one recovered entry is a list of configs (a merged checkpoint+resume run), so a
+        # plain `key in c` would silently skip it rather than check it
+        configs += c if isinstance(c, list) else ([c] if c else [])
     assert configs, "no recovered June configs; provenance file is empty or restructured"
     defaults = vars(parse_args([]))
-    for key in ("max_new", "latency"):
+    for key in ("max_new", "latency", "temp"):
         june = {c[key] for c in configs if key in c}
         assert len(june) == 1, f"June arms disagree on {key}: {june}"
         assert defaults[key] == june.pop(), (
             f"runner defaults {key}={defaults[key]}, but every published C37 arm ran "
             f"{key}={june}; a re-run at this default is not comparable to the June numbers"
         )
+
+
+def test_failed_edits_still_refresh_the_numbered_file_view():
+    """The failed-edit nudge tells the model to use line numbers "from the CURRENT numbered
+    view below". The view is only attached for files in `changed_files`, so if an edit
+    handler adds to it only on success, that sentence points at nothing precisely when the
+    model has just mis-addressed a line range. June refreshed after every attempt; this
+    regressed to success-only and was caught during the C37 re-run. Driving the real path
+    needs a model, so pin the shape: each handler's `changed_files.add` must sit after the
+    failure branch, not inside the success branch."""
+    root = Path(__file__).resolve().parents[1]
+    src = (root / "scaffold" / "stream_agent.py").read_text().splitlines()
+    nudge = [i for i, ln in enumerate(src) if "CURRENT numbered view below" in ln]
+    assert nudge, "the failed-edit nudge is gone; this test no longer guards anything"
+    fails = [i for i, ln in enumerate(src) if ln.strip() == "fail_streak += 1"]
+    assert len(fails) == 2, f"expected two edit handlers, found {len(fails)}"
+    for i in fails:
+        window = src[i + 1:i + 8]
+        assert any("changed_files.add(" in ln for ln in window), (
+            f"the edit handler at line {i+1} does not refresh the file view after a FAILED "
+            f"edit; the nudge at line {nudge[0]+1} then promises a view that is absent"
+        )
+
+
+def test_delivery_witness_table_is_not_forked_between_runner_and_analyzer():
+    """delivery_stats_lib carries its own copy of the arm -> event map for the analyzers.
+    A rename done consistently across synth_delivery.py and stream_agent.py would satisfy
+    every other test while leaving the analyzer's copy matching nothing."""
+    from scripts.analysis.delivery_stats_lib import WITNESS
+    assert WITNESS == ARM_WITNESS, (
+        f"the analyzer's witness table has drifted from the runner's: "
+        f"analyzer={WITNESS}, runner={ARM_WITNESS}"
+    )
 
 
 def test_delivery_prompt_is_pinned_to_the_june_harness_prompt():

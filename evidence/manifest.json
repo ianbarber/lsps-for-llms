@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "git_revision_at_generation": "256795ff0aa14745cad3abcbf78671137d7bef40",
+  "git_revision_at_generation": "4375a5ea69e3feb00a04c032fa3f5a9c8b0a78b6",
   "git_worktree_dirty_at_generation": true,
   "platform_at_generation": "Linux-6.17.0-1026-nvidia-aarch64-with-glibc2.39",
   "results": [
@@ -7199,6 +7199,10 @@
       "sha256": "5fbb64cfd5e8e08323eb826e8cd1b44af8a7a2c6f0b2d781846850be92e5d0ee"
     },
     {
+      "path": "scripts/analysis/delivery_stats_lib.py",
+      "sha256": "95f279903fb9edd8a73c958f2b80ac46d61ca02bad77630e792bf361a861c6cd"
+    },
+    {
       "path": "scripts/analysis/effic_real_stats.py",
       "sha256": "d4c238a16177b98836cabbf80b76e7dfede76ecf2c91e6e9c5823d8229eaf4b1"
     },
@@ -7212,7 +7216,11 @@
     },
     {
       "path": "scripts/analysis/stats_delivery.py",
-      "sha256": "2d25f77d00e577d80ab474483c717c7cf32618bde1d248db35fee2b7546c4712"
+      "sha256": "a2e0a40eac5abe966bc43f931409ab77ee247937511653a0a2be490dec4bcd44"
+    },
+    {
+      "path": "scripts/analysis/stats_delivery_v2.py",
+      "sha256": "769a8428d39bb9f2806c7d5a270359a26d7e51ee36fe0f23b0bd4e82ad2933d5"
     },
     {
       "path": "scripts/analysis/task_level_effects.py",
@@ -7250,7 +7258,7 @@
     },
     {
       "path": "scaffold/stream_agent.py",
-      "sha256": "b1873afeeda16ef0cb9327f462ba3ac460066e78a53019e6745cc166a88ae79c"
+      "sha256": "9842a53044f644cca8d6be571a485d4f2431e3dd9220e292ec337e2b27b43052"
     },
     {
       "path": "scaffold/mock_env.py",

@@ -26,6 +26,27 @@ The system prompt is pinned to SYS_LINE_DELIVERY below, a verbatim copy of the a
 the static-analyzer sentence; pinning keeps every arm on the prompt the committed results
 were produced under, and insulates this experiment from later prompt edits.
 
+WHAT A RE-RUN CAN AND CANNOT BE COMPARED AGAINST. The arms are the June arms, but the
+harness underneath them has been fixed since, so this is a re-test of the finding rather
+than a reproduction of the numbers. Three known divergences, all of which apply equally to
+every arm:
+
+  1. June terminated on its own `<done/>` echo. Its observation text contains the literal
+     "emit `<done/>`", and the harness matched that literal as if the model had emitted it:
+     449 of 449 resolved June rollouts ended within 2 tokens of the passing test. A further
+     215 June test executions fired 1-2 tokens after an observation, triggered by the
+     literal `<test/>` in the observation text rather than by the model. Both are fixed.
+     CONSEQUENCE: `out_tokens`, `n_tests` and `turns` are NOT comparable to the June values
+     printed in the summary below; they were partly artifacts of the echo. Resolve rate is
+     the measure that carries over.
+  2. A successful edit now clears `resolved`/`last_test`; June left them standing, so a
+     model that edited after a passing test still saw "tests are still failing". Clearing
+     is correct (the edit invalidates the result) but it changes the observation text.
+  3. Failed edits refresh the numbered file view again, as in June. This regressed at some
+     point to refreshing only on success, which left the failed-edit nudge pointing at a
+     "CURRENT numbered view below" that was not there. 8.3% of June edits failed, so this
+     was not rare.
+
 Usage: synth_delivery.py [out.json] [--conds A,C,D] [--names n1,n2] [--seeds K]
                          [--seed-start S] [--temp T] [--model ID] [--max-new T]
 """
@@ -82,7 +103,9 @@ def parse_args(argv=None):
     ap.add_argument("--names", default=None, help="comma subset of task names")
     ap.add_argument("--seeds", type=int, default=1, help="sampled rollouts per (task,cond) when temp>0")
     ap.add_argument("--seed-start", type=int, default=0, help="first seed index (offset for fresh seeds)")
-    ap.add_argument("--temp", type=float, default=0.0, help="0 = greedy (deterministic, seeds ignored)")
+    # 0.7 because every published arm ran 0.7, for the same reason as max_new below. A
+    # greedy default would silently collapse seeds to one rollout per cell.
+    ap.add_argument("--temp", type=float, default=0.7, help="0 = greedy (deterministic, seeds ignored)")
     ap.add_argument("--adapter", default=None)
     ap.add_argument("--model", default="Qwen/Qwen2.5-Coder-7B-Instruct")
     # 2200 and 8 are the values every published C37 arm ran under, recovered in

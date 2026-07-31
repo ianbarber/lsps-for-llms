@@ -690,13 +690,18 @@ class StreamAgent:
                     else:
                         ok, info = False, "line edits unsupported by env"
                     if ok:
-                        n_edits += 1; fail_streak = 0; changed_files.add(epath)
+                        n_edits += 1; fail_streak = 0
                         # Any earlier passing test is stale after a successful edit. This is
                         # especially important after a gate rejection: the repaired workspace
                         # must be tested and explicitly resubmitted before it can be accepted.
                         resolved = False; last_test = None
                     else:
                         fail_streak += 1
+                    # Refresh the view after EVERY attempt, applied or not. The failed-edit
+                    # nudge says "use line numbers from the CURRENT numbered view below", so
+                    # gating this on `ok` makes that sentence promise a view that is not there
+                    # exactly when the model most needs it. June refreshed unconditionally.
+                    changed_files.add(epath)
                     events.append({"tok": t, "type": "line_edit", "path": epath, "lines": f"{s}-{e}",
                                    "ok": ok, "info": str(info)[:80], "fail_streak": fail_streak,
                                    "replace": (body or "")[:300],
@@ -747,10 +752,11 @@ class StreamAgent:
                     ok = res[0] if isinstance(res, tuple) else res.ok
                     info = (res[1] if isinstance(res, tuple) else res.reason)
                 if ok:
-                    n_edits += 1; fail_streak = 0; changed_files.add(target_file)
+                    n_edits += 1; fail_streak = 0
                     resolved = False; last_test = None
                 else:
                     fail_streak += 1
+                changed_files.add(target_file)   # see the line-mode note above
                 events.append({"tok": t, "type": "edit", "path": target_file, "ok": ok,
                                "info": str(info)[:80], "fail_streak": fail_streak,
                                "replace": m["replace"][:300]})
