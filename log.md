@@ -2258,3 +2258,76 @@ Election, Information. Trimmed flowery framing sentences that only structure or 
 "two views of the same experiment", "the boundary, not a contradiction", "this is the secondary result"); state conclusions
 directly. RefactorBench reframed as the criterion for why we built the vendored-library bench, not a catalogue of what
 didn't work. Same framing applied to README. 0 em dashes maintained in REPORT/README.
+
+---
+
+## 2026-07-30 — Delivery-timing machinery ported onto the current agent. The six arms reproduce; the individual June rollouts do not, and the reason is a parser bug the frozen harness carried.
+
+**PORTED.** `scaffold/stream_agent.py` gets the C37 delivery channel back as constructor flags lifted from
+`779aa5c^`: `condition` A/C/D plus `latency_tokens`, `debounce`, `pause_align`, `announce_lsp`, `c_eager`,
+`syntax_gate`, `rich_signal`. That covers the `‹diag›` splice markers and the `announce_lsp` system-prompt
+append, the per-turn state (`pending`, `d_dirty_at`, `d_last_delivered`, `c_diag_queue`), the immediate and
+debounced live-delivery blocks with pause alignment and the `ast.parse` gate, C's batching at the yield /
+test / EOS boundary, C-eager's post-edit hook, the on-`<done/>` and end-of-run flushes, and
+`_fmt_diag` / `_enrich_diag` / `_diag_text`. `condition` defaults to None and every branch is dead without it.
+The driver is NEW — `scripts/synth_delivery.py`, not a resurrection of `scripts/synth_acd.py` — and writes its
+full argparse config into the FINAL json, the omission that nearly lost arm provenance in June. The 14-task
+suite came back as `scripts/synth_tasks_delivery.py`, byte-identical to the deleted `scripts/synth_tasks.py`.
+The driver pins the system prompt to a verbatim copy of the June `SYS_LINE` (sha256 `4fbc0f21...`), because the
+live `SYS_LINE` has since gained a `<defn>` advertisement and lost the static-analyzer sentence; a test asserts
+the pin against git. Only D-naive carries the announce sentence; the other five arms share a byte-identical
+923-character system prompt.
+
+**DEFAULTS-OFF IS BYTE-IDENTICAL.** Pre-port agent vs ported agent, same kwargs, greedy, three tasks (one
+budget-exhausted, two resolved): identical resolved / in_tokens / out_tokens / n_edits / n_tests / n_reads /
+n_lsp / turns / termination_reason, identical event traces, identical full decoded streams. `pytest -q` passes
+31 (three new: the channel is off unless asked for, the six arms are distinct and each names its witness event,
+the prompt pin matches `779aa5c^`). `stats_delivery.py` still exits 0 on the committed artifacts.
+
+**ARMS ARE DISTINGUISHABLE** (2 tasks x 2 seeds = 4 rollouts per arm, seeds 6-7, against the same June cells).
+Every arm emits exactly its expected event and nothing else: A none, C-lazy `diag_sync_queued`, C-eager
+`diag_eager`, all three D arms `diag_debounced`. Delivery counts track June closely — C-lazy 26 vs 29, C-eager
+145 vs 145, D-naive 14 vs 13, D-plain 21 vs 24, D-gate 7 vs 8 — and the syntax gate cuts deliveries 21 to 7 on
+identical cells, the same 67% cut June shows (24 to 8). Per-arm resolve on those cells matches June exactly
+(A 0/4, C-lazy 1/4, everything else 0/4).
+
+**VALIDATION SLICE: CLOSE IN AGGREGATE, ZERO BIT-FOR-BIT.** D-gate, `grid_field_rename` +
+`mutable_default_none`, seeds 6-8, the same 6 rollouts the July 29 apparatus check
+(`runs/agent/synth_dgate_reproduction_check.json`) reproduced exactly on the frozen harness. The ported
+run is `runs/agent/synth_dgate_port_check.json`. Ported vs June: resolved 3/6 vs 2/6, mean in_tokens
+2327 vs 2411, mean out_tokens 594 vs 532, mean n_tests 5.2 vs 5.5, mean n_edits 5.5 vs 6.0, mean turns 7.7 vs
+8.7, deliveries 11 vs 9. 0/6 rollouts match on all fields. Two of the six (`mutable_default_none` s6 and s7)
+match on every field except out_tokens, by exactly +2.
+
+**WHY: THE JUNE HARNESS PARSED ITS OWN TOOL OUTPUT AS MODEL ACTIONS.** That +2 is the tell. The June
+`deliver_turn` did not advance the action-search cursors past the spliced observation, so the harness matched
+the literal `<done/>` and `<test/>` inside its own tool-result text. Measured over all 1008 committed C37
+rollouts: **449 of 473 resolved rollouts (94.9%) ended after exactly ONE model token following the "Tests pass —
+emit `<done/>`" observation**, and that token is usually a word like `All`, `The`, `It` or `Since`, not `<` —
+the run was terminated by the harness's own echo, not by the model. Separately, **217 of 4876 test runs (4.5%)
+fired within 2 tokens of a turn observation whose nudge text contains `<test/>`**, concentrated in C-eager
+(113/309 = 36.6% of its test runs, 37% of its rollouts). `grid_field_rename` s6 in the June D-gate block is the
+clean example: 1 edit, then 6 of its 7 test runs self-triggered one token after each nudge, burning the whole
+budget. On the same cell the ported harness makes 9 edits and 8 real tests. The current agent fixes this by
+resetting every cursor to the end of the spliced observation, so it cannot self-trigger. **This is a real
+behavioural difference, not noise: the June rollouts stopped at the first passing test and were credited with
+that pass, whereas the ported agent keeps working and re-scores the final workspace, so a post-pass regression
+now counts against the arm.** Two smaller differences also apply: a successful edit invalidates any earlier
+passing test (`resolved=False`, `last_test=None`), and `LINE_EDIT_RE` now accepts an inline `<edit ...>body</edit>`
+via `_normalize_inline_edit`, which the June regex rejected outright.
+
+**WALL CLOCK.** On the 24 matched cells the port costs 1.03x the June wall clock (2957s vs 2881s on the GB10),
+so a full six-arm re-run at 168 rollouts per arm is about **28 hours** plus roughly two minutes of model load per
+invocation. Whether that is worth spending is a judgement call, and the argument against is that it would not
+be a reproduction: the arms are the same and the mechanism claims survive, but the numbers would be a new
+experiment on a harness that no longer self-terminates, so nothing in the C37 ledger row could be updated in
+place. The published rows stay attributable to the frozen June harness. A re-run is the right move only if the
+question is "does the delivery finding hold once the agent is no longer stopped by its own echo", which is a
+genuinely different and arguably better question — the announce-sentence deficit is the load-bearing result and
+it was measured under a harness that cut most rollouts short.
+
+**HOUSEKEEPING.** `scripts/build_manifest.py --check` now reports `protocol source hash mismatch:
+scaffold/stream_agent.py`; the manifest was deliberately not rebuilt, because rebuilding would also absorb
+in-flight run artifacts from other sessions. `stats_delivery.py` hardcodes the June filenames, so pointing it at
+a re-run means editing its ARMS map, and its self-checks against published values are expected to fail on new
+data by design.

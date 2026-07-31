@@ -1,10 +1,22 @@
 #!/usr/bin/env python3
 """Continuous-stream coding agent (efficiency-recipe edition).
 
-The agent generates one token stream of reasoning and edits under condition A
-(no inline diagnostic feedback). The final recipe trains it to prefer the cheap
-`<defn>` / `<findrefs>` go-to-definition actions over expensive whole-file
-`<read>`.
+The agent generates one token stream of reasoning and edits. By default there is no
+diagnostic feedback channel at all, and the final recipe trains it to prefer the cheap
+`<defn>` / `<findrefs>` go-to-definition actions over expensive whole-file `<read>`.
+
+Optional delivery-timing channel (ledger C37, driven by scripts/synth_delivery.py). Passing
+`condition=` turns on a type-checker feedback channel and selects WHEN its diagnostics reach
+the model. It is off unless asked for, so every other experiment is unaffected:
+  A  no feedback
+  C  batched: the diagnostic arrives as a USER observation, either at the model's next yield
+     (`c_eager=False`) or immediately after the edit, as a production post-edit hook
+     (`c_eager=True`)
+  D  live: the diagnostic is raw-spliced into the assistant stream mid-generation, either
+     `latency_tokens` after the edit (`debounce=0`) or once the stream has settled `debounce`
+     tokens past it (`debounce>0`, optionally `pause_align`ed to a newline and `syntax_gate`d
+     to fire only when the file parses). `announce_lsp` adds a system-prompt sentence telling
+     the model to fix each inline diagnostic on arrival.
 
 Supported edit formats (parsed live):
   SEARCH/REPLACE/END block
@@ -28,7 +40,7 @@ The agent is environment-agnostic and expects the env to provide:
   metrics() -> dict
 """
 from __future__ import annotations
-import hashlib, re, torch
+import ast, hashlib, re, torch
 
 # Robust SEARCH/REPLACE parser: the 7B inconsistently drops the <<<<<<</=======/>>>>>>>
 # markers, so make them optional and terminate the replace at END / blank line / next
@@ -93,6 +105,14 @@ def _normalize_inline_edit(body: str, current_source: str, start: int) -> tuple[
     return None, "ambiguous_inline_indentation"
 
 TEST_OPEN, TEST_CLOSE = "\n<test_result>\n", "\n</test_result>\n"
+# Delivery-timing experiment (ledger C37): the LIVE channel raw-splices a diagnostic into the
+# assistant stream between these markers, mid-generation, without ending the turn.
+DIAG_OPEN, DIAG_CLOSE = "\n‹diag›\n", "\n‹/diag›\n"
+# The `announce_lsp` system-prompt append that distinguishes the D-naive arm from D-plain.
+ANNOUNCE_LSP = ("\nA static type-checker runs continuously as you edit; its diagnostics "
+                "appear INLINE in your stream between ‹diag› and ‹/diag› markers a moment "
+                "after each edit. Treat them as live editor squigglies — when one appears, "
+                "fix the issue it names before moving on.")
 
 SYS = """You are a coding agent fixing a bug in a Python repository. The bug is in file
 `{file}`, whose current contents are shown below. Work iteratively.
@@ -190,8 +210,11 @@ class StreamAgent:
                  use_lsp_defn=False, advertised_symbols=None, lsp_disabled=False,
                  sys_override=None, authoring=False, allow_check=False, auto_check=False,
                  lsp_fallback=True, acceptance_gate=False, draft_submission=False,
-                 defn_oracle=None):
+                 defn_oracle=None,
+                 condition=None, latency_tokens=8, debounce=0, pause_align=False,
+                 announce_lsp=False, c_eager=False, syntax_gate=False, rich_signal=False):
         assert edit_mode in ("search", "line")
+        assert condition in (None, "A", "C", "D")
         self.sys_override = sys_override   # dispatch experiment: runner supplies the per-condition tool advertisement
         self.authoring = authoring   # Exp 2: reframe the system prompt as IMPLEMENT-a-module (not fix-a-bug)
         self.allow_check = allow_check   # Exp 2 `check` arm: advertise + honour a model-elected <check/> action
@@ -216,6 +239,23 @@ class StreamAgent:
         # span 0/12). Default None -> the live/AST resolver path is unchanged, so every existing
         # suite that does not pass this kwarg is byte-identical.
         self.defn_oracle = defn_oracle
+        # ---- delivery-timing machinery (ledger C37). ALL OFF BY DEFAULT: with condition=None
+        # every branch below is dead and the agent behaves exactly as the other experiments
+        # (dispatch / navigation / retrieval / checker) expect.
+        #   A : no diagnostic channel at all
+        #   C : batched — the diagnostic arrives as a USER observation, either at the model's
+        #       next yield (c_eager=False, "lazy") or immediately after the edit (c_eager=True)
+        #   D : live — the diagnostic is spliced into the assistant stream mid-generation
+        self.cond = condition
+        self.latency = latency_tokens   # D (debounce=0): splice this many tokens after the edit
+        # D-delivery tuning: debounce>0 re-queries the checker only after the stream has SETTLED
+        # `debounce` tokens since the last edit and (if pause_align) at a natural pause — so
+        # transient self-inflicted squiggles the model already fixed are never delivered.
+        self.debounce, self.pause_align = debounce, pause_align
+        self.announce_lsp = announce_lsp   # D: tell the model in the system prompt that inline diags appear
+        self.c_eager = c_eager             # C: post-edit hook vs batched at the next yield
+        self.syntax_gate = syntax_gate     # D: only deliver when the file currently ast.parse()s
+        self.rich_signal = rich_signal     # append go-to-def/hover context to each delivered diagnostic
         self.test_p2p_cap = 5    # in-loop <test/> caps P2P for speed; final resolved runs full
         self.edit_mode = edit_mode
         self.dev = device or model.device
@@ -333,6 +373,63 @@ class StreamAgent:
         body = diag.strip() if diag.strip() else "(no type errors)"
         return "<check_result>\n" + body + "\n</check_result>", n_diag
 
+    # ---------------------------------------------------------------- delivery-timing channel
+    @staticmethod
+    def _fmt_diag(diag):
+        """Normalize a diagnostics result to text. TaskEnv returns list[dict]
+        {severity,line,code,message}; MockEnv returns a pre-formatted string."""
+        if isinstance(diag, str):
+            return diag
+        if not diag:
+            return ""
+        lines = []
+        for d in diag:
+            if isinstance(d, dict):
+                lines.append(f"[{d.get('severity','error')}] L{d.get('line','?')} "
+                             f"{d.get('code','')}: {d.get('message','')}")
+            elif isinstance(d, (tuple, list)) and len(d) >= 4:
+                lines.append(f"[{d[0]}] L{d[1]} {d[2]}: {d[3]}")
+            else:
+                lines.append(str(d))
+        return "\n".join(lines)
+
+    def _enrich_diag(self, diag_text, src):
+        """Go-to-def/hover-lite: pyrefly backticks the symbols it names; resolve each
+        to its def/class in the current file and append the signature (+ a class's
+        field lines). Constructive context, not just the error."""
+        names = []
+        for nm in re.findall(r"`([A-Za-z_][A-Za-z0-9_]*)`", diag_text):
+            if nm not in names:
+                names.append(nm)
+        lines = src.splitlines()
+        ctx = []
+        for nm in names[:5]:
+            for i, ln in enumerate(lines):
+                if re.match(rf"\s*(?:def|class)\s+{re.escape(nm)}\b", ln):
+                    indent = len(ln) - len(ln.lstrip())
+                    ctx.append(f"L{i+1}: {ln.strip()}")
+                    if ln.lstrip().startswith("class"):
+                        for j in range(i + 1, min(i + 8, len(lines))):
+                            s = lines[j]
+                            if s.strip() and (len(s) - len(s.lstrip())) > indent:
+                                ctx.append(f"L{j+1}:   {s.strip()}")
+                            elif s.strip():
+                                break
+                    break
+        if ctx:
+            diag_text += "\ndefinitions:\n" + "\n".join(ctx[:10])
+        return diag_text
+
+    def _diag_text(self, path):
+        """Formatted (and optionally enriched) current diagnostics for `path`."""
+        d = self._fmt_diag(self.env.pyrefly_diagnostics(path))
+        if d and self.rich_signal:
+            try:
+                d = self._enrich_diag(d, self.env.read_file(path))
+            except Exception:
+                pass
+        return d
+
     @staticmethod
     def _turn_obs(last_test, n_edits):
         if last_test is None:
@@ -407,6 +504,8 @@ class StreamAgent:
             sys_text += AUTO_CHECK_ADVERT
         elif self.allow_check:
             sys_text += CHECK_ADVERT
+        if self.announce_lsp and self.cond == "D":
+            sys_text += ANNOUNCE_LSP   # D-naive arm: instruct the model to act on each inline diagnostic
         if self.lsp_disabled:
             # tool-value ablation: also strip the <defn> advertisement so the model isn't pointed at a disabled tool
             sys_text = re.sub(r"To look up just a symbol's definition.*?to disambiguate\.\s*\n?", "", sys_text, flags=re.S)
@@ -438,6 +537,10 @@ class StreamAgent:
         done_seen = resolved = bailed = draft_submitted = False
         gate_pending = False
         last_test = None
+        pending = []          # D (immediate): in-flight diags spliced mid-stream (the live channel)
+        d_dirty_at = None     # D (debounced): token index of the last edit; re-query after settle
+        d_last_delivered = "" # D (debounced): avoid re-splicing an unchanged diagnostic
+        c_diag_queue = []     # C: diags delivered as the next USER observation (sync, turn boundary)
         events = []           # trajectory log
         eos = tok.eos_token_id
 
@@ -503,8 +606,17 @@ class StreamAgent:
                     "again."
                     if gate_pending else self._turn_obs(last_test, n_edits)
                 )
+                if self.cond == "C" and c_diag_queue:
+                    obs = "Static analysis after your edits:\n" + "\n".join(c_diag_queue) + "\n" + obs
+                    c_diag_queue = []
                 deliver_turn(obs)
                 events.append({"tok": t, "type": "turn", "n": turns, "via": "eos"})
+                if self.cond == "D" and pending:   # live diag spliced into the new assistant turn
+                    for _, diag in pending:
+                        if diag:
+                            splice(DIAG_OPEN + diag + DIAG_CLOSE)
+                            events.append({"tok": t, "type": "diag_async", "ondone": True, "text": diag})
+                    pending = []
                 continue
             out_ids.append(nxt)
             out_labels.append(nxt)   # model-generated action token = trained for SFT
@@ -512,6 +624,48 @@ class StreamAgent:
             # advance one token
             logits, cache = self._prefill(torch.tensor([[nxt]], device=self.dev), cache)
             emitted = tok.decode(out_ids)   # full faithful decode each step (markers intact)
+
+            # CURSOR NOTE for every DIAG_OPEN splice below. Unlike deliver_turn, these do NOT
+            # advance done_from/test_from/read_from past the spliced text, which is faithful to
+            # the June harness the committed C37 rows were produced under. It is safe because a
+            # pyrefly diagnostic contains no action syntax, and because advancing the cursors to
+            # len(emitted) would orphan an in-progress edit block a mid-stream splice landed
+            # inside. The hazard is rich_signal=True, which appends raw workspace source to the
+            # diagnostic: a file containing a literal <test/> or <done/> would then be executed
+            # as a model action. No published arm uses rich_signal. Check the task sources before
+            # enabling it.
+            # D (immediate): deliver any pending diagnostics whose latency has elapsed
+            if self.cond == "D" and self.debounce == 0 and pending:
+                due = [d for d in pending if t >= d[0]]
+                for d in due:
+                    pending.remove(d)
+                    if d[1]:
+                        splice(DIAG_OPEN + d[1] + DIAG_CLOSE)
+                        events.append({"tok": t, "type": "diag_async", "text": d[1]})
+
+            # D (debounced): after the stream settles `debounce` tokens past the last edit,
+            # re-query CURRENT diagnostics (transient self-inflicted ones the model already
+            # fixed are gone) and deliver at a pause; only if changed.
+            if self.cond == "D" and self.debounce > 0 and d_dirty_at is not None:
+                settled = t - d_dirty_at >= self.debounce
+                at_pause = (not self.pause_align) or emitted.endswith(("\n", " ", ".", ":")) \
+                           or (t - d_dirty_at >= self.debounce * 3)
+                # syntax gate: if the file is mid-edit/unparseable, DEFER (don't deliver a
+                # self-inflicted syntax squiggle); retry once the model makes it parse again.
+                gated = False
+                if settled and at_pause and self.syntax_gate:
+                    try:
+                        ast.parse(self.env.read_file(target_file))
+                    except Exception:
+                        gated = True
+                        d_dirty_at = t   # reset settle timer; retry when parseable
+                if settled and at_pause and not gated:
+                    diag = self._diag_text(target_file)
+                    if diag and diag != d_last_delivered:
+                        splice(DIAG_OPEN + diag + DIAG_CLOSE)
+                        d_last_delivered = diag
+                        events.append({"tok": t, "type": "diag_debounced", "text": diag})
+                    d_dirty_at = None
 
             # detect a newly-completed line-range edit (line mode)
             if self.edit_mode == "line":
@@ -563,6 +717,23 @@ class StreamAgent:
                         # advance every action cursor past the spliced obs (mirrors the read-block handler)
                         read_from = lsp_from = test_from = done_from = grep_from = check_from = applied_upto = len(emitted)
                         continue
+                    # delivery-timing channel: arm the live re-query (D, debounced) or hand the
+                    # diagnostic to the batched channel (C) / the in-flight queue (D, immediate).
+                    if self.cond == "D" and self.debounce > 0 and ok:
+                        d_dirty_at = t   # settle timer; the diagnostic is re-queried at delivery
+                    elif self.cond in ("C", "D") and ok:
+                        diag = self._diag_text(epath)
+                        if self.cond == "C" and diag:
+                            if self.c_eager:
+                                turns += 1
+                                deliver_turn("Static analysis after your edit:\n" + diag)
+                                events.append({"tok": t, "type": "diag_eager", "text": diag})
+                                continue   # eager post-edit hook: yield right after the edit
+                            c_diag_queue.append(diag)
+                            events.append({"tok": t, "type": "diag_sync_queued", "text": diag})
+                        elif self.cond == "D" and diag:
+                            pending.append((t + self.latency, diag))
+                            events.append({"tok": t, "type": "diag_pending", "text": diag})
 
             # detect a newly-completed edit (search/replace mode)
             m = EDIT_RE.search(emitted, applied_upto) if self.edit_mode == "search" else None
@@ -596,6 +767,22 @@ class StreamAgent:
                     events.append({"tok": t, "type": "auto_check", "n": n_checks, "n_diag": n_diag})
                     read_from = lsp_from = test_from = done_from = grep_from = check_from = applied_upto = len(emitted)
                     continue
+                # delivery-timing channel (search/replace mode): C batches, D queues in-flight.
+                if self.cond == "D" and self.debounce > 0 and ok:
+                    d_dirty_at = t
+                elif self.cond in ("C", "D") and ok:
+                    diag = self._diag_text(target_file)
+                    if self.cond == "C" and diag:
+                        if self.c_eager:
+                            turns += 1
+                            deliver_turn("Static analysis after your edit:\n" + diag)
+                            events.append({"tok": t, "type": "diag_eager", "text": diag})
+                            continue
+                        c_diag_queue.append(diag)
+                        events.append({"tok": t, "type": "diag_sync_queued", "text": diag})
+                    elif self.cond == "D" and diag:
+                        pending.append((t + self.latency, diag))
+                        events.append({"tok": t, "type": "diag_pending", "text": diag})
 
             # detect <check/> -> run the static type checker (Exp 2 `check` arm), splice diagnostics
             sm = SUBMIT_DRAFT_RE.search(emitted, submit_from)
@@ -630,6 +817,9 @@ class StreamAgent:
                         if gate_pending else
                         "\nTests pass — emit <done/> if the fix is complete."
                     )
+                elif self.cond == "C" and c_diag_queue:
+                    obs += "\nStatic analysis after your edits:\n" + "\n".join(c_diag_queue)
+                    c_diag_queue = []
                 turns += 1
                 deliver_turn(obs)
                 events.append({"tok": t, "type": "turn", "n": turns, "via": "test"})
@@ -776,7 +966,23 @@ class StreamAgent:
                                    "n_diag": 0})
                     gate_pending = False
                 done_seen = True
+                # In D, a 'done' while a diagnostic about the last edit is still in flight:
+                # deliver it live and let the model react before stopping (the "I'm done — oh
+                # wait, a squiggle appeared" case). Only truly stop once done AND nothing pending.
+                if self.cond == "D" and pending:
+                    for _, diag in pending:
+                        if diag:
+                            splice(DIAG_OPEN + diag + DIAG_CLOSE)
+                            events.append({"tok": t, "type": "diag_async", "ondone": True, "text": diag})
+                    pending = []
+                    continue
                 break
+
+        # flush any straggler D diagnostics (matches C's information content), recorded
+        for _, diag in pending:
+            if diag:
+                splice(DIAG_OPEN + diag + DIAG_CLOSE)
+                events.append({"tok": t, "type": "diag_async", "flushed": True, "text": diag})
 
         result = self._run_tests(cap=None)   # authoritative: full F2P + full P2P
         prompt_list = prompt_ids[0].tolist()
@@ -784,7 +990,7 @@ class StreamAgent:
         kept_ids, kept_labels = out_ids[keep:], out_labels[keep:]
         sft_input_ids = prompt_list + kept_ids
         sft_labels = [-100] * len(prompt_list) + kept_labels   # prompt masked; train only on model actions
-        return {"resolved": result.get("resolved"),
+        return {"condition": self.cond, "resolved": result.get("resolved"),
                 "bailed": bailed, "done_seen": done_seen, "draft_submitted": draft_submitted,
                 "tests": result, "metrics": self.env.metrics(),
                 "events": events, "stream": emitted,
