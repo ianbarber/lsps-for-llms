@@ -2331,3 +2331,32 @@ scaffold/stream_agent.py`; the manifest was deliberately not rebuilt, because re
 in-flight run artifacts from other sessions. `stats_delivery.py` hardcodes the June filenames, so pointing it at
 a re-run means editing its ARMS map, and its self-checks against published values are expected to fail on new
 data by design.
+
+## 2026-07-30 — delivery re-run launched, killed, and relaunched at the published cap
+
+**FIRST LAUNCH WAS WRONG AND WAS DISCARDED.** The six-arm re-run went out with `--max-new` left at the
+runner's own default of 1400. Every published C37 arm ran at **2200**, recoverable from
+`runs/agent/synth_delivery_provenance.json`. The pinned `SYS_LINE_DELIVERY` and the `ARMS` table fix the
+prompt, the channel and the timing, so the arms were configured correctly and the run looked healthy; sampling
+limits simply sit outside both mechanisms. The cap is not cosmetic on these tasks. June's C-eager hit it in 7
+of 12 rollouts on `grid_field_rename` alone, so a lower cap converts rollouts that would have resolved into
+unresolved, and does so hardest in whichever arm thrashes most, which is the contrast the experiment exists to
+measure. 43 rollouts were discarded (kept out of tree under the session scratchpad).
+
+The default is now 2200 in `scripts/synth_delivery.py` rather than something the operator passes, and
+`test_delivery_sampling_defaults_match_the_published_arms` asserts the runner's `max_new` and `latency`
+defaults against the recovered June configs, so this class of drift fails a test instead of a run.
+
+**SEQUENTIAL, NOT THREE-WIDE.** The first launch ran three arms concurrently on the theory that batch-1 decode
+leaves compute idle. Measured: 43 rollouts in 4539s wall = **106s per rollout aggregate**, which is what a
+single process delivers on its own. Decoding is memory-bandwidth-bound (~143 GB/s against GB10's 273 GB/s
+peak) and one stream already saturates it, so the three processes split one process's throughput three ways.
+Parallelism was 0.96x, i.e. slightly negative. The relaunch runs one arm at a time for the same total cost,
+ordered `A, C-lazy, D-naive, C-eager, D-plain, D-gate`, so each arm can be checked against June as it lands
+instead of everything arriving together at the end. Estimated **~33 hours** at the 2200 cap.
+
+**C39, LOGGED NOT CITED.** `runs/agent/powered_retest_{base_repl,framed}.json` are a prior prompted-election
+pair that had never been committed; the `--frame-defn` flag that produced them was sitting unstaged. Both are
+now in tree. On the `effic` suite with Qwen2.5-Coder-7B, directing the model to prefer `<defn>` over reading
+moves election 2/48 to 14/48 (exact McNemar p=0.0042, discordant 14 vs 2) against a baseline that already
+advertises the tool as cheaper. No report sentence rests on this.

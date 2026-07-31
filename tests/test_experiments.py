@@ -12,7 +12,7 @@ from scaffold.stream_agent import (
     _normalize_inline_edit,
     _strip_fences,
 )
-from scripts.synth_delivery import ARMS as DELIVERY_ARMS, ARM_WITNESS, SYS_LINE_DELIVERY
+from scripts.synth_delivery import ARMS as DELIVERY_ARMS, ARM_WITNESS, SYS_LINE_DELIVERY, parse_args
 from scripts.analysis.effic_real_stats import binom_two_sided
 from scripts.analysis.analyze_checker_paired import (
     controlled_gate_cohort_audit,
@@ -522,6 +522,26 @@ def test_delivery_witness_events_are_the_ones_the_agent_emits():
         assert witness in emitted, (
             f"arm {arm} keys on {witness!r}, which stream_agent.py no longer emits; "
             f"it emits {sorted(emitted)}"
+        )
+
+
+def test_delivery_sampling_defaults_match_the_published_arms():
+    """The pinned prompt and the ARMS table only fix the channel and the timing. Sampling
+    limits sit outside both, so the runner can reproduce an arm's flags exactly and still
+    differ from the published run. That happened: the first v2 launch inherited a 1400-token
+    cap against June's 2200 and truncated rollouts that routinely hit the cap. Assert the
+    defaults against the configs recovered from the June checkpoints."""
+    root = Path(__file__).resolve().parents[1]
+    prov = json.loads((root / "runs" / "agent" / "synth_delivery_provenance.json").read_text())
+    configs = [c for f in prov["files"].values() if (c := f.get("config"))]
+    assert configs, "no recovered June configs; provenance file is empty or restructured"
+    defaults = vars(parse_args([]))
+    for key in ("max_new", "latency"):
+        june = {c[key] for c in configs if key in c}
+        assert len(june) == 1, f"June arms disagree on {key}: {june}"
+        assert defaults[key] == june.pop(), (
+            f"runner defaults {key}={defaults[key]}, but every published C37 arm ran "
+            f"{key}={june}; a re-run at this default is not comparable to the June numbers"
         )
 
 

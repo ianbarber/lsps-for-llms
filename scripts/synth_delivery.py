@@ -85,7 +85,13 @@ def parse_args(argv=None):
     ap.add_argument("--temp", type=float, default=0.0, help="0 = greedy (deterministic, seeds ignored)")
     ap.add_argument("--adapter", default=None)
     ap.add_argument("--model", default="Qwen/Qwen2.5-Coder-7B-Instruct")
-    ap.add_argument("--max-new", type=int, default=1400)
+    # 2200 and 8 are the values every published C37 arm ran under, recovered in
+    # runs/agent/synth_delivery_provenance.json and asserted by test_experiments.py.
+    # max_new is load-bearing, not cosmetic: these tasks routinely hit the cap (7 of 12
+    # C-eager rollouts on grid_field_rename did), so a lower cap truncates rollouts into
+    # unresolved and does so hardest in the thrashing arms, which is the contrast being
+    # measured. Defaulted rather than left to the caller so a re-run cannot quietly differ.
+    ap.add_argument("--max-new", type=int, default=2200)
     ap.add_argument("--latency", type=int, default=8)
     ap.add_argument("--debounce", type=int, default=0, help="D: settle tokens before re-querying (0=immediate)")
     ap.add_argument("--pause-align", action="store_true", help="D: deliver at a newline/pause")
@@ -93,6 +99,10 @@ def parse_args(argv=None):
     ap.add_argument("--c-eager", action="store_true", help="C: post-edit hook (deliver diag immediately) vs batched at yield")
     ap.add_argument("--syntax-gate", action="store_true", help="D: only deliver live diag when the file parses")
     ap.add_argument("--rich-signal", action="store_true", help="append go-to-def/hover context to each diagnostic")
+    ap.add_argument("--arm", choices=sorted(ARMS), default=None,
+                    help="select a published C37 arm by name and set every delivery flag from the "
+                         "ARMS table. Preferred over passing the flags by hand: the arm definitions "
+                         "are then enforced in code rather than by the operator typing them correctly.")
     return ap.parse_args(argv)
 
 
@@ -104,6 +114,16 @@ def main(argv=None):
     from scripts.synth_tasks_delivery import TASKS
 
     A = parse_args(argv)
+    if A.arm:
+        # Resolve the arm from the single source of truth, so a published arm cannot be
+        # misconfigured by a mistyped flag. Anything the arm does not set keeps its default.
+        spec = dict(ARMS[A.arm])
+        A.conds = spec.pop("condition")
+        for k, v in spec.items():
+            setattr(A, k, v)
+        print(f"[arm] {A.arm} -> conds={A.conds} " +
+              " ".join(f"{k}={getattr(A, k)}" for k in
+                       ("debounce", "pause_align", "announce_lsp", "c_eager", "syntax_gate")), flush=True)
     tasks = TASKS if not A.names else [t for t in TASKS if t["name"] in set(A.names.split(","))]
     conds = A.conds.split(",")
     n_seeds = 1 if A.temp == 0 else A.seeds

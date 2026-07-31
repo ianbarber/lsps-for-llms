@@ -193,6 +193,7 @@ def make_manifest() -> dict:
         + list((ROOT / "runs" / "pilot").glob("*.json"))
         + list((ROOT / "runs" / "confirmation").glob("*.json"))
         + list((ROOT / "runs" / "readreq").glob("*.json"))
+        + list((ROOT / "runs" / "delivery_v2").glob("*.json"))
     ))
     entries = []
     for path in result_paths:

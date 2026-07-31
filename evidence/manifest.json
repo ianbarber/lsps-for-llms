@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "git_revision_at_generation": "3501c6af626e61dc326ca4221166e41e79d03875",
+  "git_revision_at_generation": "256795ff0aa14745cad3abcbf78671137d7bef40",
   "git_worktree_dirty_at_generation": true,
   "platform_at_generation": "Linux-6.17.0-1026-nvidia-aarch64-with-glibc2.39",
   "results": [
@@ -2030,6 +2030,52 @@
       ]
     },
     {
+      "path": "runs/agent/powered_retest_base_repl.json",
+      "sha256": "9e0d06829b9c4afffa3a6ed35927e3cb89b5573e7ae446c6827b6d9efec943e5",
+      "bytes": 527943,
+      "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "temperature": 0.7,
+      "model_meta": null,
+      "pyrefly": null,
+      "config": {
+        "suite": "effmix",
+        "arm": "none",
+        "lsp_tools": true,
+        "dry_run": false,
+        "save_sft": false,
+        "force_lsp": false,
+        "relabel": false,
+        "lsp_defn": false,
+        "no_defn": false,
+        "frame_defn": false,
+        "out": "runs/agent/powered_retest_base_repl.json",
+        "conds": "A",
+        "names": null,
+        "seeds": 4,
+        "seed_start": 0,
+        "temp": 0.7,
+        "adapter": null,
+        "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+        "gpu_only": true,
+        "max_new": 3000,
+        "max_reads": 4,
+        "max_turns": 14
+      },
+      "declared_seeds": 4,
+      "actual_seeds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "n_rows": 72,
+      "integration_mode": "static_ast_definition_retrieval",
+      "artifact_role": "committed_model_result",
+      "source_run_files": [
+        "runs/agent/powered_retest_base_repl.json"
+      ]
+    },
+    {
       "path": "runs/agent/powered_retest_base_x.json",
       "sha256": "d3ead62bd9447681ee97da15b62740b0f4de1751b67acb72e4a87a088265465c",
       "bytes": 28205,
@@ -2087,6 +2133,52 @@
       "artifact_role": "committed_model_result",
       "source_run_files": [
         "runs/agent/powered_retest_base_x.json"
+      ]
+    },
+    {
+      "path": "runs/agent/powered_retest_framed.json",
+      "sha256": "e5f6683c61c7f446a37e8c8529a59c6b28731e1e6257904d673560cb66687536",
+      "bytes": 532416,
+      "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "temperature": 0.7,
+      "model_meta": null,
+      "pyrefly": null,
+      "config": {
+        "suite": "effmix",
+        "arm": "none",
+        "lsp_tools": true,
+        "dry_run": false,
+        "save_sft": false,
+        "force_lsp": false,
+        "relabel": false,
+        "lsp_defn": false,
+        "no_defn": false,
+        "frame_defn": true,
+        "out": "runs/agent/powered_retest_framed.json",
+        "conds": "A",
+        "names": null,
+        "seeds": 4,
+        "seed_start": 0,
+        "temp": 0.7,
+        "adapter": null,
+        "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+        "gpu_only": true,
+        "max_new": 3000,
+        "max_reads": 4,
+        "max_turns": 14
+      },
+      "declared_seeds": 4,
+      "actual_seeds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "n_rows": 72,
+      "integration_mode": "static_ast_definition_retrieval",
+      "artifact_role": "committed_model_result",
+      "source_run_files": [
+        "runs/agent/powered_retest_framed.json"
       ]
     },
     {
@@ -2992,6 +3084,46 @@
       ]
     },
     {
+      "path": "runs/agent/synth_dgate_port_check.json",
+      "sha256": "a126e859de2eeb291afb1c6186c90031b14db5acfbec9e12f94b11d0f8c12f4e",
+      "bytes": 54489,
+      "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "temperature": 0.7,
+      "model_meta": null,
+      "pyrefly": null,
+      "config": {
+        "out": "runs/agent/synth_dgate_port_check.json",
+        "conds": "D",
+        "names": "grid_field_rename,mutable_default_none",
+        "seeds": 3,
+        "seed_start": 6,
+        "temp": 0.7,
+        "adapter": null,
+        "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+        "max_new": 2200,
+        "latency": 8,
+        "debounce": 24,
+        "pause_align": true,
+        "announce_lsp": false,
+        "c_eager": false,
+        "syntax_gate": true,
+        "rich_signal": false,
+        "runner": "scripts/synth_delivery.py",
+        "harness": "scaffold/stream_agent.py",
+        "tasks": "scripts/synth_tasks_delivery.py",
+        "sys_prompt": "SYS_LINE_DELIVERY (== stream_agent.SYS_LINE @ 779aa5c^)",
+        "n_tasks": 2
+      },
+      "declared_seeds": 3,
+      "actual_seeds": [],
+      "n_rows": 0,
+      "integration_mode": "static_ast_definition_retrieval",
+      "artifact_role": "committed_model_result",
+      "source_run_files": [
+        "runs/agent/synth_dgate_port_check.json"
+      ]
+    },
+    {
       "path": "runs/agent/synth_dgate_reproduction_check.json",
       "sha256": "7eb5c344f7d295e61567ad6fb19d1c73a5f7f6af6ef1a833c862f7b923e36333",
       "bytes": 39856,
@@ -3163,6 +3295,7 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
+        "scaffold/stream_agent.py",
         "scripts/validate_pyrefly_lsp.py",
         "evidence/protocols.md"
       ]
@@ -3259,6 +3392,7 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
+        "scaffold/stream_agent.py",
         "scripts/validate_pyrefly_lsp.py",
         "evidence/protocols.md"
       ]
@@ -4773,6 +4907,7 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
+        "scaffold/stream_agent.py",
         "scripts/validate_pyrefly_lsp.py",
         "evidence/protocols.md"
       ]
@@ -5897,6 +6032,7 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
+        "scaffold/stream_agent.py",
         "scripts/validate_pyrefly_lsp.py",
         "evidence/protocols.md"
       ]
@@ -6093,6 +6229,7 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
+        "scaffold/stream_agent.py",
         "scripts/validate_pyrefly_lsp.py",
         "evidence/protocols.md"
       ]
@@ -6178,6 +6315,7 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
+        "scaffold/stream_agent.py",
         "scripts/validate_pyrefly_lsp.py",
         "evidence/protocols.md"
       ]
@@ -6376,6 +6514,7 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
+        "scaffold/stream_agent.py",
         "scripts/validate_pyrefly_lsp.py",
         "evidence/protocols.md"
       ]
@@ -6439,6 +6578,7 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
+        "scaffold/stream_agent.py",
         "scripts/validate_pyrefly_lsp.py",
         "evidence/protocols.md"
       ]
@@ -6502,6 +6642,7 @@
         "evidence/protocols.md": "e9dfa4812f42a7b587960b3a25222bc3373f6aacb0b67d8b6133911b4c007be7"
       },
       "current_protocol_source_mismatches": [
+        "scaffold/stream_agent.py",
         "scripts/validate_pyrefly_lsp.py",
         "evidence/protocols.md"
       ]
@@ -7109,7 +7250,7 @@
     },
     {
       "path": "scaffold/stream_agent.py",
-      "sha256": "0267afa17a22c5f0eea77bce82927b5d25890dea0500312163d2a1e2e1f40b79"
+      "sha256": "b1873afeeda16ef0cb9327f462ba3ac460066e78a53019e6745cc166a88ae79c"
     },
     {
       "path": "scaffold/mock_env.py",
