@@ -48,11 +48,13 @@ a mismatch prints FAIL and sets a non-zero exit code.
 Run:  python scripts/analysis/stats_delivery.py   (from the repo root)
 """
 import json
-import math
 import os
-import random
 import sys
 from itertools import combinations
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from delivery_stats_lib import (  # noqa: E402
+    WITNESS, bh_fdr, diag_kinds, load_june, mcnemar, task_bootstrap, wilson)
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 FAILURES = []
@@ -66,58 +68,6 @@ def rows(path, cond):
     return json.load(open(A(path)))["rows"][cond]
 
 
-def wilson(n, t, z=1.96):
-    p = n / t
-    d = 1 + z * z / t
-    c = (p + z * z / (2 * t)) / d
-    h = z * math.sqrt(p * (1 - p) / t + z * z / (4 * t * t)) / d
-    return c - h, c + h
-
-
-def mcnemar(X, Y):
-    """Exact two-sided McNemar over paired (task, seed) units."""
-    ix = {(r["task"], r["seed"]): r["resolved"] for r in X}
-    iy = {(r["task"], r["seed"]): r["resolved"] for r in Y}
-    keys = [k for k in ix if k in iy]
-    b = sum(1 for k in keys if ix[k] and not iy[k])
-    c = sum(1 for k in keys if iy[k] and not ix[k])
-    n = b + c
-    p = 1.0 if n == 0 else min(1.0, 2 * sum(math.comb(n, i) for i in range(min(b, c) + 1)) / 2 ** n)
-    return b, c, p, len(keys)
-
-
-def by_task(rs):
-    d = {}
-    for r in rs:
-        d.setdefault(r["task"], []).append(bool(r["resolved"]))
-    return {k: sum(v) / len(v) for k, v in d.items()}
-
-
-def task_bootstrap(X, Y, B=20000, seed=0):
-    """Mean per-task resolve difference, 95% CI over tasks resampled with replacement."""
-    x, y = by_task(X), by_task(Y)
-    ts = sorted(x)
-    rnd = random.Random(seed)
-    obs = sum(x[t] - y[t] for t in ts) / len(ts)
-    ds = []
-    for _ in range(B):
-        s = [ts[rnd.randrange(len(ts))] for _ in ts]
-        ds.append(sum(x[t] - y[t] for t in s) / len(s))
-    ds.sort()
-    return obs, ds[int(0.025 * B)], ds[int(0.975 * B)]
-
-
-def bh_fdr(ps, q=0.05):
-    """Benjamini-Hochberg: return the largest p that is still rejected, or None."""
-    m = len(ps)
-    srt = sorted(ps)
-    cut = None
-    for i, p in enumerate(srt, 1):
-        if p <= i * q / m:
-            cut = p
-    return cut
-
-
 def check(label, got, want, tol):
     ok = abs(got - want) <= tol
     if not ok:
@@ -125,14 +75,7 @@ def check(label, got, want, tol):
     return "ok  " if ok else "FAIL"
 
 
-ARMS = {
-    "A":       rows("synth_power.json", "A") + rows("synth_ac_s6.json", "A"),
-    "C-lazy":  rows("synth_power.json", "C") + rows("synth_ac_s6.json", "C"),
-    "C-eager": rows("synth_ceager.json", "C") + rows("synth_ceager_s6.json", "C"),
-    "D-naive": rows("synth_power.json", "D") + rows("synth_dnaive_s6.json", "D"),
-    "D-plain": rows("synth_dplain.json", "D") + rows("synth_dplain_s6.json", "D"),
-    "D-gate":  rows("synth_dgate.json", "D") + rows("synth_dgate_s6.json", "D"),
-}
+ARMS = load_june(ROOT)
 
 # ---------------------------------------------------------------- provenance
 print("== arm identity: config recovered from the contemporaneous run checkpoints ==")
@@ -149,11 +92,10 @@ for f, e in prov["files"].items():
 # The event trace is an independent witness of the delivery mechanism: A emits no
 # diag events, C-lazy queues them as observations, C-eager fires a post-edit hook,
 # every D arm splices mid-stream after the debounce.
-WITNESS = {"A": None, "C-lazy": "diag_sync_queued", "C-eager": "diag_eager"}
 print("  event-trace witness (independent of filenames):")
 for k, v in ARMS.items():
-    kinds = sorted({e["type"] for r in v for e in r["events"] if e["type"].startswith("diag")})
-    want = WITNESS.get(k, "diag_debounced")
+    kinds = diag_kinds(v)
+    want = WITNESS[k]
     ok = (kinds == []) if want is None else (kinds == [want])
     if not ok:
         FAILURES.append(f"{k}: diag event types {kinds}, expected {want}")
