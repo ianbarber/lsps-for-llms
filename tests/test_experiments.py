@@ -508,10 +508,9 @@ def test_delivery_arms_are_distinct_and_each_names_its_own_witness_event():
 
 
 def test_delivery_witness_events_are_the_ones_the_agent_emits():
-    """ARM_WITNESS and stats_delivery.py identify an arm by the event name in its rows.
+    """ARM_WITNESS is how the runner and the reproducer identify an arm from its rows.
     Those names are string literals in stream_agent.py, so a rename there would leave the
-    arm table and the analyzer silently matching nothing while every test stayed green.
-    Tie the two together."""
+    arm table matching nothing while every test stayed green. Tie the two together."""
     root = Path(__file__).resolve().parents[1]
     agent_src = (root / "scaffold" / "stream_agent.py").read_text()
     emitted = set(re.findall(r'"type":\s*"(diag_[a-z_]+)"', agent_src))
@@ -525,28 +524,25 @@ def test_delivery_witness_events_are_the_ones_the_agent_emits():
         )
 
 
-def test_delivery_sampling_defaults_match_the_published_arms():
-    """The pinned prompt and the ARMS table only fix the channel and the timing. Sampling
-    limits sit outside both, so the runner can reproduce an arm's flags exactly and still
-    differ from the published run. That happened: the first v2 launch inherited a 1400-token
-    cap against June's 2200 and truncated rollouts that routinely hit the cap. Assert the
-    defaults against the configs recovered from the June checkpoints."""
+def test_delivery_sampling_defaults_match_the_committed_rollouts():
+    """The pinned prompt and the ARMS table fix the channel and the timing, but not the
+    sampling limits, so the runner can reproduce an arm's flags exactly and still not
+    reproduce the arm. That happened once: a re-run inherited a 1400-token cap against the
+    2200 the rollouts were produced under, truncating rollouts that routinely hit it. Each
+    artifact records the full config it was produced with, so assert the runner's defaults
+    still match what is committed."""
     root = Path(__file__).resolve().parents[1]
-    prov = json.loads((root / "runs" / "agent" / "synth_delivery_provenance.json").read_text())
-    configs = []
-    for f in prov["files"].values():
-        c = f.get("config")
-        # one recovered entry is a list of configs (a merged checkpoint+resume run), so a
-        # plain `key in c` would silently skip it rather than check it
-        configs += c if isinstance(c, list) else ([c] if c else [])
-    assert configs, "no recovered June configs; provenance file is empty or restructured"
+    configs = [json.loads(p.read_text())["config"]
+               for p in sorted((root / "runs" / "delivery").glob("*.json"))]
+    assert configs, "no delivery rollouts committed; this test guards nothing"
     defaults = vars(parse_args([]))
     for key in ("max_new", "latency", "temp"):
-        june = {c[key] for c in configs if key in c}
-        assert len(june) == 1, f"June arms disagree on {key}: {june}"
-        assert defaults[key] == june.pop(), (
-            f"runner defaults {key}={defaults[key]}, but every published C37 arm ran "
-            f"{key}={june}; a re-run at this default is not comparable to the June numbers"
+        committed = {c[key] for c in configs if key in c}
+        assert len(committed) == 1, f"the committed arms disagree on {key}: {committed}"
+        assert defaults[key] == committed.pop(), (
+            f"runner defaults {key}={defaults[key]}, but every committed rollout was produced "
+            f"at {key}={ {c[key] for c in configs} }; a re-run at this default would not be "
+            f"comparable to the results in REPORT.md"
         )
 
 
@@ -572,20 +568,10 @@ def test_failed_edits_still_refresh_the_numbered_file_view():
         )
 
 
-def test_delivery_witness_table_is_not_forked_between_runner_and_analyzer():
-    """delivery_stats_lib carries its own copy of the arm -> event map for the analyzers.
-    A rename done consistently across synth_delivery.py and stream_agent.py would satisfy
-    every other test while leaving the analyzer's copy matching nothing."""
-    from scripts.analysis.delivery_stats_lib import WITNESS
-    assert WITNESS == ARM_WITNESS, (
-        f"the analyzer's witness table has drifted from the runner's: "
-        f"analyzer={WITNESS}, runner={ARM_WITNESS}"
-    )
-
-
-def test_delivery_prompt_is_pinned_to_the_june_harness_prompt():
+def test_delivery_prompt_is_pinned_to_the_prompt_the_rollouts_used():
     """The agent's live SYS_LINE has drifted (gained <defn>, lost the analyzer sentence).
-    The delivery arms must keep the prompt the committed C37 rollouts were produced under."""
+    The delivery arms must keep the prompt the committed rollouts were produced under, which
+    is recorded in each artifact's config as the blob at 779aa5c^."""
     root = Path(__file__).resolve().parents[1]
     june = subprocess.run(
         ["git", "show", "779aa5c^:scaffold/stream_agent.py"],

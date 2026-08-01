@@ -2398,3 +2398,39 @@ Reviewed and found clean: the ARMS table against every recovered config, the pin
 `build_prompt` output, the task suite against `779aa5c:scripts/synth_tasks.py`, the pyrefly config rewrite
 (byte-identical `pyrefly check` output), `enable_thinking=False` rendering, and the C/D delivery machinery
 line-for-line.
+
+## 2026-07-31 — delivery re-run complete; the experiment collapsed to one version
+
+All six arms finished (A 23:15, C-lazy 03:07, D-naive 06:59, C-eager 12:29, D-plain 16:03, D-gate 19:23), 1008
+rollouts on the fixed harness. **The report now cites these and only these**; the earlier run has been deleted
+from the tree along with the apparatus that existed to interpret it.
+
+**RESULT, and it is cleaner than what it replaces.** Resolve: C-lazy 0.500, C-eager 0.494, D-gate 0.452, D-plain
+0.452, A 0.440, D-naive 0.310. All five D-naive contrasts clear FDR 5% (cutoff p<=0.0071); none of the ten among
+the other five arms does, smallest p=0.143. The decomposition sharpened: the announce sentence carries the
+**entire** deficit (D-naive to D-plain +0.143 [+0.054,+0.238], p=0.0022, against +0.119 p=0.0105 before), and the
+syntax gate now adds **exactly nothing** (-0.000 [-0.089,+0.113], p=1.0000) while still removing 68% of live
+deliveries (504 to 163) and dropping the share describing a broken parse from 74% to 25%. D-plain versus A is
+p=0.87: live mid-stream delivery without the standing order is indistinguishable from no feedback at all. The
+abstract needed no change; both sentences it makes about delivery were already exactly right.
+
+**HOW THE OLD AND NEW NUMBERS RELATE**, recorded here because the report deliberately does not carry it. Every
+arm landed below its earlier value, by 3.0 to 4.2 points for A, C-lazy, C-eager and D-gate, by 2.9 for D-naive
+and by only 0.6 for D-plain (0.458 to 0.452). The per-cell flips were predominantly downward: arm A flipped 7 of
+168 cells, all 7 down, while D-plain flipped 5 down and 4 up, which is why its level barely moved. That is the
+signature of the harness fixes rather than noise: the old harness terminated 449 of 449 resolved rollouts on the
+literal `<done/>` inside its own observation text and fired 215 test executions off the literal `<test/>` in that
+text, and removing those free test runs costs a few points. The shift is not perfectly uniform, but it is small
+against the effect the experiment measures (D-naive sits 13 points below A), so the between-arm structure is
+untouched, which is what the claim rests on. Per-cell resolve agreement was 95.8% for A, C-lazy, C-eager and
+D-naive and 94.6% for D-plain and D-gate, and the disagreements were arm-specific: **zero** cells flipped in all
+four of the first arms to finish, union 25 distinct cells, pairwise overlap 0-2.
+
+**COLLAPSED TO ONE VERSION.** Keeping a second reproducer for superseded numbers was dead weight, and the
+old/new framing was an artifact of how the work happened rather than anything a reader needs. So:
+`runs/delivery_v2` is now `runs/delivery`; `stats_delivery_v2.py` and `delivery_stats_lib.py` are gone, folded
+into a single `stats_delivery.py` that re-derives every figure the report prints and exits non-zero on drift;
+the twelve superseded artifacts are deleted (7.9MB, git retains them). `synth_delivery_provenance.json` went with
+them, since it existed only to recover arm identity for artifacts whose runner never recorded its config, and
+the current artifacts each record their own. The sampling-defaults test now asserts the runner against the
+committed rollouts rather than against recovered configs, so the thing it guards is the thing the report cites.

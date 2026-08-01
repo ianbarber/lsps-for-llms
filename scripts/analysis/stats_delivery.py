@@ -1,136 +1,179 @@
 #!/usr/bin/env python3
-"""Reproduce the delivery-timing statistics (ledger C37) from the committed result JSONs.
+"""Reproduce the delivery-timing table in REPORT.md (ledger C37) from the committed rollouts.
 
-The question: WHEN should a type diagnostic reach a coding agent? Six delivery
-arms over the 14-task synthetic authoring suite, Qwen2.5-Coder-7B-Instruct with
-real Pyrefly, temp 0.7, 14 tasks x 12 seeds = 168 paired (task, seed) units per
-arm:
+The question: WHEN should a type diagnostic reach a coding agent? Six delivery arms over the
+14-task synthetic authoring suite (`scripts/synth_tasks_delivery.py`), Qwen2.5-Coder-7B-Instruct
+with real Pyrefly, temp 0.7, 14 tasks x 12 seeds = 168 paired (task, seed) rollouts per arm.
 
   A        no feedback
   C-lazy   batched, delivered at the model's next yield
   C-eager  batched, delivered immediately after each edit (the production hook)
-  D-naive  live mid-stream, debounce 24 + pause-align + an `announce_lsp` prompt
-           telling the model to fix each diagnostic before moving on
+  D-naive  live mid-stream, debounce 24 + pause-align + an `announce_lsp` prompt telling the
+           model to fix each diagnostic before moving on
   D-plain  live mid-stream, debounce 24 + pause-align, no announce sentence
   D-gate   D-plain plus a syntax gate: deliver only when the file `ast.parse`s
 
-Arm -> flag -> file is NOT inferred from filenames. The finalized JSONs omit the
-runner config, but the contemporaneous per-task checkpoints (`<out>.json.partial`)
-recorded `vars(argparse)` next to byte-identical rows; those configs are lifted
-into runs/agent/synth_delivery_provenance.json, which this script prints and
-cross-checks against the event traces.
+Produced by `scripts/synth_delivery.py --arm <name>`, one artifact per arm. Arms are keyed by
+the `arm` each artifact records in its own `config`, never by filename, and each arm's
+mechanism is corroborated independently by the diagnostic events in its rows: an arm that
+claims to be live but emits no `diag_debounced` is a broken arm whatever its config says.
 
-  arm      | scripts/synth_acd.py @ 779aa5c invocation                | files (seeds 0-5 / 6-11)
-  A        | --conds A                                                | synth_power.json[A] / synth_ac_s6.json[A]
-  C-lazy   | --conds C                                                | synth_power.json[C] / synth_ac_s6.json[C]
-  C-eager  | --conds C --c-eager                                      | synth_ceager.json / synth_ceager_s6.json
-  D-naive  | --conds D --debounce 24 --pause-align --announce-lsp     | synth_power.json[D] / synth_dnaive_s6.json
-  D-plain  | --conds D --debounce 24 --pause-align                    | synth_dplain.json / synth_dplain_s6.json
-  D-gate   | --conds D --debounce 24 --pause-align --syntax-gate      | synth_dgate.json / synth_dgate_s6.json
+Every figure the report prints is re-derived here and checked against RECORDED_* below. A
+mismatch prints FAIL and exits non-zero, so REPORT.md cannot drift from the artifacts.
 
-Seeds 0-5 were run 2026-06-01..03; seeds 6-11 of every arm except D-naive were
-run 2026-06-03; the D-naive seeds 6-11 block was run 2026-07-29 on the same
-unchanged environment (pyrefly 1.0.0 / torch 2.11.0 / transformers 5.9.0,
-installed 2026-05-27) with the same harness restored from git. The seeds-6-11
-blocks carry a harness fix the seeds-0-5 blocks predate (24k context cap plus a
-250-line file-view truncation); it fires as a `context_overflow` bail on 8 of the
-1008 rollouts.
-
-Two tests are reported for every contrast. Exact McNemar treats each (task, seed)
-as an independent pair, which over-counts: seeds within a task are correlated. The
-task-clustered bootstrap resamples the 14 tasks, which is the convention REPORT.md
-uses ("the unit is the task; intervals are task-level bootstraps"). Fifteen
-contrasts are run, so a Benjamini-Hochberg FDR is applied across the family.
-
-Values published in log.md / the 2026-06-04 README are re-checked where they exist;
-a mismatch prints FAIL and sets a non-zero exit code.
+Two tests are reported for every contrast. Exact McNemar treats each (task, seed) as an
+independent pair, which over-counts because seeds within a task are correlated. The
+task-clustered bootstrap resamples the 14 tasks, which is the convention REPORT.md uses ("the
+unit is the task; intervals are task-level bootstraps"). Fifteen contrasts are run, so a
+Benjamini-Hochberg FDR is applied across the family.
 
 Run:  python scripts/analysis/stats_delivery.py   (from the repo root)
 """
+import glob
 import json
+import math
 import os
+import random
 import sys
 from itertools import combinations
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from delivery_stats_lib import (  # noqa: E402
-    WITNESS, bh_fdr, diag_kinds, load_june, mcnemar, task_bootstrap, wilson)
-
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
+sys.path.insert(0, os.path.abspath(ROOT))
+from scripts.synth_delivery import ARM_WITNESS  # noqa: E402  (the runner owns the arm table)
+
+RUNS = os.environ.get("DELIVERY_DIR") or os.path.join(ROOT, "runs", "delivery")
+FULL_N = 168  # 14 tasks x 12 seeds
 FAILURES = []
 
-
-def A(p):
-    return os.path.join(ROOT, "runs", "agent", p)
-
-
-def rows(path, cond):
-    return json.load(open(A(path)))["rows"][cond]
+# Every figure REPORT.md prints, re-checked against the artifacts on every run, at the
+# precision the report prints it. Printing a number without checking it is how a typo in the
+# report survives a green reproducer, so the rule here is: if the report states it, it is
+# below.
+RECORDED_RESOLVE = {"C-lazy": 0.500, "C-eager": 0.494, "D-gate": 0.452,
+                    "D-plain": 0.452, "A": 0.440, "D-naive": 0.310}
+RECORDED_DELIVERIES = {"D-naive": 624, "D-plain": 504, "D-gate": 163}
+# The report's "Difference vs no feedback" column: arm minus A, so the negation of the
+# A-vs-arm contrast, with the interval endpoints swapped as well as negated.
+RECORDED_VS_NONE = {"C-lazy":  (+0.060, -0.000, +0.119),
+                    "C-eager": (+0.054, -0.024, +0.143),
+                    "D-naive": (-0.131, -0.196, -0.065),
+                    "D-plain": (+0.012, -0.083, +0.083),
+                    "D-gate":  (+0.012, -0.030, +0.060)}
+RECORDED_FDR_CUTOFF = 0.0071     # footnote
+RECORDED_BAND_SMALLEST_P = 0.143  # footnote: smallest p among the properly-delivered arms
+# The paragraph below the table: (delta, lo, hi, p)
+RECORDED_DECOMP = {("D-naive", "D-plain"): (+0.143, +0.054, +0.238, 0.0022),
+                   ("D-plain", "D-gate"):  (+0.000, -0.089, +0.113, 1.0000)}
+RECORDED_BROKEN_SHARE = {"D-plain": 0.74, "D-gate": 0.25}   # share of live deliveries
 
 
 def check(label, got, want, tol):
     ok = abs(got - want) <= tol
     if not ok:
-        FAILURES.append(f"{label}: got {got}, recorded {want}")
+        FAILURES.append(f"{label}: got {got}, report says {want}")
     return "ok  " if ok else "FAIL"
 
 
-ARMS = load_june(ROOT)
+def wilson(n, t, z=1.96):
+    p = n / t
+    d = 1 + z * z / t
+    c = (p + z * z / (2 * t)) / d
+    h = z * math.sqrt(p * (1 - p) / t + z * z / (4 * t * t)) / d
+    return c - h, c + h
 
-# ---------------------------------------------------------------- provenance
-print("== arm identity: config recovered from the contemporaneous run checkpoints ==")
-prov = json.load(open(A("synth_delivery_provenance.json")))
-FLAGS = ("conds", "debounce", "pause_align", "announce_lsp", "c_eager", "syntax_gate")
-for f, e in prov["files"].items():
-    for c in (e["config"] if isinstance(e["config"], list) else [e["config"]]):
-        print(f"  {f:24s} {e['arm']:20s} " + " ".join(f"{k}={c.get(k)}" for k in FLAGS))
-    if e.get("blob_matches_779aa5c") is False:
-        FAILURES.append(f"{f}: worktree copy differs from the committed blob at 779aa5c")
-    if e.get("rows_identical_to_checkpoint") is False:
-        FAILURES.append(f"{f}: rows differ from the config-carrying checkpoint")
 
-# The event trace is an independent witness of the delivery mechanism: A emits no
-# diag events, C-lazy queues them as observations, C-eager fires a post-edit hook,
-# every D arm splices mid-stream after the debounce.
-print("  event-trace witness (independent of filenames):")
-for k, v in ARMS.items():
-    kinds = diag_kinds(v)
-    want = WITNESS[k]
+def mcnemar(X, Y):
+    """Exact two-sided McNemar over paired (task, seed) units."""
+    ix = {(r["task"], r["seed"]): r["resolved"] for r in X}
+    iy = {(r["task"], r["seed"]): r["resolved"] for r in Y}
+    keys = [k for k in ix if k in iy]
+    b = sum(1 for k in keys if ix[k] and not iy[k])
+    c = sum(1 for k in keys if iy[k] and not ix[k])
+    n = b + c
+    p = 1.0 if n == 0 else min(1.0, 2 * sum(math.comb(n, i) for i in range(min(b, c) + 1)) / 2 ** n)
+    return b, c, p, len(keys)
+
+
+def by_task(rs):
+    d = {}
+    for r in rs:
+        d.setdefault(r["task"], []).append(bool(r["resolved"]))
+    return {k: sum(v) / len(v) for k, v in d.items()}
+
+
+def task_bootstrap(X, Y, B=20000, seed=0):
+    """Mean per-task resolve difference, 95% CI over tasks resampled with replacement."""
+    x, y = by_task(X), by_task(Y)
+    ts = sorted(set(x) & set(y))
+    rnd = random.Random(seed)
+    obs = sum(x[t] - y[t] for t in ts) / len(ts)
+    ds = []
+    for _ in range(B):
+        s = [ts[rnd.randrange(len(ts))] for _ in ts]
+        ds.append(sum(x[t] - y[t] for t in s) / len(s))
+    ds.sort()
+    return obs, ds[int(0.025 * B)], ds[int(0.975 * B)]
+
+
+def bh_fdr(ps, q=0.05):
+    """Benjamini-Hochberg: the largest p still rejected at FDR q, or None."""
+    m = len(ps)
+    cut = None
+    for i, p in enumerate(sorted(ps), 1):
+        if p <= i * q / m:
+            cut = p
+    return cut
+
+
+def load():
+    """Arm -> rows, from each artifact's own recorded config."""
+    out = {}
+    for p in sorted(glob.glob(os.path.join(RUNS, "*.json"))):
+        d = json.load(open(p))
+        arm = (d.get("config") or {}).get("arm")
+        if not arm:
+            FAILURES.append(f"{os.path.basename(p)}: no config.arm; the arm cannot be identified")
+            continue
+        out[arm] = [r for v in d["rows"].values() for r in v]
+    return out
+
+
+ARMS = load()
+if not ARMS:
+    print(f"no rollouts in {RUNS}")
+    sys.exit(1)
+
+# --------------------------------------------------------------------- apparatus
+print("== apparatus: each arm's delivery mechanism, witnessed by its own event trace ==")
+for arm in sorted(ARMS):
+    kinds = sorted({e["type"] for r in ARMS[arm] for e in r["events"]
+                    if e["type"].startswith("diag")})
+    want = ARM_WITNESS.get(arm)
     ok = (kinds == []) if want is None else (kinds == [want])
     if not ok:
-        FAILURES.append(f"{k}: diag event types {kinds}, expected {want}")
-    print(f"    {k:8s} diag events: {kinds or ['(none)']}  {'ok' if ok else 'FAIL'}")
+        FAILURES.append(f"{arm}: diag event types {kinds}, expected {want or '(none)'}")
+    print(f"  {arm:8s} n={len(ARMS[arm]):3d}  diag events: {kinds or ['(none)']}  "
+          f"{'ok' if ok else 'FAIL'}")
+for arm in ARM_WITNESS:
+    if arm not in ARMS:
+        FAILURES.append(f"{arm}: no artifact in {RUNS}; the arm is missing")
+    elif len(ARMS[arm]) != FULL_N:
+        FAILURES.append(f"{arm}: {len(ARMS[arm])} rollouts, expected {FULL_N}")
 
-# ------------------------------------------------------- apparatus check
-print("  apparatus check (runs/agent/synth_dgate_reproduction_check.json):")
-_chk = {(r["task"], r["seed"]): r
-        for r in rows("synth_dgate_reproduction_check.json", "D")}
-_june = {(r["task"], r["seed"]): r for r in rows("synth_dgate_s6.json", "D")}
-_f = ["resolved", "in_tokens", "out_tokens", "n_edits", "n_tests", "turns", "rework_ratio",
-      "stream_tail"]
-_same = sum(1 for k, r in _chk.items() if all(_june[k][x] == r[x] for x in _f))
-if _same != len(_chk):
-    FAILURES.append(f"apparatus check: only {_same}/{len(_chk)} rollouts reproduce")
-print(f"    {_same}/{len(_chk)} June D-gate rollouts re-run on 2026-07-29 reproduce bit-for-bit "
-      f"{'ok' if _same == len(_chk) else 'FAIL'}")
-
-# ----------------------------------------------------------- resolve rates
-print("\n== resolve rate, 14 tasks x 12 seeds, n=168 per arm ==")
-RECORDED = {"A": 0.482, "C-lazy": 0.530, "C-eager": 0.524, "D-plain": 0.458, "D-gate": 0.482}
-for k, v in ARMS.items():
+# ------------------------------------------------------------------ resolve rates
+print(f"\n== resolve rate, 14 tasks x 12 seeds, n={FULL_N} per arm ==")
+for arm in sorted(ARMS, key=lambda a: -sum(r["resolved"] for r in ARMS[a])):
+    v = ARMS[arm]
     n, t = sum(r["resolved"] for r in v), len(v)
     lo, hi = wilson(n, t)
-    st = "    " if k not in RECORDED else check(f"resolve {k}", round(n / t, 3), RECORDED[k], 0.001)
-    e0 = sum(r["resolved"] for r in v if r["seed"] < 6)
-    e1 = sum(r["resolved"] for r in v if r["seed"] >= 6)
-    print(f"  {k:8s} {n:3d}/{t} = {n/t:.3f}  [{lo:.2f},{hi:.2f}]   "
-          f"(seeds 0-5 {e0}/84, seeds 6-11 {e1}/84)   {st}")
-print(f"  D-naive seeds 0-5 = 0.345 and seeds 6-11 = 0.333: the arm replicates on fresh seeds.")
+    st = ("    " if arm not in RECORDED_RESOLVE
+          else check(f"resolve {arm}", round(n / t, 3), RECORDED_RESOLVE[arm], 0.001))
+    print(f"  {arm:8s} {n:3d}/{t} = {n/t:.3f}  [{lo:.2f},{hi:.2f}]   {st}")
 
-# ------------------------------------------------------------- comparisons
+# --------------------------------------------------------------------- contrasts
 print("\n== all 15 pairwise contrasts ==")
 res = []
-for a, b in combinations(ARMS, 2):
+for a, b in combinations(sorted(ARMS), 2):
     B, C, p, n = mcnemar(ARMS[a], ARMS[b])
     o, lo, hi = task_bootstrap(ARMS[a], ARMS[b])
     res.append((a, b, B, C, p, o, lo, hi))
@@ -139,50 +182,74 @@ for a, b, B, C, p, o, lo, hi in res:
     mark = " *" if cut is not None and p <= cut else "  "
     print(f"  {a:8s} vs {b:8s}: b={B:3d} c={C:3d} McNemar p={p:.4f}   "
           f"task delta {o:+.3f} [{lo:+.3f},{hi:+.3f}]{mark}")
-print(f"  * = rejected at Benjamini-Hochberg FDR 5% over all 15 contrasts (cutoff p<={cut:.4f})")
-sig = {(a, b) for a, b, B, C, p, o, lo, hi in res if cut is not None and p <= cut}
-band = {"A", "C-lazy", "C-eager", "D-plain", "D-gate"}
-if any(a in band and b in band for a, b in sig):
-    FAILURES.append("a contrast among the five properly-delivered arms came out significant")
-if not all(("D-naive" in (a, b)) for a, b in sig):
-    FAILURES.append("a significant contrast does not involve D-naive")
-if len(sig) != 5:
-    FAILURES.append(f"expected all 5 D-naive contrasts significant, got {len(sig)}")
-print("  every significant contrast involves D-naive; none of the ten contrasts among the")
-print("  five properly-delivered arms is significant (smallest of those, McNemar p="
-      f"{min(p for a,b,B,C,p,o,lo,hi in res if a in band and b in band):.3f}).")
+print(f"  * = rejected at Benjamini-Hochberg FDR 5% over all {len(res)} contrasts"
+      + (f" (cutoff p<={cut:.4f})" if cut is not None else "; nothing rejected"))
+if cut is not None and RECORDED_FDR_CUTOFF is not None:
+    check("FDR cutoff", round(cut, 4), RECORDED_FDR_CUTOFF, 0.0)
 
-# ------------------------------------------------- decomposing D-naive's deficit
-print("\n== decomposing the naive arm's deficit ==")
-for a, b, label in (("D-naive", "D-plain", "drop the announce sentence"),
-                    ("D-plain", "D-gate", "add the syntax gate on top"),
-                    ("D-naive", "D-gate", "both changes together")):
-    B, C, p, n = mcnemar(ARMS[a], ARMS[b])
-    o, lo, hi = task_bootstrap(ARMS[a], ARMS[b])
-    print(f"  {label:28s} {a} -> {b}: {-o:+.3f} [{-hi:+.3f},{-lo:+.3f}]  McNemar p={p:.4f}")
-print("  the announce sentence carries the deficit; the gate adds little to the outcome")
-print("  even though it removes ~70% of the deliveries.")
+# The report's difference column, which is the negation of the A-vs-arm contrast.
+vs_a = {(b if a == "A" else a): (-o, -hi, -lo) if a == "A" else (o, lo, hi)
+        for a, b, B, C, p, o, lo, hi in res if "A" in (a, b)}
+for arm, (want_d, want_lo, want_hi) in RECORDED_VS_NONE.items():
+    if arm not in vs_a:
+        FAILURES.append(f"vs-none {arm}: no contrast against A to check the report against")
+        continue
+    got_d, got_lo, got_hi = vs_a[arm]
+    check(f"vs-none {arm} delta", round(got_d, 3), want_d, 0.0)
+    check(f"vs-none {arm} CI lo", round(got_lo, 3), want_lo, 0.0)
+    check(f"vs-none {arm} CI hi", round(got_hi, 3), want_hi, 0.0)
 
-# ------------------------------------------------------- the gate's mechanism
-print("\n== mechanism: what the syntax gate removes ==")
-RECORDED_N = {("D-naive", "0-5"): 244, ("D-plain", "0-5"): 240, ("D-gate", "0-5"): 71,
-              ("D-plain", "6-11"): 302, ("D-gate", "6-11"): 90}
-for (nm, seeds), src in (
-        (("D-naive", "0-5"), rows("synth_power.json", "D")),
-        (("D-naive", "6-11"), rows("synth_dnaive_s6.json", "D")),
-        (("D-plain", "0-5"), rows("synth_dplain.json", "D")),
-        (("D-plain", "6-11"), rows("synth_dplain_s6.json", "D")),
-        (("D-gate", "0-5"), rows("synth_dgate.json", "D")),
-        (("D-gate", "6-11"), rows("synth_dgate_s6.json", "D"))):
-    texts = [e.get("text", "") for r in src for e in r["events"] if e["type"] == "diag_debounced"]
-    bad = sum(1 for t in texts if "invalid-syntax" in t or "parse-error" in t)
-    st = ("    " if (nm, seeds) not in RECORDED_N
-          else check(f"deliveries {nm} {seeds}", len(texts), RECORDED_N[(nm, seeds)], 0))
-    print(f"  {nm:8s} seeds {seeds:5s} deliveries={len(texts):4d}  "
-          f"mentioning a syntax/parse error={bad:4d} ({bad/max(1,len(texts)):.0%})   {st}")
-print("  the gate cuts live deliveries ~70% in both seed blocks (240->71, 302->90) and the")
-print("  share describing a broken parse falls from ~76% to ~24%: most ungated live")
-print("  diagnostics were about the model's own half-finished edit.")
+# The report's claim: the five properly-delivered arms are indistinguishable, and every
+# significant contrast involves the naive arm.
+sig = {frozenset((a, b)) for a, b, B, C, p, *_ in res if cut is not None and p <= cut}
+band = {"A", "C-lazy", "C-eager", "D-plain", "D-gate"} & set(ARMS)
+within = [frozenset(pair) for pair in combinations(sorted(band), 2)]
+bad = [sorted(s) for s in within if s in sig]
+if bad:
+    FAILURES.append(f"contrasts among the properly-delivered arms came out significant: {bad}")
+if any("D-naive" not in s for s in sig):
+    FAILURES.append("a significant contrast does not involve D-naive: "
+                    f"{[sorted(s) for s in sig if 'D-naive' not in s]}")
+if len(band) > 1:
+    smallest = min(p for a, b, B, C, p, *_ in res if a in band and b in band)
+    print(f"  none of the {len(within)} contrasts among the {len(band)} properly-delivered "
+          f"arms is significant (smallest p={smallest:.3f}).")
+    if RECORDED_BAND_SMALLEST_P is not None:
+        check("smallest p among the properly-delivered arms",
+              round(smallest, 3), RECORDED_BAND_SMALLEST_P, 0.0)
+
+# -------------------------------------------------- decomposing the naive deficit
+if {"D-naive", "D-plain", "D-gate"} <= set(ARMS):
+    print("\n== decomposing the naive arm's deficit ==")
+    for a, b, label in (("D-naive", "D-plain", "drop the announce sentence"),
+                        ("D-plain", "D-gate", "add the syntax gate on top"),
+                        ("D-naive", "D-gate", "both changes together")):
+        B, C, p, n = mcnemar(ARMS[a], ARMS[b])
+        o, lo, hi = task_bootstrap(ARMS[a], ARMS[b])
+        print(f"  {label:28s} {a} -> {b}: {-o:+.3f} [{-hi:+.3f},{-lo:+.3f}]  McNemar p={p:.4f}")
+        want = RECORDED_DECOMP.get((a, b))
+        if want:
+            check(f"decomposition {a}->{b} delta", round(-o, 3), want[0], 0.0)
+            check(f"decomposition {a}->{b} CI lo", round(-hi, 3), want[1], 0.0)
+            check(f"decomposition {a}->{b} CI hi", round(-lo, 3), want[2], 0.0)
+            check(f"decomposition {a}->{b} p", round(p, 4), want[3], 0.0)
+
+# ------------------------------------------------------------- the gate mechanism
+gate_arms = [a for a in ("D-naive", "D-plain", "D-gate") if a in ARMS]
+if gate_arms:
+    print("\n== mechanism: what the syntax gate removes ==")
+    for arm in gate_arms:
+        texts = [e.get("text", "") for r in ARMS[arm] for e in r["events"]
+                 if e["type"] == "diag_debounced"]
+        broken = sum(1 for t in texts if "invalid-syntax" in t or "parse-error" in t)
+        st = ("    " if arm not in RECORDED_DELIVERIES
+              else check(f"deliveries {arm}", len(texts), RECORDED_DELIVERIES[arm], 0))
+        if arm in RECORDED_BROKEN_SHARE and texts:
+            check(f"broken-parse share {arm}", round(broken / len(texts), 2),
+                  RECORDED_BROKEN_SHARE[arm], 0.0)
+        print(f"  {arm:8s} live deliveries={len(texts):4d}  "
+              f"mentioning a syntax/parse error={broken:4d} "
+              f"({broken/max(1,len(texts)):.0%})   {st}")
 
 print("\n" + ("ALL CHECKS PASS" if not FAILURES else "FAILURES:\n  " + "\n  ".join(FAILURES)))
 sys.exit(1 if FAILURES else 0)

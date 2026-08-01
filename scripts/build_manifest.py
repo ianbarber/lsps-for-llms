@@ -183,17 +183,35 @@ def artifact_role(path: str, payload: dict) -> str:
     return payload.get("kind", "committed_model_result")
 
 
+# Every directory whose *.json results are hash-tracked. Globbing a directory that does not
+# exist returns nothing rather than raising, so a renamed or mistyped entry here silently
+# drops its results from the manifest and `--check` still passes: the artifacts simply stop
+# being covered. That has happened three times (runs/readreq, then runs/delivery twice), so
+# the directories are listed as data and their existence is asserted before globbing.
+RESULT_DIRS = [
+    ("runs", "agent"),
+    ("runs", "realbench"),
+    ("runs", "realbench", "dispatch"),
+    ("runs", "realbench", "scan"),
+    ("runs", "protocol"),
+    ("runs", "pilot"),
+    ("runs", "confirmation"),
+    ("runs", "readreq"),
+    ("runs", "delivery"),
+]
+
+
 def make_manifest() -> dict:
+    missing = ["/".join(p) for p in RESULT_DIRS if not ROOT.joinpath(*p).is_dir()]
+    if missing:
+        raise SystemExit(
+            "manifest: these result directories are listed but do not exist: "
+            + ", ".join(missing)
+            + "\nEither the directory was renamed (update RESULT_DIRS) or it is gone (drop it). "
+              "Left alone, its results would be silently unmanifested."
+        )
     result_paths = sorted(set(
-        list((ROOT / "runs" / "agent").glob("*.json"))
-        + list((ROOT / "runs" / "realbench").glob("*.json"))
-        + list((ROOT / "runs" / "realbench" / "dispatch").glob("*.json"))
-        + list((ROOT / "runs" / "realbench" / "scan").glob("*.json"))
-        + list((ROOT / "runs" / "protocol").glob("*.json"))
-        + list((ROOT / "runs" / "pilot").glob("*.json"))
-        + list((ROOT / "runs" / "confirmation").glob("*.json"))
-        + list((ROOT / "runs" / "readreq").glob("*.json"))
-        + list((ROOT / "runs" / "delivery_v2").glob("*.json"))
+        p for d in RESULT_DIRS for p in ROOT.joinpath(*d).glob("*.json")
     ))
     entries = []
     for path in result_paths:

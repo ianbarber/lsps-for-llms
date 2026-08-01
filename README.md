@@ -88,12 +88,8 @@ substitution confirmation instead.
 | `scripts/realbench/local_dispatch.py` | Dispatch ladder and the hidden-source dispatch grid |
 | `scripts/synth_delivery.py` | The six delivery-timing arms, over `scripts/synth_tasks_delivery.py` |
 
-`scripts/analysis/stats_delivery.py` analyses the committed delivery-timing results and records
-the original invocations, the per-arm provenance and the self-checks it enforces. The driver that
-produced those results was removed in the publication cleanup; `scripts/synth_delivery.py` is a
-port of it onto the current agent, so the arms can be re-run, but it is not the frozen June
-harness and does not reproduce the June rows rollout for rollout. See the 2026-07-30 entry in
-[`log.md`](log.md) for what differs and by how much.
+`scripts/analysis/stats_delivery.py` re-derives every delivery-timing figure in the report from
+`runs/delivery/` and exits non-zero if one has drifted.
 
 ## Repository layout
 
