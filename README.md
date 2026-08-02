@@ -86,11 +86,10 @@ substitution confirmation instead.
 | `scripts/run_checker_gate_v3.sh` | Four-arm checker delivery grid |
 | `scripts/run_checker_paired.sh`, `run_checker_case_series.sh`, `run_checker_hidden.sh`, `run_checker_gate_v2.sh` | Earlier checker experiments, retained |
 | `scripts/realbench/local_dispatch.py` | Dispatch ladder and the hidden-source dispatch grid |
+| `scripts/synth_delivery.py` | The six delivery-timing arms, over `scripts/synth_tasks_delivery.py` |
 
-The six delivery-timing arms have no driver left in the tree; the one that produced them was
-removed in the publication cleanup, and `scripts/synth_mf.py` now offers condition A only.
-`scripts/analysis/stats_delivery.py` works from the committed results and records the original
-invocations, the per-arm provenance and the self-checks it enforces.
+`scripts/analysis/stats_delivery.py` re-derives every delivery-timing figure in the report from
+`runs/delivery/` and exits non-zero if one has drifted.
 
 ## Repository layout
 

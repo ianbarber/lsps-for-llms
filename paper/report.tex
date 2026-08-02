@@ -514,25 +514,25 @@ Difference vs no feedback
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-none & never & 81/168 = 0.482 & --- \\
-lazy & batched, at the model's next yield & 89/168 = 0.530 & +0.048
-{[}−0.018, +0.113{]} \\
-eager & batched, immediately after each edit & 88/168 = 0.524 & +0.042
-{[}−0.024, +0.119{]} \\
-naive & live mid-stream, told to fix each on arrival & 57/168 = 0.339 &
-\textbf{−0.143 {[}−0.208, −0.077{]}} \\
-plain & live mid-stream & 77/168 = 0.458 & −0.024 {[}−0.113,
-+0.048{]} \\
-gated & live mid-stream, only when the file parses & 81/168 = 0.482 &
-+0.000 {[}−0.054, +0.054{]} \\
+none & never & 74/168 = 0.440 & --- \\
+lazy & batched, at the model's next yield & 84/168 = 0.500 & +0.060
+{[}−0.000, +0.119{]} \\
+eager & batched, immediately after each edit & 83/168 = 0.494 & +0.054
+{[}−0.024, +0.143{]} \\
+naive & live mid-stream, told to fix each on arrival & 52/168 = 0.310 &
+\textbf{−0.131 {[}−0.196, −0.065{]}} \\
+plain & live mid-stream & 76/168 = 0.452 & +0.012 {[}−0.083,
++0.083{]} \\
+gated & live mid-stream, only when the file parses & 76/168 = 0.452 &
++0.012 {[}−0.030, +0.060{]} \\
 \end{longtable}
 }
 
 \emph{14 tasks x 12 seeds = 168 paired rollouts per arm. Differences are
 task-clustered bootstraps; significance is paired exact McNemar under
 Benjamini-Hochberg FDR 5\% across all 15 pairwise contrasts (cutoff
-p\textless=0.0105). Only the naive arm's five contrasts clear it; among
-the other five arms the smallest p is 0.119. Arms are \texttt{A},
+p\textless=0.0071). Only the naive arm's five contrasts clear it; among
+the other five arms the smallest p is 0.143. Arms are \texttt{A},
 \texttt{C-lazy}, \texttt{C-eager}, \texttt{D-naive}, \texttt{D-plain}
 and \texttt{D-gate} in the run artifacts.}
 
@@ -540,11 +540,14 @@ Batching at a yield, batching after every edit and interrupting
 mid-generation all land within noise of each other and of no feedback at
 all. What hurt was the instruction. The naive live arm differs from the
 plain live arm only by a sentence telling the model to fix each
-diagnostic before moving on, and removing that sentence recovers most of
-the deficit (+0.119 {[}+0.036, +0.202{]}, p=0.0105). Most ungated
+diagnostic before moving on, and removing that sentence recovers the
+whole deficit (+0.143 {[}+0.054, +0.238{]}, p=0.0022). Most ungated
 diagnostics were about the model's own half-finished edit, so the
-channel is noisy as described. It is the standing order to act on every
-message, not the noise, that impacts the fix rate though.
+channel is noisy as described. Gating delivery on the file parsing cuts
+deliveries from 504 to 163 and the share describing a broken parse from
+74\% to 25\%, and changes the fix rate by 0.000 {[}−0.089, +0.113{]}. It
+is the standing order to act on every message, not the noise, that
+impacts the fix rate.
 
 \section{Conclusions, if you use a coding
 agent}\label{conclusions-if-you-use-a-coding-agent}

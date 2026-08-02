@@ -6,7 +6,13 @@ import subprocess
 import sys
 
 from scaffold.mock_env import MultiFileEnv
-from scaffold.stream_agent import LINE_EDIT_RE, _normalize_inline_edit, _strip_fences
+from scaffold.stream_agent import (
+    LINE_EDIT_RE,
+    StreamAgent,
+    _normalize_inline_edit,
+    _strip_fences,
+)
+from scripts.synth_delivery import ARMS as DELIVERY_ARMS, ARM_WITNESS, SYS_LINE_DELIVERY, parse_args
 from scripts.analysis.effic_real_stats import binom_two_sided
 from scripts.analysis.analyze_checker_paired import (
     controlled_gate_cohort_audit,
@@ -475,3 +481,102 @@ def test_paired_analyzers_reject_incomplete_nested_grids():
         {"task": "t", "draft_id": "d", "seed": 1, "arm": "gate", "held_pass": True},
     ]
     assert not paired_contrast(checker_rows, "gate", "held_pass", False, 10, 1)["estimable"]
+
+
+def test_delivery_channel_is_off_unless_an_arm_asks_for_it():
+    """Every other experiment drives this agent with no delivery kwargs; the C37 channel
+    must stay dead for them, or a diagnostic leaks into an unrelated condition."""
+    agent = StreamAgent(None, None, None, edit_mode="line", device="cpu")
+    assert agent.cond is None
+    assert (agent.debounce, agent.latency) == (0, 8)
+    assert not any((agent.pause_align, agent.announce_lsp, agent.c_eager,
+                    agent.syntax_gate, agent.rich_signal))
+
+
+def test_delivery_arms_are_distinct_and_each_names_its_own_witness_event():
+    assert set(DELIVERY_ARMS) == set(ARM_WITNESS)
+    configs = {name: tuple(sorted(kw.items())) for name, kw in DELIVERY_ARMS.items()}
+    assert len(set(configs.values())) == len(configs)
+    # The witness the analyzer keys arm identity on, independent of any filename.
+    assert ARM_WITNESS["A"] is None
+    assert ARM_WITNESS["C-lazy"] == "diag_sync_queued"
+    assert ARM_WITNESS["C-eager"] == "diag_eager"
+    assert all(ARM_WITNESS[a] == "diag_debounced" for a in ("D-naive", "D-plain", "D-gate"))
+    # Only the naive arm carries the announce sentence; only the gate arm parses before delivering.
+    assert [a for a, kw in DELIVERY_ARMS.items() if kw.get("announce_lsp")] == ["D-naive"]
+    assert [a for a, kw in DELIVERY_ARMS.items() if kw.get("syntax_gate")] == ["D-gate"]
+
+
+def test_delivery_witness_events_are_the_ones_the_agent_emits():
+    """ARM_WITNESS is how the runner and the reproducer identify an arm from its rows.
+    Those names are string literals in stream_agent.py, so a rename there would leave the
+    arm table matching nothing while every test stayed green. Tie the two together."""
+    root = Path(__file__).resolve().parents[1]
+    agent_src = (root / "scaffold" / "stream_agent.py").read_text()
+    emitted = set(re.findall(r'"type":\s*"(diag_[a-z_]+)"', agent_src))
+    assert emitted, "no diagnostic events found in the agent; the delivery channel is gone"
+    for arm, witness in ARM_WITNESS.items():
+        if witness is None:
+            continue
+        assert witness in emitted, (
+            f"arm {arm} keys on {witness!r}, which stream_agent.py no longer emits; "
+            f"it emits {sorted(emitted)}"
+        )
+
+
+def test_delivery_sampling_defaults_match_the_committed_rollouts():
+    """The pinned prompt and the ARMS table fix the channel and the timing, but not the
+    sampling limits, so the runner can reproduce an arm's flags exactly and still not
+    reproduce the arm. That happened once: a re-run inherited a 1400-token cap against the
+    2200 the rollouts were produced under, truncating rollouts that routinely hit it. Each
+    artifact records the full config it was produced with, so assert the runner's defaults
+    still match what is committed."""
+    root = Path(__file__).resolve().parents[1]
+    configs = [json.loads(p.read_text())["config"]
+               for p in sorted((root / "runs" / "delivery").glob("*.json"))]
+    assert configs, "no delivery rollouts committed; this test guards nothing"
+    defaults = vars(parse_args([]))
+    for key in ("max_new", "latency", "temp"):
+        committed = {c[key] for c in configs if key in c}
+        assert len(committed) == 1, f"the committed arms disagree on {key}: {committed}"
+        assert defaults[key] == committed.pop(), (
+            f"runner defaults {key}={defaults[key]}, but every committed rollout was produced "
+            f"at {key}={ {c[key] for c in configs} }; a re-run at this default would not be "
+            f"comparable to the results in REPORT.md"
+        )
+
+
+def test_failed_edits_still_refresh_the_numbered_file_view():
+    """The failed-edit nudge tells the model to use line numbers "from the CURRENT numbered
+    view below". The view is only attached for files in `changed_files`, so if an edit
+    handler adds to it only on success, that sentence points at nothing precisely when the
+    model has just mis-addressed a line range. June refreshed after every attempt; this
+    regressed to success-only and was caught during the C37 re-run. Driving the real path
+    needs a model, so pin the shape: each handler's `changed_files.add` must sit after the
+    failure branch, not inside the success branch."""
+    root = Path(__file__).resolve().parents[1]
+    src = (root / "scaffold" / "stream_agent.py").read_text().splitlines()
+    nudge = [i for i, ln in enumerate(src) if "CURRENT numbered view below" in ln]
+    assert nudge, "the failed-edit nudge is gone; this test no longer guards anything"
+    fails = [i for i, ln in enumerate(src) if ln.strip() == "fail_streak += 1"]
+    assert len(fails) == 2, f"expected two edit handlers, found {len(fails)}"
+    for i in fails:
+        window = src[i + 1:i + 8]
+        assert any("changed_files.add(" in ln for ln in window), (
+            f"the edit handler at line {i+1} does not refresh the file view after a FAILED "
+            f"edit; the nudge at line {nudge[0]+1} then promises a view that is absent"
+        )
+
+
+def test_delivery_prompt_is_pinned_to_the_prompt_the_rollouts_used():
+    """The agent's live SYS_LINE has drifted (gained <defn>, lost the analyzer sentence).
+    The delivery arms must keep the prompt the committed rollouts were produced under, which
+    is recorded in each artifact's config as the blob at 779aa5c^."""
+    root = Path(__file__).resolve().parents[1]
+    june = subprocess.run(
+        ["git", "show", "779aa5c^:scaffold/stream_agent.py"],
+        cwd=root, capture_output=True, text=True, check=True,
+    ).stdout
+    namespace = {}
+    exec(june[june.index('SYS_LINE = """'):june.index("\nSYS_REWRITE")], namespace)
+    assert SYS_LINE_DELIVERY == namespace["SYS_LINE"]

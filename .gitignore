@@ -70,3 +70,6 @@ runs/realbench/eval/
 runs/realbench/pilot/
 runs/realbench/matrix*/
 runs/realbench/ablate/
+
+# agent worktrees (transient, sometimes embedded git repos)
+.claude/worktrees/

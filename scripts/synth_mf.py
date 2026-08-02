@@ -15,7 +15,7 @@ import os, sys, json, time, argparse
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from scaffold.stream_agent import StreamAgent
+from scaffold.stream_agent import StreamAgent, SYS_LINE, SYS_LINE_MULTI, SYS_LINE_AUTHOR
 from scaffold.mock_env import MultiFileEnv
 from scripts.synth_tasks_effic import TASKS_EFFIC  # EFFICIENCY-as-policy: prefer cheap <defn> over reading a big lib
 from scripts.synth_tasks_effic_real import TASKS_EFFIC_REAL  # REAL-CODE effic: same shape, real vendored library source
@@ -47,6 +47,12 @@ ap.add_argument("--lsp-defn", action="store_true",
                 help="back <defn> with a LIVE pyrefly LSP daemon (env.lsp_definition) instead of the AST resolver")
 ap.add_argument("--no-defn", action="store_true",
                 help="TOOL-VALUE ABLATION: make <defn>/<findrefs> genuinely unavailable (read-only condition)")
+ap.add_argument("--frame-defn", action="store_true",
+                help="PROMPTED-ELECTION arm: append a directive to the system prompt telling the model to "
+                     "PREFER <defn> over reading the whole defining file (mirrors the dispatch suite's "
+                     "defn_prompt condition). CAPABILITY IS UNCHANGED — the tool is already available and "
+                     "already advertised under --lsp-tools; the ONLY difference from the base arm is this "
+                     "framing text. Use with --lsp-tools.")
 ap.add_argument("out", nargs="?", default="runs/agent/mf_run.json")
 ap.add_argument("--conds", default="A", choices=["A"],
                 help="condition(s) to run; the final recipe uses A only")
@@ -64,6 +70,21 @@ ap.add_argument("--max-reads", type=int, default=6,
 ap.add_argument("--max-turns", type=int, default=12,
                 help="cap on agent turns (reads/tests/edits)")
 A = ap.parse_args()
+
+# --frame-defn: the ONLY text that differs between the base arm and the prompted-election arm.
+# Appended verbatim to whichever system-prompt template the base arm would already have used, so the
+# two arms are byte-identical apart from these lines. Directs the model to PREFER the <defn> action it
+# already has; it names no symbol, no file, and grants no new capability.
+FRAME_DEFN = (
+    "\nThe cheapest way to learn a symbol you have not seen: rather than <read>ing the whole file that "
+    "defines it and paying for hundreds of irrelevant lines, emit ONE <defn sym=\"NAME\"/> for that "
+    "symbol -- it returns exactly its definition and signature. Prefer it, and only <read> a file when "
+    "you genuinely need its full contents."
+)
+
+if A.frame_defn and not A.lsp_tools:
+    ap.error("--frame-defn frames the <defn> action, so it must be run with --lsp-tools "
+             "(the base arm it is compared against advertises the tool)")
 
 TASKS_MF = {"effic": TASKS_EFFIC, "effic_real": TASKS_EFFIC_REAL, "effic_real2": TASKS_EFFIC_REAL2,
             "gapd": TASKS_GAPD, "efficread": TASKS_EFFICREAD,
@@ -174,9 +195,29 @@ def checkpoint():
     json.dump({"model": A.model, "config": vars(A),
                "rows": {c: agg[c]["rows"] for c in conds}}, open(A.out + ".partial", "w"))
 
+def base_sys_template(task):
+    """The system-prompt template StreamAgent would pick for this task on the default path."""
+    _target, editable, _gold, _shown = task_meta(task)
+    if A.suite == "authoring" and len(editable) <= 1:
+        return SYS_LINE_AUTHOR
+    if len(editable) > 1:
+        return SYS_LINE_MULTI
+    return SYS_LINE
+
+def frame_sys_override(task):
+    """--frame-defn: reproduce EXACTLY the system prompt StreamAgent would have built for this task,
+    then append FRAME_DEFN. Returns None when the flag is off, so the default path is untouched."""
+    if not A.frame_defn:
+        return None
+    return base_sys_template(task) + FRAME_DEFN
+
 if A.dry_run:
     for task in tasks:
+        target, editable, _g, _s = task_meta(task)
         print(f"\n{'='*30} {task['name']} ({task['group']}) {'='*30}")
+        tmpl = frame_sys_override(task) or base_sys_template(task)
+        sys_text = tmpl.format(file=target, files=", ".join(f"`{f}`" for f in editable))
+        print("--- system prompt ---\n" + sys_text)
         print("--- cond A prompt ---\n" + build_prompt(task))
         print("   attractors:", task.get("attractors", []))
     sys.exit(0)
@@ -207,6 +248,7 @@ for task in tasks:
                                 force_lsp=A.force_lsp, relabel=A.relabel,
                                 advertised_symbols=(advertised_symbols(task) if A.lsp_tools else []),
                                 use_lsp_defn=A.lsp_defn, lsp_disabled=A.no_defn,
+                                sys_override=frame_sys_override(task),
                                 authoring=is_auth,
                                 allow_check=(is_auth and A.arm == "check"),
                                 auto_check=(is_auth and A.arm == "feedback"))
